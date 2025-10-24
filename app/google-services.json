@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "60751051995",
+    "project_id": "setulink-app-fb",
+    "storage_bucket": "setulink-app-fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:60751051995:android:fdd8bc0dce6a0c730060fe",
+        "android_client_info": {
+          "package_name": "com.example.setulink_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDywqDmqmNhotb3ikQW3KgzKd4rxrA3aCQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
