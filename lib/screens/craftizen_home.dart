@@ -64,15 +64,20 @@ class _CraftizenHomeState extends State<CraftizenHome> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Your Skills: ${widget.userObj['skills']?.join(', ') ?? 'Not specified'}',
+              'Your Skills: ${widget.userObj['skills']?.join(', ') ??
+                  'Not specified'}',
               style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStatCard('Pending Jobs', '${pendingJobs.where((job) => job['status'] == 'pending').length}', Icons.pending_actions),
-                _buildStatCard('Accepted Jobs', '${pendingJobs.where((job) => job['status'] == 'accepted').length}', Icons.assignment_turned_in),
+                _buildStatCard('Pending Jobs', '${pendingJobs
+                    .where((job) => job['status'] == 'pending')
+                    .length}', Icons.pending_actions),
+                _buildStatCard('Accepted Jobs', '${pendingJobs
+                    .where((job) => job['status'] == 'accepted')
+                    .length}', Icons.assignment_turned_in),
                 _buildStatCard('Earnings', '₹0', Icons.attach_money),
               ],
             ),
@@ -107,8 +112,11 @@ class _CraftizenHomeState extends State<CraftizenHome> {
                     elevation: 2,
                     child: ListTile(
                       leading: Icon(
-                        job['status'] == 'pending' ? Icons.pending : Icons.assignment_turned_in,
-                        color: job['status'] == 'pending' ? Colors.orange : Colors.green,
+                        job['status'] == 'pending' ? Icons.pending : Icons
+                            .assignment_turned_in,
+                        color: job['status'] == 'pending'
+                            ? Colors.orange
+                            : Colors.green,
                       ),
                       title: Text(job['title'] ?? ''),
                       subtitle: Column(
@@ -118,15 +126,19 @@ class _CraftizenHomeState extends State<CraftizenHome> {
                           const SizedBox(height: 4),
                           Text(
                             'Customer: ${job['userName']}',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[600]),
                           ),
                           Chip(
                             label: Text(
                               job['status'] ?? 'pending',
-                              style: const TextStyle(fontSize: 10, color: Colors.white),
+                              style: const TextStyle(
+                                  fontSize: 10, color: Colors.white),
                             ),
-                            backgroundColor: job['status'] == 'pending' ? Colors.orange : Colors.green,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            backgroundColor: job['status'] == 'pending' ? Colors
+                                .orange : Colors.green,
+                            materialTapTargetSize: MaterialTapTargetSize
+                                .shrinkWrap,
                           ),
                         ],
                       ),
