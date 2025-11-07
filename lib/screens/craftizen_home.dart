@@ -128,13 +128,16 @@ class _CraftizenHomeState extends State<CraftizenHome> {
                             'Customer: ${job['userName']}',
                             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                           ),
-                          Chip(
-                            label: Text(
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: job['status'] == 'pending' ? Colors.orange : Colors.green,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
                               job['status'] ?? 'pending',
                               style: const TextStyle(fontSize: 10, color: Colors.white),
                             ),
-                            backgroundColor: job['status'] == 'pending' ? Colors.orange : Colors.green,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                         ],
                       ),
