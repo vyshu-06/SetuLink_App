@@ -16,13 +16,11 @@ class AuthService {
   }
 
   // Register user with email/password, name, phone, role
-  Future<Map<String, dynamic>?> registerWithEmail(
-      String email,
+  Future<Map<String, dynamic>?> registerWithEmail(String email,
       String password,
       String name,
       String phone,
-      String role,
-      ) async {
+      String role,) async {
     try {
       final hashedPwd = _hashPassword(password);
 
@@ -33,7 +31,10 @@ class AuthService {
       }
 
       // Create user data
-      final userId = DateTime.now().millisecondsSinceEpoch.toString();
+      final userId = DateTime
+          .now()
+          .millisecondsSinceEpoch
+          .toString();
       final userData = <String, dynamic>{
         'uid': userId,
         'email': email,
@@ -65,16 +66,15 @@ class AuthService {
   }
 
   // SignIn user with email/password
-  Future<Map<String, dynamic>?> signInWithEmail(
-      String email,
+  Future<Map<String, dynamic>?> signInWithEmail(String email,
       String password,
-      String role,
-      ) async {
+      String role,) async {
     try {
       // Find user with matching email and role
       final hashedPwd = _hashPassword(password);
       final user = _mockUsers.firstWhere(
-            (user) => user['email'] == email &&
+            (user) =>
+        user['email'] == email &&
             user['role'] == role &&
             user['hashedPassword'] == hashedPwd,
         orElse: () => <String, dynamic>{},
@@ -97,16 +97,17 @@ class AuthService {
   }
 
   // Send OTP for phone number verification (mock implementation)
-  Future<String?> sendOTP(
-      String phoneNumber, {
-        required Function(String verificationId) onCodeSent,
-      }) async {
+  Future<String?> sendOTP(String phoneNumber, {
+    required Function(String verificationId) onCodeSent,
+  }) async {
     try {
       // Mock OTP verification - in real app, this would use Firebase Auth
       await Future.delayed(const Duration(seconds: 1));
 
       // Generate a mock verification ID
-      final verificationId = 'mock_verification_${DateTime.now().millisecondsSinceEpoch}';
+      final verificationId = 'mock_verification_${DateTime
+          .now()
+          .millisecondsSinceEpoch}';
 
       // Simulate code sent callback
       onCodeSent(verificationId);
@@ -120,11 +121,9 @@ class AuthService {
   }
 
   // Verify OTP and sign in user by phone (mock implementation)
-  Future<Map<String, dynamic>?> verifyOTP(
-      String verificationId,
+  Future<Map<String, dynamic>?> verifyOTP(String verificationId,
       String smsCode,
-      String role,
-      ) async {
+      String role,) async {
     try {
       // Mock OTP verification - always accept '123456' as valid OTP
       if (smsCode != '123456') {
@@ -135,7 +134,9 @@ class AuthService {
       // For demo purposes, create a mock user if none exists
       if (_mockUsers.isEmpty) {
         final mockUser = <String, dynamic>{
-          'uid': 'mock_phone_user_${DateTime.now().millisecondsSinceEpoch}',
+          'uid': 'mock_phone_user_${DateTime
+              .now()
+              .millisecondsSinceEpoch}',
           'email': 'phoneuser@example.com',
           'name': 'Phone User',
           'phone': verificationId.replaceFirst('mock_verification_', ''),
