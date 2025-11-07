@@ -1,11 +1,12 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crypto/crypto.dart';
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  // Mock user storage (replace with actual database later)
+  static final List<Map<String, dynamic>> _mockUsers = [];
+
+  // Mock current user
+  static Map<String, dynamic>? _currentUser;
 
   // Hash password with SHA-256
   String _hashPassword(String password) {
@@ -24,22 +25,23 @@ class AuthService {
       ) async {
     try {
       final hashedPwd = _hashPassword(password);
-      final userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
 
-      final userId = userCredential.user!.uid;
+      // Check if user already exists
+      if (_mockUsers.any((user) => user['email'] == email)) {
+        print('User already exists with this email');
+        return null;
+      }
 
-      // Save extra user info to Firestore
+      // Create user data
+      final userId = DateTime.now().millisecondsSinceEpoch.toString();
       final userData = {
         'uid': userId,
         'email': email,
         'name': name,
         'phone': phone,
         'role': role,
-        'createdAt': FieldValue.serverTimestamp(),
-        'hashedPassword': hashedPwd, // Storing for reference, though Firebase handles auth
+        'createdAt': DateTime.now().toString(),
+        'hashedPassword': hashedPwd,
       };
 
       // Add skills field for craftizens
@@ -48,8 +50,13 @@ class AuthService {
         userData['verified'] = false;
       }
 
-      await _db.collection('users').doc(userId).set(userData);
+      // Save to mock storage
+      _mockUsers.add(userData);
 
+      // Set as current user
+      _currentUser = userData;
+
+      print('User registered successfully: $email');
       return userData;
     } catch (e) {
       print('Register error: $e');
@@ -61,59 +68,50 @@ class AuthService {
   Future<Map<String, dynamic>?> signInWithEmail(
       String email,
       String password,
-      String role
+      String role,
       ) async {
     try {
-      // First verify the user exists with this role
-      final userQuery = await _db
-          .collection('users')
-          .where('email', isEqualTo: email)
-          .where('role', isEqualTo: role)
-          .limit(1)
-          .get();
+      // Find user with matching email and role
+      final hashedPwd = _hashPassword(password);
+      final user = _mockUsers.firstWhere(
+            (user) => user['email'] == email &&
+            user['role'] == role &&
+            user['hashedPassword'] == hashedPwd,
+        orElse: () => {},
+      );
 
-      if (userQuery.docs.isEmpty) {
-        print('No user found with this email and role');
+      if (user.isEmpty) {
+        print('No user found with this email, role, and password');
         return null;
       }
 
-      // Firebase Auth sign-in with email/password
-      final userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      // Set as current user
+      _currentUser = user;
 
-      // Return user data from Firestore
-      final userDoc = userQuery.docs.first;
-      return userDoc.data();
+      print('User signed in successfully: $email');
+      return user;
     } catch (e) {
       print('SignIn error: $e');
       return null;
     }
   }
 
-  // Send OTP for phone number verification
+  // Send OTP for phone number verification (mock implementation)
   Future<String?> sendOTP(
       String phoneNumber, {
         required Function(String verificationId) onCodeSent,
       }) async {
     try {
-      await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        verificationCompleted: (PhoneAuthCredential credential) {
-          // Auto-signin can be handled here
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          print('Phone auth failed: ${e.message}');
-        },
-        codeSent: (String verificationId, int? resendToken) {
-          onCodeSent(verificationId);
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          // Handle timeout if needed
-        },
-        timeout: const Duration(seconds: 60),
-      );
+      // Mock OTP verification - in real app, this would use Firebase Auth
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Generate a mock verification ID
+      final verificationId = 'mock_verification_${DateTime.now().millisecondsSinceEpoch}';
+
+      // Simulate code sent callback
+      onCodeSent(verificationId);
+
+      print('Mock OTP sent to: $phoneNumber');
       return null;
     } catch (e) {
       print('sendOTP error: $e');
@@ -121,26 +119,50 @@ class AuthService {
     }
   }
 
-  // Verify OTP and sign in user by phone
+  // Verify OTP and sign in user by phone (mock implementation)
   Future<Map<String, dynamic>?> verifyOTP(
       String verificationId,
       String smsCode,
-      String role
+      String role,
       ) async {
     try {
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: verificationId,
-        smsCode: smsCode,
+      // Mock OTP verification - always accept '123456' as valid OTP
+      if (smsCode != '123456') {
+        print('Invalid OTP');
+        return null;
+      }
+
+      // For demo purposes, create a mock user if none exists
+      if (_mockUsers.isEmpty) {
+        final mockUser = {
+          'uid': 'mock_phone_user_${DateTime.now().millisecondsSinceEpoch}',
+          'email': 'phoneuser@example.com',
+          'name': 'Phone User',
+          'phone': verificationId.replaceFirst('mock_verification_', ''),
+          'role': role,
+          'createdAt': DateTime.now().toString(),
+          'hashedPassword': _hashPassword('mockpassword'),
+        };
+
+        if (role == 'craftizen') {
+          mockUser['skills'] = [];
+          mockUser['verified'] = false;
+        }
+
+        _mockUsers.add(mockUser);
+        _currentUser = mockUser;
+        return mockUser;
+      }
+
+      // Find existing user with matching role
+      final user = _mockUsers.firstWhere(
+            (user) => user['role'] == role,
+        orElse: () => {},
       );
 
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      final userId = userCredential.user!.uid;
-
-      // Check if user exists with this UID and role in Firestore
-      final userDoc = await _db.collection('users').doc(userId).get();
-
-      if (userDoc.exists && userDoc.data()?['role'] == role) {
-        return userDoc.data();
+      if (user.isNotEmpty) {
+        _currentUser = user;
+        return user;
       }
 
       return null;
@@ -151,27 +173,60 @@ class AuthService {
   }
 
   // Get current user
-  User? getCurrentUser() {
-    return _auth.currentUser;
+  Map<String, dynamic>? getCurrentUser() {
+    return _currentUser;
   }
 
   // Sign out
   Future<void> signOut() async {
-    await _auth.signOut();
+    _currentUser = null;
+    print('User signed out');
   }
 
   // Check if user is logged in
   bool isLoggedIn() {
-    return _auth.currentUser != null;
+    return _currentUser != null;
   }
 
   // Get user data by ID
   Future<Map<String, dynamic>?> getUserData(String uid) async {
     try {
-      final doc = await _db.collection('users').doc(uid).get();
-      return doc.data();
+      final user = _mockUsers.firstWhere(
+            (user) => user['uid'] == uid,
+        orElse: () => {},
+      );
+      return user.isEmpty ? null : user;
     } catch (e) {
       print('Error getting user data: $e');
       return null;
     }
   }
+
+  // Add some mock users for testing
+  void initializeMockUsers() {
+    if (_mockUsers.isEmpty) {
+      _mockUsers.addAll([
+        {
+          'uid': '1',
+          'email': 'citizen@example.com',
+          'name': 'John Citizen',
+          'phone': '+1234567890',
+          'role': 'citizen',
+          'createdAt': DateTime.now().toString(),
+          'hashedPassword': _hashPassword('password123'),
+        },
+        {
+          'uid': '2',
+          'email': 'craftizen@example.com',
+          'name': 'Jane Craftizen',
+          'phone': '+0987654321',
+          'role': 'craftizen',
+          'skills': ['Plumbing', 'Electrical'],
+          'verified': true,
+          'createdAt': DateTime.now().toString(),
+          'hashedPassword': _hashPassword('password123'),
+        },
+      ]);
+    }
+  }
+}
