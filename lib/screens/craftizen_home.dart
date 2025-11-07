@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CraftizenHome extends StatefulWidget {
   final Map<String, dynamic> userObj;
@@ -46,10 +44,10 @@ class _CraftizenHomeState extends State<CraftizenHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('craftizen_dashboard'.tr()),
+        title: const Text('Craftizen Dashboard'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () {
               // Add logout functionality here
             },
@@ -62,29 +60,29 @@ class _CraftizenHomeState extends State<CraftizenHome> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "${'welcome'.tr()}, ${widget.userObj['name'] ?? ''}",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              "Welcome, ${widget.userObj['name'] ?? ''}",
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              'your_skills'.tr() + ': ${widget.userObj['skills']?.join(', ') ?? 'Not specified'}',
+              'Your Skills: ${widget.userObj['skills']?.join(', ') ?? 'Not specified'}',
               style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStatCard('pending_jobs'.tr(), '${pendingJobs.where((job) => job['status'] == 'pending').length}', Icons.pending_actions),
-                _buildStatCard('accepted_jobs'.tr(), '${pendingJobs.where((job) => job['status'] == 'accepted').length}', Icons.assignment_turned_in),
-                _buildStatCard('earnings'.tr(), '₹0', Icons.attach_money),
+                _buildStatCard('Pending Jobs', '${pendingJobs.where((job) => job['status'] == 'pending').length}', Icons.pending_actions),
+                _buildStatCard('Accepted Jobs', '${pendingJobs.where((job) => job['status'] == 'accepted').length}', Icons.assignment_turned_in),
+                _buildStatCard('Earnings', '₹0', Icons.attach_money),
               ],
             ),
-            SizedBox(height: 24),
-            Text(
-              'current_jobs'.tr(),
+            const SizedBox(height: 24),
+            const Text(
+              'Current Jobs',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Expanded(
               child: pendingJobs.isEmpty
                   ? Center(
@@ -92,9 +90,9 @@ class _CraftizenHomeState extends State<CraftizenHome> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.work_outline, size: 64, color: Colors.grey[400]),
-                    SizedBox(height: 16),
-                    Text(
-                      'no_jobs_available'.tr(),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No Jobs Available',
                       style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       textAlign: TextAlign.center,
                     ),
@@ -106,7 +104,7 @@ class _CraftizenHomeState extends State<CraftizenHome> {
                 itemBuilder: (context, index) {
                   final job = pendingJobs[index];
                   return Card(
-                    margin: EdgeInsets.symmetric(vertical: 8),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
                     elevation: 2,
                     child: ListTile(
                       leading: Icon(
@@ -118,27 +116,27 @@ class _CraftizenHomeState extends State<CraftizenHome> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(job['description'] ?? ''),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            '${'customer'.tr()}: ${job['userName']}',
+                            'Customer: ${job['userName']}',
                             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                           ),
                           Chip(
                             label: Text(
                               job['status'] ?? 'pending',
-                              style: TextStyle(fontSize: 10, color: Colors.white),
+                              style: const TextStyle(fontSize: 10, color: Colors.white),
                             ),
                             backgroundColor: job['status'] == 'pending' ? Colors.orange : Colors.green,
                             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                         ],
                       ),
-                      trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
                         // Navigate to job details
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('${'viewing_job'.tr()}: ${job['title']}'),
+                            content: Text('Viewing job: ${job['title']}'),
                           ),
                         );
                       },
@@ -161,10 +159,10 @@ class _CraftizenHomeState extends State<CraftizenHome> {
         child: Column(
           children: [
             Icon(icon, size: 24, color: Colors.teal),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               value,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
               title,
