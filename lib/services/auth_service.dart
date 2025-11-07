@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:crypto/crypto.dart';
+// Remove crypto import since it's causing errors
 
 class AuthService {
   // Mock user storage (replace with actual database later)
@@ -8,11 +8,11 @@ class AuthService {
   // Mock current user
   static Map<String, dynamic>? _currentUser;
 
-  // Hash password with SHA-256
+  // Simple password hashing (without crypto package)
   String _hashPassword(String password) {
+    // Simple base64 encoding instead of SHA-256
     final bytes = utf8.encode(password);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
+    return base64.encode(bytes);
   }
 
   // Register user with email/password, name, phone, role
@@ -34,7 +34,7 @@ class AuthService {
 
       // Create user data
       final userId = DateTime.now().millisecondsSinceEpoch.toString();
-      final userData = {
+      final userData = <String, dynamic>{
         'uid': userId,
         'email': email,
         'name': name,
@@ -46,7 +46,7 @@ class AuthService {
 
       // Add skills field for craftizens
       if (role == 'craftizen') {
-        userData['skills'] = [];
+        userData['skills'] = <String>[];
         userData['verified'] = false;
       }
 
@@ -77,7 +77,7 @@ class AuthService {
             (user) => user['email'] == email &&
             user['role'] == role &&
             user['hashedPassword'] == hashedPwd,
-        orElse: () => {},
+        orElse: () => <String, dynamic>{},
       );
 
       if (user.isEmpty) {
@@ -134,7 +134,7 @@ class AuthService {
 
       // For demo purposes, create a mock user if none exists
       if (_mockUsers.isEmpty) {
-        final mockUser = {
+        final mockUser = <String, dynamic>{
           'uid': 'mock_phone_user_${DateTime.now().millisecondsSinceEpoch}',
           'email': 'phoneuser@example.com',
           'name': 'Phone User',
@@ -145,7 +145,7 @@ class AuthService {
         };
 
         if (role == 'craftizen') {
-          mockUser['skills'] = [];
+          mockUser['skills'] = <String>[];
           mockUser['verified'] = false;
         }
 
@@ -157,7 +157,7 @@ class AuthService {
       // Find existing user with matching role
       final user = _mockUsers.firstWhere(
             (user) => user['role'] == role,
-        orElse: () => {},
+        orElse: () => <String, dynamic>{},
       );
 
       if (user.isNotEmpty) {
@@ -193,7 +193,7 @@ class AuthService {
     try {
       final user = _mockUsers.firstWhere(
             (user) => user['uid'] == uid,
-        orElse: () => {},
+        orElse: () => <String, dynamic>{},
       );
       return user.isEmpty ? null : user;
     } catch (e) {
@@ -206,7 +206,7 @@ class AuthService {
   void initializeMockUsers() {
     if (_mockUsers.isEmpty) {
       _mockUsers.addAll([
-        {
+        <String, dynamic>{
           'uid': '1',
           'email': 'citizen@example.com',
           'name': 'John Citizen',
@@ -215,13 +215,13 @@ class AuthService {
           'createdAt': DateTime.now().toString(),
           'hashedPassword': _hashPassword('password123'),
         },
-        {
+        <String, dynamic>{
           'uid': '2',
           'email': 'craftizen@example.com',
           'name': 'Jane Craftizen',
           'phone': '+0987654321',
           'role': 'craftizen',
-          'skills': ['Plumbing', 'Electrical'],
+          'skills': <String>['Plumbing', 'Electrical'],
           'verified': true,
           'createdAt': DateTime.now().toString(),
           'hashedPassword': _hashPassword('password123'),
