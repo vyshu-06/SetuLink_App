@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class CitizenHome extends StatelessWidget {
   final Map<String, dynamic> userObj;
+
   const CitizenHome({required this.userObj, Key? key}) : super(key: key);
 
   // Service categories with hardcoded titles to avoid translation issues
