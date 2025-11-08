@@ -13,7 +13,6 @@ class MapNearbyCraftizens extends StatefulWidget {
 }
 
 class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
-  GoogleMapController? _mapController;
   LatLng? _currentPosition;
   final Location _location = Location();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -47,9 +46,11 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
 
       await _loadNearbyCraftizens();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching location: $e')),
-      );
+      if(mounted){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error fetching location: $e')),
+        );
+      }
     }
   }
 
@@ -89,12 +90,13 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
       }
     }
 
-    setState(() {
-      _craftizenMarkers = markers;
-    });
+    if(mounted){
+      setState(() {
+        _craftizenMarkers = markers;
+      });
+    }
   }
 
-  // Haversine Formula to calculate distance between two coordinates
   double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     const earthRadius = 6371; // km
     final dLat = _deg2rad(lat2 - lat1);
@@ -115,7 +117,6 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
       body: _currentPosition == null
           ? const Center(child: CircularProgressIndicator())
           : GoogleMap(
-        onMapCreated: (controller) => _mapController = controller,
         initialCameraPosition: CameraPosition(
           target: _currentPosition!,
           zoom: 13.5,

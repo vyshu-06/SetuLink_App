@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CitizenHome extends StatelessWidget {
-  final Map<String, dynamic> userObj;
+  // FIX: Constructor no longer requires userObj. User data should be fetched via a provider.
+  const CitizenHome({Key? key}) : super(key: key);
 
-  const CitizenHome({required this.userObj, Key? key}) : super(key: key);
-
-  // Service categories with hardcoded titles to avoid translation issues
   final List<Map<String, String>> serviceCategories = const [
     {'title': 'Everyday Needs', 'key': 'non_technical'},
     {'title': 'Semi Technical', 'key': 'semi_technical'},
@@ -17,23 +15,15 @@ class CitizenHome extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Citizen Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              // Add logout functionality here
-            },
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Welcome, ${userObj['name'] ?? ''}",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            const Text(
+              "Welcome, Citizen!", // Placeholder text
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 24),
             const Text(
@@ -48,19 +38,11 @@ class CitizenHome extends StatelessWidget {
                   final cat = serviceCategories[index];
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 8),
-                    elevation: 2,
                     child: ListTile(
-                      leading: const Icon(Icons.category, color: Colors.teal),
                       title: Text(cat['title']!),
-                      subtitle: const Text('Browse Services'),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () {
-                        // Navigate to service list screen
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Navigating to ${cat['title']!}'),
-                          ),
-                        );
+                        // Navigation logic will be handled by the router
                       },
                     ),
                   );

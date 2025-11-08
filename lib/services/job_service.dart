@@ -1,147 +1,112 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:math';
 import 'dart:convert';
-import 'package:crypto/crypto.dart'; // For hashing OTPs
+import 'package:crypto/crypto.dart';
 
 class JobService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // 🔹 Generate & hash OTP securely
-  String _generateOTP() {
-    final rand = Random();
-    return (rand.nextInt(900000) + 100000).toString();
+  // Basic Job CRUD
+  Stream<QuerySnapshot> getJobs(String category) {
+    return _db.collection('jobs').where('category', isEqualTo: category).snapshots();
   }
 
-  String _hashOTP(String otp) {
-    return sha256.convert(utf8.encode(otp)).toString();
+  Future<DocumentReference> addJob(Map<String, dynamic> jobData) {
+    jobData['jobId'] = _generateJobId(jobData['title'], jobData['userId']);
+    return _db.collection('jobs').add(jobData);
   }
 
-  // 🔹 Create a new job request
-  Future<String?> createJobRequest({
-    required String citizenId,
-    required String serviceCategory,
-    required String serviceId,
-    String? craftizenId,
-  }) async {
-    if (citizenId.isEmpty || serviceCategory.isEmpty || serviceId.isEmpty) {
-      throw Exception('Missing required fields');
-    }
+  String _generateJobId(String title, String userId) {
+    final uniqueString = "$title-$userId-${DateTime.now().millisecondsSinceEpoch}";
+    return sha256.convert(utf8.encode(uniqueString)).toString();
+  }
 
-    try {
-      final otpStart = _generateOTP();
-      final otpComplete = _generateOTP();
+  Future<void> updateJob(String jobId, Map<String, dynamic> newData) {
+    return _db.collection('jobs').doc(jobId).update(newData);
+  }
 
-      final jobRef = await _db.collection('jobs').add({
-        'citizenId': citizenId,
+  Future<void> deleteJob(String jobId) {
+    return _db.collection('jobs').doc(jobId).delete();
+  }
+
+  // Job Lifecycle Management
+  Future<void> postJob(Map<String, dynamic> jobData) {
+    jobData['status'] = 'open';
+    jobData['postedAt'] = FieldValue.serverTimestamp();
+    return addJob(jobData);
+  }
+
+  Stream<QuerySnapshot> getOpenJobs() {
+    return _db.collection('jobs').where('status', isEqualTo: 'open').snapshots();
+  }
+
+  Future<void> applyForJob(String jobId, String craftizenId, String craftizenName) async {
+    final jobRef = _db.collection('jobs').doc(jobId);
+    return jobRef.update({
+      'applicants': FieldValue.arrayUnion([{
         'craftizenId': craftizenId,
-        'serviceCategory': serviceCategory,
-        'serviceId': serviceId,
-        'status': JobStatus.requested,
-        'otpStartHash': _hashOTP(otpStart),
-        'otpCompleteHash': _hashOTP(otpComplete),
-        'requestedAt': FieldValue.serverTimestamp(),
-        'acceptedAt': null,
-        'startedAt': null,
-        'completedAt': null,
-        'ratedAt': null,
-        'rating': null,
-        'feedback': null,
+        'craftizenName': craftizenName,
+        'appliedAt': DateTime.now(),
+      }])
+    });
+  }
+
+  Future<void> acceptApplicant(String jobId, String craftizenId) {
+    final jobRef = _db.collection('jobs').doc(jobId);
+    return _db.runTransaction((transaction) async {
+      final jobSnapshot = await transaction.get(jobRef);
+      if (!jobSnapshot.exists) {
+        throw Exception("Job does not exist!");
+      }
+      transaction.update(jobRef, {
+        'status': 'assigned',
+        'assignedCraftizenId': craftizenId,
+        'assignedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
+  Future<void> startJob(String jobId) {
+    return updateJob(jobId, {
+      'status': 'in_progress',
+      'startedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> completeJob(String jobId) {
+    return updateJob(jobId, {
+      'status': 'completed',
+      'completedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> cancelJob(String jobId) {
+    return updateJob(jobId, {'status': 'cancelled'});
+  }
+
+  // Reviews and Ratings
+  Future<void> leaveReview({
+    required String jobId,
+    required String userId,
+    required String craftizenId,
+    required double rating,
+    required String comment,
+  }) {
+    final reviewRef = _db.collection('reviews').doc();
+    final craftizenRef = _db.collection('users').doc(craftizenId);
+
+    return _db.runTransaction((transaction) async {
+      transaction.set(reviewRef, {
+        'jobId': jobId,
+        'userId': userId,
+        'craftizenId': craftizenId,
+        'rating': rating,
+        'comment': comment,
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // Optionally return OTPs for user confirmation screen
-      return jobRef.id;
-    } catch (e) {
-      print('Error creating job: $e');
-      return null;
-    }
-  }
-
-  // 🔹 Accept job (with transaction)
-  Future<bool> acceptJob(String jobId, String craftizenId) async {
-    try {
-      await _db.runTransaction((txn) async {
-        final jobRef = _db.collection('jobs').doc(jobId);
-        final snapshot = await txn.get(jobRef);
-
-        if (!snapshot.exists) throw Exception('Job not found');
-        if (snapshot['status'] != JobStatus.requested) {
-          throw Exception('Job already accepted');
-        }
-
-        txn.update(jobRef, {
-          'craftizenId': craftizenId,
-          'status': JobStatus.accepted,
-          'acceptedAt': FieldValue.serverTimestamp(),
-        });
+      transaction.update(craftizenRef, {
+        'ratings': FieldValue.arrayUnion([rating]),
       });
-      return true;
-    } catch (e) {
-      print('Accept job error: $e');
-      return false;
-    }
+    });
   }
-
-  // 🔹 Confirm job start
-  Future<bool> confirmJobStart(String jobId, String otp) async {
-    try {
-      final jobRef = _db.collection('jobs').doc(jobId);
-      final doc = await jobRef.get();
-
-      if (!doc.exists) return false;
-      final data = doc.data()!;
-      final hash = _hashOTP(otp);
-
-      if (data['otpStartHash'] == hash && data['status'] == JobStatus.accepted) {
-        await jobRef.update({
-          'status': JobStatus.started,
-          'startedAt': FieldValue.serverTimestamp(),
-        });
-        return true;
-      }
-      return false;
-    } catch (e) {
-      print('Confirm job start error: $e');
-      return false;
-    }
-  }
-
-  // 🔹 Confirm job completion
-  Future<bool> confirmJobCompletion(
-      String jobId,
-      String otp,
-      int rating,
-      String feedback,
-      ) async {
-    try {
-      final jobRef = _db.collection('jobs').doc(jobId);
-      final doc = await jobRef.get();
-
-      if (!doc.exists) return false;
-      final data = doc.data()!;
-      final hash = _hashOTP(otp);
-
-      if (data['otpCompleteHash'] == hash && data['status'] == JobStatus.started) {
-        await jobRef.update({
-          'status': JobStatus.completed,
-          'completedAt': FieldValue.serverTimestamp(),
-          'rating': rating,
-          'feedback': feedback,
-          'ratedAt': FieldValue.serverTimestamp(),
-        });
-        return true;
-      }
-      return false;
-    } catch (e) {
-      print('Confirm job completion error: $e');
-      return false;
-    }
-  }
-}
-
-// 🔹 Enum-like status constants
-class JobStatus {
-  static const requested = 'requested';
-  static const accepted = 'accepted';
-  static const started = 'started';
-  static const completed = 'completed';
 }

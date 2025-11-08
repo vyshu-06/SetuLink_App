@@ -1,19 +1,22 @@
-import 'security.dart';
+import './security.dart';
 
 class AuthHelper {
-  /// Hash password and generate salt for signup
-  static String hashPasswordForSignup(String password) {
+  // Example of using the Security class for hashing passwords.
+  static String createHashedPassword(String password) {
     final salt = Security.generateSalt();
-    return Security.hashPasswordWithSalt(password, salt);
+    // CORRECT: Call the existing hashPassword method
+    return Security.hashPassword(password, salt);
   }
 
-  /// Verify password for login
-  static bool verifyPassword(String password, String storedHash) {
-    return Security.verifyPassword(password, storedHash);
+  // Example of verifying a password.
+  static bool checkPassword(String password, String salt, String hashedPassword) {
+    // CORRECT: Call the existing verifyPassword method
+    return Security.verifyPassword(password, salt, hashedPassword);
   }
 
-  /// Generate secure HMAC token (optional use)
-  static String generateHmac(String data, String secretKey) {
-    return Security.hmacSha256(data, secretKey);
+  // Example of creating a signature for data verification.
+  static String createDataSignature(String data, String secret) {
+    // CORRECT: Call the existing encryptData method (which is actually an HMAC)
+    return Security.encryptData(data, secret);
   }
 }

@@ -1,44 +1,39 @@
-import 'package:crypto/crypto.dart';
 import 'dart:convert';
-import 'dart:math';
+import 'package:crypto/crypto.dart';
 
 class Security {
-  /// Hash a string using SHA-256
-  static String hashString(String input) {
-    final bytes = utf8.encode(input);
-    final digest = sha256.convert(bytes);
+  // Hashing a password with a salt
+  static String hashPassword(String password, String salt) {
+    final saltedPassword = utf8.encode(password + salt);
+    final digest = sha256.convert(saltedPassword);
     return digest.toString();
   }
 
-  /// Generate a random salt for passwords
-  static String generateSalt([int length = 16]) {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rand = Random.secure();
-    return List.generate(length, (index) => chars[rand.nextInt(chars.length)]).join();
+  // Verifying a password against a hash
+  static bool verifyPassword(String password, String salt, String hashedPassword) {
+    final hashToVerify = hashPassword(password, salt);
+    return hashToVerify == hashedPassword;
   }
 
-  /// Hash password with salt (for signup)
-  static String hashPasswordWithSalt(String password, String salt) {
-    final combined = '$salt$password';
-    final hashed = hashString(combined);
-    return '$salt:$hashed'; // store salt:hash format
+  // Generating a random salt
+  static String generateSalt() {
+    final random = DateTime.now().millisecondsSinceEpoch.toString();
+    return base64Url.encode(utf8.encode(random));
   }
 
-  /// Verify password (for login)
-  static bool verifyPassword(String password, String storedHash) {
-    final parts = storedHash.split(':');
-    if (parts.length != 2) return false;
-    final salt = parts[0];
-    final hash = hashString('$salt$password');
-    return hash == parts[1];
-  }
-
-  /// Optional HMAC generator (for tokens)
-  static String hmacSha256(String data, String secretKey) {
+  // Encrypting data (example with HMAC)
+  static String encryptData(String data, String secretKey) {
     final key = utf8.encode(secretKey);
     final bytes = utf8.encode(data);
-    final hmacSha = Hmac(sha256, key);
-    final digest = hmacSha.convert(bytes);
+    final hmac = Hmac(sha256, key);
+    final digest = hmac.convert(bytes);
     return digest.toString();
+  }
+
+  // Decrypting data is not possible with HMAC, it's for verification.
+  // This function would be for HMAC verification.
+  static bool verifyHmac(String data, String secretKey, String hmacToVerify) {
+    final expectedHmac = encryptData(data, secretKey);
+    return expectedHmac == hmacToVerify;
   }
 }

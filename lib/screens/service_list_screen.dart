@@ -31,23 +31,19 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             .where('category', isEqualTo: widget.categoryKey)
             .snapshots(),
         builder: (context, snapshot) {
-          // 🔹 Loading State
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // 🔹 Error State
           if (snapshot.hasError) {
             return Center(child: Text(tr('error_loading_data')));
           }
 
-          // 🔹 Empty Data
           final docs = snapshot.data?.docs ?? [];
           if (docs.isEmpty) {
             return Center(child: Text(tr('no_jobs_available')));
           }
 
-          // 🔹 List Display
           return ListView.separated(
             padding: const EdgeInsets.all(8.0),
             itemCount: docs.length,
@@ -64,7 +60,6 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
                   // TODO: Navigate to detail page
-                  // Example: Navigator.push(...);
                 },
               );
             },
