@@ -63,7 +63,7 @@
     },
     {
       "name": "crypto",
-      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.6",
+      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.7",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -491,6 +491,6 @@
   "generator": "pub",
   "generatorVersion": "3.9.2",
   "flutterRoot": "file:///C:/flutter",
-  "flutterVersion": "3.35.7",
+  "flutterVersion": "3.35.6",
   "pubCache": "file:///C:/Users/HP/AppData/Local/Pub/Cache"
 }

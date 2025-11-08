@@ -1,4 +1,4 @@
-name: setulink
+name: setulink_app
 description: A role-based Flutter app for Citizens and Craftizens with Firebase Auth, Localization, and Maps.
 publish_to: 'none'
 
@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  cupertino_icons: ^1.0.6
   firebase_core: ^3.5.0
   firebase_auth: ^5.3.1
   cloud_firestore: ^5.4.2
@@ -23,6 +24,8 @@ dependencies:
   flutter_spinkit: ^5.2.1
   font_awesome_flutter: ^10.7.0
   http: ^1.2.1
+  location: ^5.0.3
+  flutter_local_notifications: ^17.0.0
   flutter_localizations:
     sdk: flutter
 
