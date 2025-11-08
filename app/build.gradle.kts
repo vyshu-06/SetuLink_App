@@ -35,9 +35,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     // Enable Jetpack Compose [5]
     buildFeatures {
         compose = true
@@ -69,7 +66,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.foundation:foundation")
-    implementation("androidx.compose.foundation:foundation-text")
 
 
     // Test dependencies
