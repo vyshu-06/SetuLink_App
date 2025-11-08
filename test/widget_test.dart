@@ -1,30 +1,38 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:setulink_app/main.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
+import 'package:setulink_app/services/auth_service.dart';
+import 'package:setulink_app/screens/greeting_page.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  // Set up the environment for EasyLocalization
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    await EasyLocalization.ensureInitialized();
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('App smoke test - GreetingPage', (WidgetTester tester) async {
+    // Provide the app with the necessary context from EasyLocalization and Provider
+    await tester.pumpWidget(
+      EasyLocalization(
+        supportedLocales: const [Locale('en', 'US')],
+        path: 'assets/translations',
+        fallbackLocale: const Locale('en', 'US'),
+        child: MultiProvider(
+          providers: [
+            Provider<AuthService>(create: (_) => AuthService()),
+          ],
+          child: const SetuLinkApp(),
+        ),
+      ),
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Let the widget tree build
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the GreetingPage is the initial route and is displayed
+    expect(find.byType(GreetingPage), findsOneWidget);
   });
 }
