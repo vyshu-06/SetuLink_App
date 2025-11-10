@@ -2,6 +2,11 @@ import 'dart:convert';
 // Remove crypto import since it's causing errors
 
 class AuthService {
+
+  AuthService() {
+    initializeMockUsers();
+  }
+
   // Mock user storage (replace with actual database later)
   static final List<Map<String, dynamic>> _mockUsers = [];
 
