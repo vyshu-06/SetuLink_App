@@ -9,16 +9,19 @@ import 'package:setulink_app/screens/login_screen.dart';
 import 'package:setulink_app/screens/register_screen.dart';
 import 'package:setulink_app/screens/phone_auth_screen.dart';
 import 'package:setulink_app/screens/greeting_page.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Assumes you have firebase_options.dart setup
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await EasyLocalization.ensureInitialized();
 
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('hi')],
-      path: 'assets/translations', // Ensure this path is correct
+      path: 'assets/translations',
       fallbackLocale: const Locale('en'),
       child: MultiProvider(
         providers: [
@@ -44,10 +47,9 @@ class SetuLinkApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.teal),
       builder: (context, child) {
         final media = MediaQuery.of(context);
-        // FIX: Use the 'double' textScaleFactor for clamping, then create the TextScaler.
         return MediaQuery(
           data: media.copyWith(
-              textScaler: TextScaler.linear(media.textScaleFactor.clamp(1.0, 1.3))),
+              textScaler: TextScaler.linear(media.textScaler.scale(1).clamp(1.0, 1.3))),
           child: child!,
         );
       },
