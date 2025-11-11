@@ -46,18 +46,19 @@ class GreetingPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  tr('welcome_msg'),
+                  tr('Bridging Local Talent with Trusted Services'),
                   style: const TextStyle(fontSize: 18.0),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 40),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal[400],
+                    backgroundColor: Colors.teal[700],
+
                     padding: const EdgeInsets.symmetric(
                         horizontal: 40, vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius:  BorderRadius.circular(12),
                     ),
                   ),
                   onPressed: () => _navigateToLogin(context, 'citizen'),
@@ -69,7 +70,7 @@ class GreetingPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 40),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal[700],
@@ -89,9 +90,15 @@ class GreetingPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+                Text(
+                  tr('New to the App?'),
+                  style: const TextStyle(fontSize: 18.0),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
                 TextButton(
                   child: Text(
-                    tr('New to the App? Register Now'),
+                    tr('Register Now'),
                     style: const TextStyle(
                       color: Colors.teal,
                       fontSize: 16,
