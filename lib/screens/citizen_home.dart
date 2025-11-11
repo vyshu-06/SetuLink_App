@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'chat_list_screen.dart'; // Import the new screen
 
 class CitizenHome extends StatelessWidget {
   // FIX: Constructor no longer requires userObj. User data should be fetched via a provider.
@@ -15,6 +16,17 @@ class CitizenHome extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Citizen Dashboard'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.chat_bubble_outline),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChatListScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
