@@ -62,9 +62,9 @@ class GreetingPage extends StatelessWidget {
                   ),
                   onPressed: () => _navigateToLogin(context, 'citizen'),
                   child: Text(
-                    tr('i_am_user') + " (नागररक)",
+                    tr('User') + " (नागररक)",
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       color: Colors.white,
                     ),
                   ),
@@ -81,9 +81,9 @@ class GreetingPage extends StatelessWidget {
                   ),
                   onPressed: () => _navigateToLogin(context, 'craftizen'),
                   child: Text(
-                    tr('i_am_craftizen') + " (कला-नागररक)",
+                    tr('Craftizen') + " (कला-नागररक)",
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       color: Colors.white,
                     ),
                   ),
@@ -91,7 +91,7 @@ class GreetingPage extends StatelessWidget {
                 const SizedBox(height: 24),
                 TextButton(
                   child: Text(
-                    tr('register_here'),
+                    tr('New to the App? Register Now'),
                     style: const TextStyle(
                       color: Colors.teal,
                       fontSize: 16,
