@@ -26,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(tr(widget.role == "citizen" ? 'citizen_login' : 'craftizen_login')),
+        backgroundColor: widget.role == 'citizen' ? Colors.teal : Colors.deepOrange,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -40,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: (val) =>
                       (val != null && val.contains('@')) ? null : tr('enter_valid_email'),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   decoration: InputDecoration(labelText: tr('password')),
                   obscureText: true,
@@ -48,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: (val) =>
                       (val != null && val.length >= 6) ? null : tr('password_min_6'),
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 CustomButton(
                   text: tr('login'),
                   onPressed: () async {
@@ -72,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     }
                   },
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 OutlinedButton(
                   child: Text(tr('login_with_phone')),
                   onPressed: () {
@@ -85,12 +86,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 if (loading) ...[
-                  SizedBox(height: 20),
-                  CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  const CircularProgressIndicator(),
                 ],
                 if (error.isNotEmpty) ...[
-                  SizedBox(height: 16),
-                  Text(error, style: TextStyle(color: Colors.redAccent)),
+                  const SizedBox(height: 16),
+                  Text(error, style: const TextStyle(color: Colors.redAccent)),
                 ],
               ],
             ),

@@ -33,7 +33,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(tr('register'))),
+      appBar: AppBar(
+        title: Text(tr('register')),
+        backgroundColor: Colors.teal,
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -41,13 +44,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             key: _formKey,
             child: Column(
               children: [
+                const SizedBox(height: 20),
                 TextFormField(
                   decoration: InputDecoration(labelText: tr('name')),
                   onChanged: (val) => name = val.trim(),
                   validator: (val) =>
                       val == null || val.isEmpty ? tr('enter_name') : null,
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 TextFormField(
                   decoration: InputDecoration(labelText: tr('email')),
                   onChanged: (val) => email = val.trim(),
@@ -55,7 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ? null
                       : tr('enter_valid_email'),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 TextFormField(
                   decoration: InputDecoration(labelText: tr('phone')),
                   keyboardType: TextInputType.phone,
@@ -64,7 +68,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ? null
                       : tr('enter_valid_phone'),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 TextFormField(
                   decoration: InputDecoration(labelText: tr('password')),
                   obscureText: true,
@@ -73,7 +77,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ? null
                       : tr('password_min_6'),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 TextFormField(
                   decoration: InputDecoration(labelText: tr('confirm_password')),
                   obscureText: true,
@@ -81,36 +85,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   validator: (val) =>
                       val != password ? tr('passwords_not_matching') : null,
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
-                      child: ListTile(
-                        title: Text(tr('citizen')),
-                        leading: Radio<String>(
-                          value: 'citizen',
-                          groupValue: role,
-                          onChanged: (val) {
-                            setState(() => role = val!);
-                          },
-                        ),
+                      child: RadioListTile<String>(
+                        title: Text(tr('user')),
+                        value: 'citizen',
+                        groupValue: role,
+                        onChanged: (val) {
+                          setState(() => role = val!);
+                        },
                       ),
                     ),
                     Expanded(
-                      child: ListTile(
+                      child: RadioListTile<String>(
                         title: Text(tr('craftizen')),
-                        leading: Radio<String>(
-                          value: 'craftizen',
-                          groupValue: role,
-                          onChanged: (val) {
-                            setState(() => role = val!);
-                          },
-                        ),
+                        value: 'craftizen',
+                        groupValue: role,
+                        onChanged: (val) {
+                          setState(() => role = val!);
+                        },
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 26),
+                const SizedBox(height: 26),
                 CustomButton(
                   text: tr('register'),
                   onPressed: () async {
@@ -139,10 +139,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     }
                   },
                 ),
-                if (loading) ...[SizedBox(height: 18), CircularProgressIndicator()],
+                if (loading) ...[const SizedBox(height: 18), const CircularProgressIndicator()],
                 if (error.isNotEmpty) ...[
-                  SizedBox(height: 16),
-                  Text(error, style: TextStyle(color: Colors.redAccent))
+                  const SizedBox(height: 16),
+                  Text(error, style: const TextStyle(color: Colors.redAccent))
                 ]
               ],
             ),

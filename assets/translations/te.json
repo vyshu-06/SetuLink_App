@@ -1,0 +1,36 @@
+{
+  "welcome_slogan": "విశ్వసనీయ సేవలతో స్థానిక ప్రతిభను కలపడం",
+  "user": "వినియోగదారు",
+  "craftizen": "క్రాఫ్టిజెన్",
+  "new_to_app": "యాప్‌కు కొత్తవా?",
+  "register_now": "ఇప్పుడే నమోదు చేసుకోండి",
+
+  "citizen_login": "పౌరుల లాగిన్",
+  "craftizen_login": "క్రాఫ్టిజెన్ లాగిన్",
+  "email": "ఇమెయిల్",
+  "password": "పాస్వర్డ్",
+  "login": "లాగిన్",
+  "login_with_phone": "ఫోన్‌తో లాగిన్ అవ్వండి",
+  "enter_valid_email": "దయచేసి సరైన ఇమెయిల్ నమోదు చేయండి",
+  "password_min_6": "పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి",
+  "login_failed": "లాగిన్ విఫలమైంది. దయచేసి మీ ఆధారాలను తనిఖీ చేయండి.",
+
+  "register": "నమోదు చేసుకోండి",
+  "name": "పేరు",
+  "phone": "ఫోన్",
+  "confirm_password": "పాస్వర్డ్ను నిర్ధారించండి",
+  "enter_name": "దయచేసి మీ పేరు నమోదు చేయండి",
+  "enter_valid_phone": "దయచేసి సరైన ఫోన్ నంబర్ నమోదు చేయండి",
+  "passwords_not_matching": "పాస్వర్డ్లు సరిపోలడం లేదు",
+  "registration_failed": "నమోదు విఫలమైంది. దయచేసి మళ్ళీ ప్రయత్నించండి.",
+
+  "citizen_dashboard": "పౌర డ్యాష్‌బోర్డ్",
+  "welcome_citizen": "స్వాగతం, పౌరుడా!",
+  "available_services": "అందుబాటులో ఉన్న సేవలు",
+  "everyday_needs": "రోజువారీ అవసరాలు",
+  "semi_technical": "సెమీ టెక్నికల్",
+  "community_skills": "సంఘం నైపుణ్యాలు",
+
+  "craftizen_dashboard": "క్రాఫ్టిజెన్ డ్యాష్‌బోర్డ్",
+  "welcome_craftizen": "స్వాగతం, క్రాఫ్టిజెన్!"
+}

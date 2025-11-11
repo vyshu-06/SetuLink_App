@@ -15,104 +15,89 @@ class GreetingPage extends StatelessWidget {
     Navigator.pushNamed(context, '/login', arguments: role);
   }
 
-  void _navigateToRegister(BuildContext context, String role) {
-    Navigator.pushNamed(context, '/register', arguments: role);
+  void _navigateToRegister(BuildContext context) {
+    Navigator.pushNamed(context, '/register', arguments: 'citizen');
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 60),
-                Icon(
-                  Icons.handshake,
-                  size: 80,
-                  color: Colors.teal[600],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Spacer(flex: 2),
+              Icon(Icons.handshake_outlined, size: 80, color: Colors.teal[700]),
+              const SizedBox(height: 20),
+              const Text(
+                'SetuLink',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
                 ),
-                const SizedBox(height: 16),
-                const Text(
-                  'SetuLink',
-                  style: TextStyle(
-                    fontSize: 32.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.teal,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  tr('Bridging Local Talent with Trusted Services'),
-                  style: const TextStyle(fontSize: 18.0),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 40),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal[700],
-
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:  BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () => _navigateToLogin(context, 'citizen'),
-                  child: Text(
-                    tr('User') + " (नागररक)",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal[700],
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () => _navigateToLogin(context, 'craftizen'),
-                  child: Text(
-                    tr('Craftizen') + " (कला-नागररक)",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  tr('New to the App?'),
-                  style: const TextStyle(fontSize: 18.0),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                TextButton(
-                  child: Text(
-                    tr('Register Now'),
-                    style: const TextStyle(
-                      color: Colors.teal,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  onPressed: () => _navigateToRegister(context, 'citizen'), // Defaulting to citizen for register
-                ),
-                const SizedBox(height: 40),
-              ],
-            ),
+              ),
+              const SizedBox(height: 12),
+              Text(tr('welcome_slogan'),
+                  textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
+              const Spacer(flex: 3),
+              _buildRoleButton(
+                context,
+                roleKey: 'user',
+                onPressed: () => _navigateToLogin(context, 'citizen'),
+                color: Colors.teal,
+              ),
+              const SizedBox(height: 20),
+              _buildRoleButton(
+                context,
+                roleKey: 'craftizen',
+                onPressed: () => _navigateToLogin(context, 'craftizen'),
+                color: Colors.deepOrange,
+              ),
+              const Spacer(flex: 2),
+              _buildRegistrationSection(context),
+              const Spacer(),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRoleButton(BuildContext context,
+      {required String roleKey,
+      required VoidCallback onPressed,
+      required Color color}) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 5,
+      ),
+      child: Text(tr(roleKey),
+          style: const TextStyle(
+              color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+    );
+  }
+
+  Widget _buildRegistrationSection(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(tr('new_to_app')),
+        TextButton(
+          onPressed: () => _navigateToRegister(context),
+          child: Text(tr('register_now'),
+              style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
+        ),
+      ],
     );
   }
 }

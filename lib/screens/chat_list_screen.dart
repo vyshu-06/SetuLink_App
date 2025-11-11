@@ -20,7 +20,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget build(BuildContext context) {
     final currentUser = _authService.getCurrentUser();
     if (currentUser == null) {
-      // Handle case where user is not logged in
       return Scaffold(
         appBar: AppBar(title: const Text('Chats')),
         body: const Center(
@@ -29,10 +28,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
       );
     }
 
+    final currentUserId = currentUser['uid'] as String;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Chats')),
       body: StreamBuilder<List<ChatMetadata>>(
-        stream: _chatService.getChats(currentUser['uid']),
+        stream: _chatService.getChats(currentUserId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -47,10 +48,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
             itemCount: chats.length,
             itemBuilder: (context, index) {
               final chat = chats[index];
-              final otherUserId = chat.user1 == currentUser['uid'] ? chat.user2 : chat.user1;
+              // Correctly find the other user's ID from the participants list
+              final otherUserId = chat.participants.firstWhere((id) => id != currentUserId, orElse: () => '');
 
-              // We need to fetch the other user's name to display it
-              // This is a simplified version; in a real app, you might cache user data
+              if (otherUserId.isEmpty) return const SizedBox.shrink(); // Should not happen
+
               return FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance.collection('users').doc(otherUserId).get(),
                 builder: (context, userSnapshot) {
@@ -59,18 +61,26 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   }
 
                   final otherUserData = userSnapshot.data!.data() as Map<String, dynamic>;
+                  // Correctly get the unread count from the map
+                  final unreadCount = chat.unreadCount[currentUserId] ?? 0;
 
                   return ListTile(
                     title: Text(otherUserData['name'] ?? 'Unknown User'),
                     subtitle: Text(chat.lastMessage),
-                    trailing: (chat.unreadCountUser1 > 0 && chat.user1 == currentUser['uid']) || (chat.unreadCountUser2 > 0 && chat.user2 == currentUser['uid']) ? const CircleAvatar(radius: 8, backgroundColor: Colors.red) : null,
+                    trailing: unreadCount > 0
+                        ? CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Colors.red,
+                            child: Text(unreadCount.toString(), style: const TextStyle(color: Colors.white, fontSize: 12)),
+                          )
+                        : null,
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ChatScreen(
                             chatId: chat.chatId,
-                            currentUserId: currentUser['uid'],
+                            currentUserId: currentUserId,
                             peerId: otherUserId,
                             peerName: otherUserData['name'] ?? 'Unknown User',
                           ),

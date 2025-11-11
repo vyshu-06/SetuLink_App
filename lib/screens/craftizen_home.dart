@@ -1,21 +1,15 @@
 import 'package:flutter/material.dart';
-import 'chat_list_screen.dart'; // Import the new screen
+import 'package:easy_localization/easy_localization.dart';
+import 'chat_list_screen.dart';
 
-class CraftizenHome extends StatefulWidget {
-  // FIX: Constructor no longer requires userObj.
+class CraftizenHome extends StatelessWidget {
   const CraftizenHome({Key? key}) : super(key: key);
 
-  @override
-  State<CraftizenHome> createState() => _CraftizenHomeState();
-}
-
-class _CraftizenHomeState extends State<CraftizenHome> {
-  // ... (rest of the file is placeholder and can remain)
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Craftizen Dashboard'),
+        title: Text(tr('craftizen_dashboard')),
         actions: [
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline),
@@ -28,7 +22,19 @@ class _CraftizenHomeState extends State<CraftizenHome> {
           ),
         ],
       ),
-      body: const Center(child: Text("Welcome, Craftizen!")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              tr('welcome_craftizen'),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
+            // Add other Craftizen-specific dashboard widgets here
+          ],
+        ),
+      ),
     );
   }
 }
