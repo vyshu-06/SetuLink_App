@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/bilingual_tr.dart';
 
 class GreetingPage extends StatelessWidget {
   const GreetingPage({Key? key}) : super(key: key);
@@ -43,7 +44,7 @@ class GreetingPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              Text(tr('welcome_slogan'),
+              Text(btr(context, 'welcome_slogan'),
                   textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
               const Spacer(flex: 3),
               _buildRoleButton(
@@ -81,7 +82,7 @@ class GreetingPage extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 5,
       ),
-      child: Text(tr(roleKey),
+      child: Text(btr(context, roleKey),
           style: const TextStyle(
               color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
     );
@@ -91,10 +92,10 @@ class GreetingPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(tr('new_to_app')),
+        Text(btr(context, 'new_to_app')),
         TextButton(
           onPressed: () => _navigateToRegister(context),
-          child: Text(tr('register_now'),
+          child: Text(btr(context, 'register_now'),
               style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
         ),
       ],

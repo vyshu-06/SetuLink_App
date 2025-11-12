@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../utils/bilingual_tr.dart';
 import '../widgets/custom_button.dart';
 import '../services/auth_service.dart';
 import 'citizen_home.dart';
@@ -34,7 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('register')),
+        title: Text(btr(context, 'register')),
         backgroundColor: Colors.teal,
       ),
       body: Center(
@@ -46,44 +47,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: [
                 const SizedBox(height: 20),
                 TextFormField(
-                  decoration: InputDecoration(labelText: tr('name')),
+                  decoration: InputDecoration(labelText: btr(context, 'name')),
                   onChanged: (val) => name = val.trim(),
                   validator: (val) =>
-                      val == null || val.isEmpty ? tr('enter_name') : null,
+                      val == null || val.isEmpty ? btr(context, 'enter_name') : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: InputDecoration(labelText: tr('email')),
+                  decoration: InputDecoration(labelText: btr(context, 'email')),
                   onChanged: (val) => email = val.trim(),
                   validator: (val) => (val != null && val.contains('@'))
                       ? null
-                      : tr('enter_valid_email'),
+                      : btr(context, 'enter_valid_email'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: InputDecoration(labelText: tr('phone')),
+                  decoration: InputDecoration(labelText: btr(context, 'phone')),
                   keyboardType: TextInputType.phone,
                   onChanged: (val) => phone = val.trim(),
                   validator: (val) => (val != null && val.length >= 10)
                       ? null
-                      : tr('enter_valid_phone'),
+                      : btr(context, 'enter_valid_phone'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: InputDecoration(labelText: tr('password')),
+                  decoration: InputDecoration(labelText: btr(context, 'password')),
                   obscureText: true,
                   onChanged: (val) => password = val,
                   validator: (val) => (val != null && val.length >= 6)
                       ? null
-                      : tr('password_min_6'),
+                      : btr(context, 'password_min_6'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: InputDecoration(labelText: tr('confirm_password')),
+                  decoration: InputDecoration(labelText: btr(context, 'confirm_password')),
                   obscureText: true,
                   onChanged: (val) => confirmPwd = val,
                   validator: (val) =>
-                      val != password ? tr('passwords_not_matching') : null,
+                      val != password ? btr(context, 'passwords_not_matching') : null,
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -95,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (val) {
                           setState(() => role = val!);
                         },
-                        child: Text(tr('user')),
+                        child: Text(btr(context, 'user')),
                       ),
                     ),
                     Expanded(
@@ -105,14 +106,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (val) {
                           setState(() => role = val!);
                         },
-                        child: Text(tr('craftizen')),
+                        child: Text(btr(context, 'craftizen')),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 26),
                 CustomButton(
-                  text: tr('register'),
+                  text: btr(context, 'register'),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       setState(() => loading = true);
@@ -125,7 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       );
                       setState(() => loading = false);
                       if (userObj == null) {
-                        setState(() => error = tr('registration_failed'));
+                        setState(() => error = btr(context, 'registration_failed'));
                       } else {
                         Navigator.pushReplacement(
                           context,

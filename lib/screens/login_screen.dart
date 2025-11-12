@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../utils/bilingual_tr.dart';
 import '../widgets/custom_button.dart';
 import 'phone_auth_screen.dart';
 import '../services/auth_service.dart';
@@ -25,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr(widget.role == "citizen" ? 'citizen_login' : 'craftizen_login')),
+        title: Text(btr(context, widget.role == "citizen" ? 'citizen_login' : 'craftizen_login')),
         backgroundColor: widget.role == 'citizen' ? Colors.teal : Colors.deepOrange,
       ),
       body: Center(
@@ -36,22 +37,22 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: [
                 TextFormField(
-                  decoration: InputDecoration(labelText: tr('email')),
+                  decoration: InputDecoration(labelText: btr(context, 'email')),
                   onChanged: (val) => email = val.trim(),
                   validator: (val) =>
-                      (val != null && val.contains('@')) ? null : tr('enter_valid_email'),
+                      (val != null && val.contains('@')) ? null : btr(context, 'enter_valid_email'),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  decoration: InputDecoration(labelText: tr('password')),
+                  decoration: InputDecoration(labelText: btr(context, 'password')),
                   obscureText: true,
                   onChanged: (val) => password = val,
                   validator: (val) =>
-                      (val != null && val.length >= 6) ? null : tr('password_min_6'),
+                      (val != null && val.length >= 6) ? null : btr(context, 'password_min_6'),
                 ),
                 const SizedBox(height: 24),
                 CustomButton(
-                  text: tr('login'),
+                  text: btr(context, 'login'),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       setState(() => loading = true);
@@ -59,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           .signInWithEmail(email, password, widget.role);
                       setState(() => loading = false);
                       if (result == null) {
-                        setState(() => error = tr('login_failed'));
+                        setState(() => error = btr(context, 'login_failed'));
                       } else {
                         Navigator.pushReplacement(
                           context,
@@ -75,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton(
-                  child: Text(tr('login_with_phone')),
+                  child: Text(btr(context, 'login_with_phone')),
                   onPressed: () {
                     Navigator.push(
                       context,
