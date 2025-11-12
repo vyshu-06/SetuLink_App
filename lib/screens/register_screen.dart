@@ -89,23 +89,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: RadioListTile<String>(
-                        title: Text(tr('user')),
+                      child: RadioMenuButton<String>(
                         value: 'citizen',
                         groupValue: role,
                         onChanged: (val) {
                           setState(() => role = val!);
                         },
+                        child: Text(tr('user')),
                       ),
                     ),
                     Expanded(
-                      child: RadioListTile<String>(
-                        title: Text(tr('craftizen')),
+                      child: RadioMenuButton<String>(
                         value: 'craftizen',
                         groupValue: role,
                         onChanged: (val) {
                           setState(() => role = val!);
                         },
+                        child: Text(tr('craftizen')),
                       ),
                     ),
                   ],
