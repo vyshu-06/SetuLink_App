@@ -1,4 +1,5 @@
 {
+  "SetuLink": "SetuLink",
   "welcome_slogan": "Bridging Local Talent with Trusted Services",
   "user": "User",
   "craftizen": "Craftizen",
@@ -32,5 +33,13 @@
   "community_skills": "Community Skills",
 
   "craftizen_dashboard": "Craftizen Dashboard",
-  "welcome_craftizen": "Welcome, Craftizen!"
+  "welcome_craftizen": "Welcome, Craftizen!",
+
+  "phone_login": "Phone Login",
+  "phone_number": "Phone Number",
+  "enter_otp": "Enter OTP",
+  "verify_otp": "Verify OTP",
+  "send_otp": "Send OTP",
+  "enter_valid_otp": "Please enter a valid OTP",
+  "unexpected_error": "An unexpected error occurred"
 }

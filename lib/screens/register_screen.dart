@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../utils/bilingual_tr.dart';
-import '../widgets/custom_button.dart';
+import 'package:flutter/material.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 import '../services/auth_service.dart';
 import 'citizen_home.dart';
 import 'craftizen_home.dart';
@@ -23,7 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String phone = '';
   String name = '';
   bool loading = false;
-  String error = '';
+  String errorKey = ''; // Holds the translation key for the error
 
   @override
   void initState() {
@@ -35,7 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(btr(context, 'register')),
+        title: const BilingualText(textKey: 'register'),
         backgroundColor: Colors.teal,
       ),
       body: Center(
@@ -47,44 +46,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: [
                 const SizedBox(height: 20),
                 TextFormField(
-                  decoration: InputDecoration(labelText: btr(context, 'name')),
+                  decoration: InputDecoration(labelText: context.tr('name')),
                   onChanged: (val) => name = val.trim(),
                   validator: (val) =>
-                      val == null || val.isEmpty ? btr(context, 'enter_name') : null,
+                      val == null || val.isEmpty ? context.tr('enter_name') : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: InputDecoration(labelText: btr(context, 'email')),
+                  decoration: InputDecoration(labelText: context.tr('email')),
                   onChanged: (val) => email = val.trim(),
                   validator: (val) => (val != null && val.contains('@'))
                       ? null
-                      : btr(context, 'enter_valid_email'),
+                      : context.tr('enter_valid_email'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: InputDecoration(labelText: btr(context, 'phone')),
+                  decoration: InputDecoration(labelText: context.tr('phone')),
                   keyboardType: TextInputType.phone,
                   onChanged: (val) => phone = val.trim(),
                   validator: (val) => (val != null && val.length >= 10)
                       ? null
-                      : btr(context, 'enter_valid_phone'),
+                      : context.tr('enter_valid_phone'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: InputDecoration(labelText: btr(context, 'password')),
+                  decoration: InputDecoration(labelText: context.tr('password')),
                   obscureText: true,
                   onChanged: (val) => password = val,
                   validator: (val) => (val != null && val.length >= 6)
                       ? null
-                      : btr(context, 'password_min_6'),
+                      : context.tr('password_min_6'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: InputDecoration(labelText: btr(context, 'confirm_password')),
+                  decoration: InputDecoration(labelText: context.tr('confirm_password')),
                   obscureText: true,
                   onChanged: (val) => confirmPwd = val,
                   validator: (val) =>
-                      val != password ? btr(context, 'passwords_not_matching') : null,
+                      val != password ? context.tr('passwords_not_matching') : null,
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -96,7 +95,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (val) {
                           setState(() => role = val!);
                         },
-                        child: Text(btr(context, 'user')),
+                        child: const BilingualText(textKey: 'user'),
                       ),
                     ),
                     Expanded(
@@ -106,17 +105,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (val) {
                           setState(() => role = val!);
                         },
-                        child: Text(btr(context, 'craftizen')),
+                        child: const BilingualText(textKey: 'craftizen'),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 26),
-                CustomButton(
-                  text: btr(context, 'register'),
+                ElevatedButton(
+                  child: const BilingualText(textKey: 'register'),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      setState(() => loading = true);
+                      setState(() {
+                        loading = true;
+                        errorKey = '';
+                      });
                       final userObj = await AuthService().registerWithEmail(
                         email,
                         password,
@@ -126,7 +128,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       );
                       setState(() => loading = false);
                       if (userObj == null) {
-                        setState(() => error = btr(context, 'registration_failed'));
+                        setState(() => errorKey = 'registration_failed');
                       } else {
                         Navigator.pushReplacement(
                           context,
@@ -141,9 +143,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 if (loading) ...[const SizedBox(height: 18), const CircularProgressIndicator()],
-                if (error.isNotEmpty) ...[
+                if (errorKey.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Text(error, style: const TextStyle(color: Colors.redAccent))
+                  BilingualText(textKey: errorKey, style: const TextStyle(color: Colors.redAccent))
                 ]
               ],
             ),

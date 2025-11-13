@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../utils/bilingual_tr.dart';
-import '../widgets/custom_button.dart';
+import 'package:flutter/material.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'phone_auth_screen.dart';
 import '../services/auth_service.dart';
 import '../screens/citizen_home.dart';
@@ -20,13 +19,13 @@ class _LoginScreenState extends State<LoginScreen> {
   String email = '';
   String password = '';
   bool loading = false;
-  String error = '';
+  String errorKey = ''; // Holds the translation key for the error
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(btr(context, widget.role == "citizen" ? 'citizen_login' : 'craftizen_login')),
+        title: BilingualText(textKey: widget.role == "citizen" ? 'citizen_login' : 'craftizen_login'),
         backgroundColor: widget.role == 'citizen' ? Colors.teal : Colors.deepOrange,
       ),
       body: Center(
@@ -37,30 +36,33 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: [
                 TextFormField(
-                  decoration: InputDecoration(labelText: btr(context, 'email')),
+                  decoration: InputDecoration(labelText: context.tr('email')),
                   onChanged: (val) => email = val.trim(),
                   validator: (val) =>
-                      (val != null && val.contains('@')) ? null : btr(context, 'enter_valid_email'),
+                      (val != null && val.contains('@')) ? null : context.tr('enter_valid_email'),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  decoration: InputDecoration(labelText: btr(context, 'password')),
+                  decoration: InputDecoration(labelText: context.tr('password')),
                   obscureText: true,
                   onChanged: (val) => password = val,
                   validator: (val) =>
-                      (val != null && val.length >= 6) ? null : btr(context, 'password_min_6'),
+                      (val != null && val.length >= 6) ? null : context.tr('password_min_6'),
                 ),
                 const SizedBox(height: 24),
-                CustomButton(
-                  text: btr(context, 'login'),
+                ElevatedButton(
+                  child: const BilingualText(textKey: 'login'),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      setState(() => loading = true);
+                      setState(() {
+                        loading = true;
+                        errorKey = '';
+                      });
                       final result = await AuthService()
                           .signInWithEmail(email, password, widget.role);
                       setState(() => loading = false);
                       if (result == null) {
-                        setState(() => error = btr(context, 'login_failed'));
+                        setState(() => errorKey = 'login_failed');
                       } else {
                         Navigator.pushReplacement(
                           context,
@@ -76,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton(
-                  child: Text(btr(context, 'login_with_phone')),
+                  child: const BilingualText(textKey: 'login_with_phone'),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -90,9 +92,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
                   const CircularProgressIndicator(),
                 ],
-                if (error.isNotEmpty) ...[
+                if (errorKey.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Text(error, style: const TextStyle(color: Colors.redAccent)),
+                  BilingualText(textKey: errorKey, style: const TextStyle(color: Colors.redAccent)),
                 ],
               ],
             ),

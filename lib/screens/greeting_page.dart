@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../utils/bilingual_tr.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class GreetingPage extends StatelessWidget {
   const GreetingPage({Key? key}) : super(key: key);
@@ -34,9 +33,8 @@ class GreetingPage extends StatelessWidget {
               const Spacer(flex: 2),
               Icon(Icons.handshake_outlined, size: 80, color: Colors.teal[700]),
               const SizedBox(height: 20),
-              const Text(
-                'SetuLink',
-                textAlign: TextAlign.center,
+              const BilingualText(
+                textKey: 'SetuLink',
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
@@ -44,8 +42,7 @@ class GreetingPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              Text(btr(context, 'welcome_slogan'),
-                  textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
+              const BilingualText(textKey: 'welcome_slogan', style: TextStyle(fontSize: 16)),
               const Spacer(flex: 3),
               _buildRoleButton(
                 context,
@@ -82,7 +79,8 @@ class GreetingPage extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 5,
       ),
-      child: Text(btr(context, roleKey),
+      child: BilingualText(
+          textKey: roleKey,
           style: const TextStyle(
               color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
     );
@@ -92,11 +90,12 @@ class GreetingPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(btr(context, 'new_to_app')),
+        const BilingualText(textKey: 'new_to_app'),
         TextButton(
           onPressed: () => _navigateToRegister(context),
-          child: Text(btr(context, 'register_now'),
-              style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
+          child: const BilingualText(
+              textKey: 'register_now',
+              style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
         ),
       ],
     );

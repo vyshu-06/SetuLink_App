@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'chat_list_screen.dart';
 
 class CraftizenHome extends StatelessWidget {
@@ -9,7 +9,7 @@ class CraftizenHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('craftizen_dashboard')),
+        title: const BilingualText(textKey: 'craftizen_dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline),
@@ -26,10 +26,10 @@ class CraftizenHome extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              tr('welcome_craftizen'),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          children: const [
+            BilingualText(
+              textKey: 'welcome_craftizen',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
             // Add other Craftizen-specific dashboard widgets here
           ],

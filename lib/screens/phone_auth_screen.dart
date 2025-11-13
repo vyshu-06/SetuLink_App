@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../utils/bilingual_tr.dart';
-import '../widgets/custom_button.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 import '../services/auth_service.dart';
 import 'citizen_home.dart';
 import 'craftizen_home.dart';
@@ -23,12 +22,12 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
   bool _otpSent = false;
   bool _loading = false;
   String? _verificationId;
-  String _error = '';
+  String _errorKey = '';
 
   @override
   void initState() {
     super.initState();
-    _phoneController.text = '+918121127978';
+    _phoneController.text = '+918121127978'; // Default for testing
   }
 
   @override
@@ -40,7 +39,10 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
 
   Future<void> _sendOtp() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _errorKey = '';
+    });
     try {
       await _authService.sendOtp(
         _phoneController.text.trim(),
@@ -57,14 +59,14 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
         },
         verificationFailed: (e) {
           setState(() {
-            _error = e.message ?? 'Failed to send OTP';
+            _errorKey = e.code;
             _loading = false;
           });
         },
       );
     } catch (e) {
       setState(() {
-        _error = e.toString();
+        _errorKey = 'unexpected_error';
         _loading = false;
       });
     }
@@ -72,18 +74,21 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
 
   Future<void> _verifyOtp() async {
     if (!_formKey.currentState!.validate() || _verificationId == null) return;
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _errorKey = '';
+    });
     try {
       await _authService.verifyOtp(_verificationId!, _otpController.text.trim(), widget.role);
       _navigateToHome();
     } on FirebaseAuthException catch (e) {
       setState(() {
-        _error = e.message ?? 'Invalid OTP';
+        _errorKey = e.code;
         _loading = false;
       });
     } catch (e) {
       setState(() {
-        _error = e.toString();
+        _errorKey = 'unexpected_error';
         _loading = false;
       });
     }
@@ -103,7 +108,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(btr(context, 'phone_login')),
+        title: const BilingualText(textKey: 'phone_login'),
         backgroundColor: widget.role == 'citizen' ? Colors.teal : Colors.deepOrange,
       ),
       body: Center(
@@ -116,32 +121,32 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                 if (!_otpSent)
                   TextFormField(
                     controller: _phoneController,
-                    decoration: InputDecoration(labelText: btr(context, 'phone_number')),
+                    decoration: InputDecoration(labelText: context.tr('phone_number')),
                     keyboardType: TextInputType.phone,
                     validator: (val) =>
-                        val == null || val.length < 10 ? btr(context, 'enter_valid_phone') : null,
+                        val == null || val.length < 10 ? context.tr('enter_valid_phone') : null,
                   ),
                 if (_otpSent)
                   TextFormField(
                     controller: _otpController,
-                    decoration: InputDecoration(labelText: btr(context, 'enter_otp')),
+                    decoration: InputDecoration(labelText: context.tr('enter_otp')),
                     keyboardType: TextInputType.number,
                     validator: (val) =>
-                        val == null || val.length < 6 ? btr(context, 'enter_valid_otp') : null,
+                        val == null || val.length < 6 ? context.tr('enter_valid_otp') : null,
                   ),
                 const SizedBox(height: 20),
                 if (_loading)
                   const CircularProgressIndicator()
                 else
-                  CustomButton(
-                    text: _otpSent ? btr(context, 'verify_otp') : btr(context, 'send_otp'),
+                  ElevatedButton(
+                    child: BilingualText(textKey: _otpSent ? 'verify_otp' : 'send_otp'),
                     onPressed: _otpSent ? _verifyOtp : _sendOtp,
                   ),
-                if (_error.isNotEmpty)
+                if (_errorKey.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0),
-                    child: Text(
-                      _error,
+                    child: BilingualText(
+                      textKey: _errorKey,
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),
