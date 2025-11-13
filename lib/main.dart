@@ -20,7 +20,7 @@ Future<void> main() async {
 
   runApp(
     EasyLocalization(
-      supportedLocales: const [Locale('en'), Locale('hi')],
+      supportedLocales: const [Locale('en'), Locale('te')], // Changed to Telugu
       path: 'assets/translations',
       fallbackLocale: const Locale('en'),
       child: MultiProvider(

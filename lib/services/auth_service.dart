@@ -1,7 +1,8 @@
 import 'dart:convert';
-// Remove crypto import since it's causing errors
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   AuthService() {
     initializeMockUsers();
@@ -101,80 +102,40 @@ class AuthService {
     }
   }
 
-  // Send OTP for phone number verification (mock implementation)
-  Future<String?> sendOTP(String phoneNumber, {
-    required Function(String verificationId) onCodeSent,
+  // Send OTP for phone number verification
+  Future<void> sendOtp(String phoneNumber, {
+    required Function(String, int?) codeSent,
+    required Function(PhoneAuthCredential) verificationCompleted,
+    required Function(FirebaseAuthException) verificationFailed,
   }) async {
-    try {
-      // Mock OTP verification - in real app, this would use Firebase Auth
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Generate a mock verification ID
-      final verificationId = 'mock_verification_${DateTime
-          .now()
-          .millisecondsSinceEpoch}';
-
-      // Simulate code sent callback
-      onCodeSent(verificationId);
-
-      print('Mock OTP sent to: $phoneNumber');
-      return null;
-    } catch (e) {
-      print('sendOTP error: $e');
-      return e.toString();
-    }
+    await _auth.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationCompleted: verificationCompleted,
+      verificationFailed: verificationFailed,
+      codeSent: codeSent,
+      codeAutoRetrievalTimeout: (String verificationId) {},
+    );
   }
 
-  // Verify OTP and sign in user by phone (mock implementation)
-  Future<Map<String, dynamic>?> verifyOTP(String verificationId,
-      String smsCode,
-      String role,) async {
-    try {
-      // Mock OTP verification - always accept '123456' as valid OTP
-      if (smsCode != '123456') {
-        print('Invalid OTP');
-        return null;
-      }
+  // Verify OTP and sign in user by phone
+  Future<void> verifyOtp(String verificationId, String smsCode, String role) async {
+    final credential = PhoneAuthProvider.credential(
+      verificationId: verificationId,
+      smsCode: smsCode,
+    );
+    await signInWithCredential(credential, role);
+  }
 
-      // For demo purposes, create a mock user if none exists
-      if (_mockUsers.isEmpty) {
-        final mockUser = <String, dynamic>{
-          'uid': 'mock_phone_user_${DateTime
-              .now()
-              .millisecondsSinceEpoch}',
-          'email': 'phoneuser@example.com',
-          'name': 'Phone User',
-          'phone': verificationId.replaceFirst('mock_verification_', ''),
-          'role': role,
-          'createdAt': DateTime.now().toString(),
-          'hashedPassword': _hashPassword('mockpassword'),
-        };
-
-        if (role == 'craftizen') {
-          mockUser['skills'] = <String>[];
-          mockUser['verified'] = false;
-        }
-
-        _mockUsers.add(mockUser);
-        _currentUser = mockUser;
-        return mockUser;
-      }
-
-      // Find existing user with matching role
-      final user = _mockUsers.firstWhere(
-            (user) => user['role'] == role,
-        orElse: () => <String, dynamic>{},
-      );
-
-      if (user.isNotEmpty) {
-        _currentUser = user;
-        return user;
-      }
-
-      return null;
-    } catch (e) {
-      print('verifyOTP error: $e');
-      return null;
+  // Sign in with any credential
+  Future<void> signInWithCredential(AuthCredential credential, String role) async {
+    final userCredential = await _auth.signInWithCredential(credential);
+    if (userCredential.user != null) {
+      // By default, we'll just create a mock user object here
+      _currentUser = {
+        'uid': userCredential.user!.uid,
+        'phone': userCredential.user!.phoneNumber,
+        'role': role,
+      };
     }
   }
 
@@ -185,6 +146,7 @@ class AuthService {
 
   // Sign out
   Future<void> signOut() async {
+    await _auth.signOut();
     _currentUser = null;
     print('User signed out');
   }

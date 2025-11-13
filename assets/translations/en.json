@@ -1,1 +1,45 @@
-{}
+{
+  "SetuLink": "SetuLink",
+  "welcome_slogan": "Bridging Local Talent with Trusted Services",
+  "user": "User",
+  "craftizen": "Craftizen",
+  "new_to_app": "New to the App?",
+  "register_now": "Register Now",
+
+  "citizen_login": "Citizen Login",
+  "craftizen_login": "Craftizen Login",
+  "email": "Email",
+  "password": "Password",
+  "login": "Login",
+  "login_with_phone": "Login with Phone",
+  "enter_valid_email": "Please enter a valid email",
+  "password_min_6": "Password must be at least 6 characters",
+  "login_failed": "Login failed. Please check your credentials.",
+
+  "register": "Register",
+  "name": "Name",
+  "phone": "Phone",
+  "confirm_password": "Confirm Password",
+  "enter_name": "Please enter your name",
+  "enter_valid_phone": "Please enter a valid phone number",
+  "passwords_not_matching": "Passwords do not match",
+  "registration_failed": "Registration failed. Please try again.",
+
+  "citizen_dashboard": "Citizen Dashboard",
+  "welcome_citizen": "Welcome, Citizen!",
+  "available_services": "Available Services",
+  "everyday_needs": "Everyday Needs",
+  "semi_technical": "Semi Technical",
+  "community_skills": "Community Skills",
+
+  "craftizen_dashboard": "Craftizen Dashboard",
+  "welcome_craftizen": "Welcome, Craftizen!",
+
+  "phone_login": "Phone Login",
+  "phone_number": "Phone Number",
+  "enter_otp": "Enter OTP",
+  "verify_otp": "Verify OTP",
+  "send_otp": "Send OTP",
+  "enter_valid_otp": "Please enter a valid OTP",
+  "unexpected_error": "An unexpected error occurred"
+}
