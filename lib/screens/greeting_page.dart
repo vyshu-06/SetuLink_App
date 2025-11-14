@@ -57,7 +57,13 @@ class GreetingPage extends StatelessWidget {
                 onPressed: () => _navigateToLogin(context, 'craftizen'),
                 color: Colors.deepOrange,
               ),
-              const Spacer(flex: 2),
+              const Spacer(),
+              // ADDED: Temporary button to access the Admin Panel
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, '/admin'),
+                child: const Text('Admin Panel'),
+              ),
+              const Spacer(flex: 1),
               _buildRegistrationSection(context),
               const Spacer(),
             ],

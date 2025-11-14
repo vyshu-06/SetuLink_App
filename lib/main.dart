@@ -9,18 +9,16 @@ import 'package:setulink_app/screens/login_screen.dart';
 import 'package:setulink_app/screens/register_screen.dart';
 import 'package:setulink_app/screens/phone_auth_screen.dart';
 import 'package:setulink_app/screens/greeting_page.dart';
-import 'firebase_options.dart';
+import 'package:setulink_app/screens/admin_panel_screen.dart'; // Import the new screen
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp();
   await EasyLocalization.ensureInitialized();
 
   runApp(
     EasyLocalization(
-      supportedLocales: const [Locale('en'), Locale('te')], // Changed to Telugu
+      supportedLocales: const [Locale('en'), Locale('hi')],
       path: 'assets/translations',
       fallbackLocale: const Locale('en'),
       child: MultiProvider(
@@ -49,7 +47,7 @@ class SetuLinkApp extends StatelessWidget {
         final media = MediaQuery.of(context);
         return MediaQuery(
           data: media.copyWith(
-              textScaler: TextScaler.linear(media.textScaler.scale(1).clamp(1.0, 1.3))),
+              textScaler: TextScaler.linear(media.textScaleFactor.clamp(1.0, 1.3))),
           child: child!,
         );
       },
@@ -70,6 +68,8 @@ class SetuLinkApp extends StatelessWidget {
           final role = ModalRoute.of(context)!.settings.arguments as String? ?? 'citizen';
           return PhoneAuthScreen(role: role);
         },
+        // ADDED: Route for the new Admin Panel
+        '/admin': (context) => AdminPanelScreen(),
       },
     );
   }
