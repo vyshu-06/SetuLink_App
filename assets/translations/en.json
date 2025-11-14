@@ -29,8 +29,8 @@
   "welcome_citizen": "Welcome, Citizen!",
   "available_services": "Available Services",
   "everyday_needs": "Everyday Needs",
-  "semi_technical": "Semi Technical",
-  "community_skills": "Community Skills",
+  "semi_technical": "Semi-Technical",
+  "community_skills": "Community/Skill-based",
 
   "craftizen_dashboard": "Craftizen Dashboard",
   "welcome_craftizen": "Welcome, Craftizen!",
@@ -41,5 +41,48 @@
   "verify_otp": "Verify OTP",
   "send_otp": "Send OTP",
   "enter_valid_otp": "Please enter a valid OTP",
-  "unexpected_error": "An unexpected error occurred"
+  "unexpected_error": "An unexpected error occurred",
+
+  "plumber": "Plumber",
+  "electrician": "Electrician",
+  "carpenter": "Carpenter",
+  "house_cleaner": "House Cleaner",
+  "gardener": "Gardener",
+  "tailor": "Tailor",
+  "painter": "Painter",
+  "babysitter": "Babysitter",
+  "laundry": "Laundry",
+  "elderly_caregiver": "Elderly Caregiver",
+  "pet_care": "Pet Care",
+  "driver": "Driver",
+
+  "mobile_repair": "Mobile Repair",
+  "appliance_repair": "Appliance Repair",
+  "tv_setup": "TV Setup",
+  "cctv": "CCTV",
+  "wifi": "Wi-Fi",
+  "home_automation": "Home Automation",
+  "solar_installers": "Solar Installers",
+
+  "tutor": "Tutor",
+  "yoga_trainer": "Yoga Trainer",
+  "music_teacher": "Music Teacher",
+  "event_assistant": "Event Assistant",
+  "errand_helper": "Errand Helper",
+  
+  "what_service_looking_for": "What service are you looking for?",
+  "search_services": "Search for services...",
+
+  "profile": "Profile",
+  "logout": "Logout",
+  "home": "Home",
+  "bookings": "Bookings",
+  "chats": "Chats",
+  "bookings_page_title": "My Bookings",
+  "jobs": "Jobs",
+  "jobs_page_title": "My Jobs",
+
+  "my_skills": "My Skills",
+  "job_requests": "Job Requests",
+  "no_jobs_available": "No jobs available at the moment"
 }

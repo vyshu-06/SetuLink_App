@@ -6,8 +6,14 @@ import 'package:easy_localization/easy_localization.dart';
 class BilingualText extends StatefulWidget {
   final String textKey;
   final TextStyle? style;
+  final TextAlign? textAlign;
 
-  const BilingualText({Key? key, required this.textKey, this.style}) : super(key: key);
+  const BilingualText({
+    Key? key,
+    required this.textKey,
+    this.style,
+    this.textAlign,
+  }) : super(key: key);
 
   @override
   _BilingualTextState createState() => _BilingualTextState();
@@ -20,6 +26,14 @@ class _BilingualTextState extends State<BilingualText> {
   void initState() {
     super.initState();
     _translations = _loadTranslations();
+  }
+
+  @override
+  void didUpdateWidget(covariant BilingualText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.textKey != widget.textKey) {
+      _translations = _loadTranslations();
+    }
   }
 
   Future<Map<String, String>> _loadTranslations() async {
@@ -35,7 +49,6 @@ class _BilingualTextState extends State<BilingualText> {
 
       return {'en': enText, 'te': teText};
     } catch (e) {
-      // If loading fails, return the key itself
       return {'en': widget.textKey, 'te': widget.textKey};
     }
   }
@@ -50,7 +63,6 @@ class _BilingualTextState extends State<BilingualText> {
           final teluguText = snapshot.data!['te']!;
           final currentLocale = context.locale;
 
-          // Determine the order based on the current app locale
           final bilingualText = currentLocale.languageCode == 'te'
               ? '$teluguText ($englishText)'
               : '$englishText ($teluguText)';
@@ -58,12 +70,15 @@ class _BilingualTextState extends State<BilingualText> {
           return Text(
             bilingualText,
             style: widget.style,
-            textAlign: TextAlign.center, // Center align the text
+            textAlign: widget.textAlign,
           );
         }
         
-        // Show a placeholder or the key while loading
-        return Text(widget.textKey, style: widget.style, textAlign: TextAlign.center,);
+        return Text(
+          widget.textKey,
+          style: widget.style,
+          textAlign: widget.textAlign,
+        );
       },
     );
   }

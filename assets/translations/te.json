@@ -22,15 +22,15 @@
   "confirm_password": "పాస్వర్డ్ను నిర్ధారించండి",
   "enter_name": "దయచేసి మీ పేరు నమోదు చేయండి",
   "enter_valid_phone": "దయచేసి సరైన ఫోన్ నంబర్ నమోదు చేయండి",
-  "passwords_not_matching": "పాస్వర్డ్లు సరిపోలవడం లేదు",
+  "passwords_not_matching": "పాస్వర్డ్లు సరిపోలడం లేదు",
   "registration_failed": "నమోదు విఫలమైంది. దయచేసి మళ్ళీ ప్రయత్నించండి.",
 
   "citizen_dashboard": "పౌర డ్యాష్‌బోర్డ్",
   "welcome_citizen": "స్వాగతం, పౌరుడా!",
   "available_services": "అందుబాటులో ఉన్న సేవలు",
   "everyday_needs": "రోజువారీ అవసరాలు",
-  "semi_technical": "సెమీ టెక్నికల్",
-  "community_skills": "సంఘం నైపుణ్యాలు",
+  "semi_technical": "సెమీ-టెక్నికల్",
+  "community_skills": "సంఘం/నైపుణ్యం-ఆధారిత",
 
   "craftizen_dashboard": "క్రాఫ్టిజెన్ డ్యాష్‌బోర్డ్",
   "welcome_craftizen": "స్వాగతం, క్రాఫ్టిజెన్!",
@@ -41,5 +41,48 @@
   "verify_otp": "OTPని ధృవీకరించండి",
   "send_otp": "OTP పంపండి",
   "enter_valid_otp": "దయచేసి సరైన OTPని నమోదు చేయండి",
-  "unexpected_error": "ఊహించని లోపం సంభవించింది"
+  "unexpected_error": "ఊహించని లోపం సంభవించింది",
+
+  "plumber": "ప్లంబర్",
+  "electrician": "ఎలక్ట్రీషియన్",
+  "carpenter": "వడ్రంగి",
+  "house_cleaner": "హౌస్ క్లీనర్",
+  "gardener": "తోటమాలి",
+  "tailor": "దర్జీ",
+  "painter": "పెయింటర్",
+  "babysitter": "బేబీ సిటర్",
+  "laundry": "లాండ్రీ",
+  "elderly_caregiver": "వృద్ధుల సంరక్షకుడు",
+  "pet_care": "పెంపుడు జంతువుల సంరక్షణ",
+  "driver": "డ్రైవర్",
+
+  "mobile_repair": "మొబైల్ మరమ్మతు",
+  "appliance_repair": "ఉపకరణాల మరమ్మతు",
+  "tv_setup": "టీవీ సెటప్",
+  "cctv": "సిసిటివి",
+  "wifi": "Wi-Fi",
+  "home_automation": "గృహ ఆటోమేషన్",
+  "solar_installers": "సోలార్ ఇన్‌స్టాలర్‌లు",
+
+  "tutor": "ట్యూటర్",
+  "yoga_trainer": "యోగా శిక్షకుడు",
+  "music_teacher": "సంగీత ఉపాధ్యాయుడు",
+  "event_assistant": "ఈవెంట్ అసిస్టెంట్",
+  "errand_helper": "పని సహాయకుడు",
+  
+  "what_service_looking_for": "మీరు ఏ సేవ కోసం చూస్తున్నారు?",
+  "search_services": "సేవల కోసం శోధించండి...",
+
+  "profile": "ప్రొఫైల్",
+  "logout": "లాగ్ అవుట్",
+  "home": "హోమ్",
+  "bookings": "బుకింగ్లు",
+  "chats": "చాట్లు",
+  "bookings_page_title": "నా బుకింగ్లు",
+  "jobs": "ఉద్యోగాలు",
+  "jobs_page_title": "నా ఉద్యోగాలు",
+
+  "my_skills": "నా నైపుణ్యాలు",
+  "job_requests": "ఉద్యోగ అభ్యర్థనలు",
+  "no_jobs_available": "ప్రస్తుతానికి ఉద్యోగాలు అందుబాటులో లేవు"
 }
