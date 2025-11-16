@@ -3,6 +3,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class MapNearbyCraftizens extends StatefulWidget {
   final String skillCategory;
@@ -60,7 +62,7 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
     final snapshot = await _db
         .collection('users')
         .where('role', isEqualTo: 'craftizen')
-        .where('skillCategory', isEqualTo: widget.skillCategory)
+        .where('skills', arrayContains: widget.skillCategory)
         .get();
 
     Set<Marker> markers = {};
@@ -83,7 +85,7 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
             position: LatLng(geoPoint.latitude, geoPoint.longitude),
             infoWindow: InfoWindow(
               title: data['name'] ?? 'Unknown',
-              snippet: '${data['skillCategory']} • ${distance.toStringAsFixed(1)} km away',
+              snippet: '${data['skills'].join(', ')} • ${distance.toStringAsFixed(1)} ${context.tr('km_away')}',
             ),
           ),
         );
@@ -113,7 +115,7 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nearby Craftizens')),
+      appBar: AppBar(title: const BilingualText(textKey: 'nearby_craftizens_title')),
       body: _currentPosition == null
           ? const Center(child: CircularProgressIndicator())
           : GoogleMap(

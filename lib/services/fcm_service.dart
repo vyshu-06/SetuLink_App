@@ -2,58 +2,49 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class FcmService {
-  static final FcmService _instance = FcmService._internal();
-  factory FcmService() => _instance;
-  FcmService._internal();
-
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  static Future<void> initialize() async {
-    await _instance.init();
-  }
-
   Future<void> init() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
-
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
+    // Request permission for iOS
     await _firebaseMessaging.requestPermission();
 
-    FirebaseMessaging.instance.getInitialMessage();
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       _showLocalNotification(message);
     });
   }
 
-  Future<String?> getToken() async {
-    return await _firebaseMessaging.getToken();
-  }
-
   void _showLocalNotification(RemoteMessage message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'setulink_channel', 
-      'SetuLink Notifications',
-      importance: Importance.max,
-      priority: Priority.high,
-      ticker: 'ticker',
-    );
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification?.android;
 
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
-
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      message.notification?.title ?? 'SetuLink',
-      message.notification?.body ?? '',
-      platformChannelSpecifics,
-      payload: 'SetuLink Payload',
-    );
+    if (notification != null && android != null) {
+      const AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
+        'your_channel_id', // id
+        'your_channel_name', // name
+        channelDescription: 'your_channel_description', // description
+        importance: Importance.max,
+        priority: Priority.high,
+        showWhen: false,
+      );
+      const NotificationDetails platformChannelSpecifics = NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+      );
+      await _flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        platformChannelSpecifics,
+      );
+    }
   }
 }

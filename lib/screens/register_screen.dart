@@ -1,9 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:setulink_app/screens/craftizen_home.dart';
+import 'package:setulink_app/screens/document_upload_screen.dart';
+import 'package:setulink_app/screens/kyc_questionnaire_screen.dart';
+import 'package:setulink_app/screens/skill_demo_upload_screen.dart';
+import 'package:setulink_app/services/analytics_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import '../services/auth_service.dart';
 import 'citizen_home.dart';
-import 'craftizen_home.dart';
+
+final AnalyticsService _analyticsService = AnalyticsService();
 
 class RegisterScreen extends StatefulWidget {
   final String role;
@@ -21,6 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late String role;
   String phone = '';
   String name = '';
+  String referralCode = '';
   bool loading = false;
   String errorKey = ''; // Holds the translation key for the error
 
@@ -46,6 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: [
                 const SizedBox(height: 20),
                 TextFormField(
+                  key: const ValueKey('register_name'),
                   decoration: InputDecoration(labelText: context.tr('name')),
                   onChanged: (val) => name = val.trim(),
                   validator: (val) =>
@@ -53,6 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
+                  key: const ValueKey('register_email'),
                   decoration: InputDecoration(labelText: context.tr('email')),
                   onChanged: (val) => email = val.trim(),
                   validator: (val) => (val != null && val.contains('@'))
@@ -61,6 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
+                  key: const ValueKey('register_phone'),
                   decoration: InputDecoration(labelText: context.tr('phone')),
                   keyboardType: TextInputType.phone,
                   onChanged: (val) => phone = val.trim(),
@@ -70,6 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
+                  key: const ValueKey('register_password'),
                   decoration: InputDecoration(labelText: context.tr('password')),
                   obscureText: true,
                   onChanged: (val) => password = val,
@@ -79,11 +91,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
+                  key: const ValueKey('register_confirm'),
                   decoration: InputDecoration(labelText: context.tr('confirm_password')),
                   obscureText: true,
                   onChanged: (val) => confirmPwd = val,
                   validator: (val) =>
                       val != password ? context.tr('passwords_not_matching') : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  decoration: InputDecoration(labelText: context.tr('referral_code_optional')),
+                  onChanged: (val) => referralCode = val.trim(),
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -130,14 +148,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       if (userObj == null) {
                         setState(() => errorKey = 'registration_failed');
                       } else {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => role == 'citizen'
-                                ? const CitizenHome()
-                                : const CraftizenHome(),
-                          ),
-                        );
+                        // Handle referral code
+                        if (referralCode.isNotEmpty) {
+                          // TODO: Find referrer and add to referrals collection
+                        }
+
+                        await _analyticsService.logSignUp(role);
+                        if (role == 'craftizen') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => KYCQuestionnaireScreen(
+                                onCompleted: (answers) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => DocumentUploadScreen(
+                                        onUploadComplete: (docUrls) {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => SkillDemoUploadScreen(
+                                                onUploadComplete: (videoUrl) async {
+                                                  await FirebaseFirestore.instance
+                                                      .collection('users')
+                                                      .doc(userObj['uid'])
+                                                      .update({
+                                                    'kyc': {
+                                                      'questionnaire': answers,
+                                                      'aadharUrl': docUrls['aadhar'],
+                                                      'passportUrl': docUrls['passport'],
+                                                      'videoUrl': videoUrl,
+                                                      'verified': false,
+                                                      'submittedAt':
+                                                          FieldValue.serverTimestamp(),
+                                                    }
+                                                  });
+                                                  Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (_) =>
+                                                            const CraftizenHome()),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const CitizenHome()),
+                          );
+                        }
                       }
                     }
                   },

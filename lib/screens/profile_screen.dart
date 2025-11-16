@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:setulink_app/screens/kyc_screen.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 
@@ -53,6 +54,27 @@ class ProfileScreen extends StatelessWidget {
                 title: Text(role),
               ),
             ),
+            const SizedBox(height: 24),
+            if (role == 'craftizen')
+              Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => const KYCScreen()),
+                      );
+                    },
+                    child: const BilingualText(textKey: 'verify_kyc'),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/subscription_plans');
+                    },
+                    child: const BilingualText(textKey: 'subscription_plans'),
+                  ),
+                ],
+              ),
           ],
         ),
       ),

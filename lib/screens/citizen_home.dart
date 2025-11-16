@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:setulink_app/services/analytics_service.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'chat_list_screen.dart';
 import 'greeting_page.dart';
 import 'profile_screen.dart';
+import 'map_nearby_craftizens.dart'; // Import the new map screen
+
+final AnalyticsService _analyticsService = AnalyticsService();
 
 class CitizenHome extends StatefulWidget {
   const CitizenHome({Key? key}) : super(key: key);
@@ -233,7 +237,13 @@ class _CategorySection extends StatelessWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(15),
                   onTap: () {
-                    // TODO: Implement service booking logic
+                    _analyticsService.logJobRequested(service['titleKey']!);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MapNearbyCraftizens(skillCategory: service['titleKey']!),
+                      ),
+                    );
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

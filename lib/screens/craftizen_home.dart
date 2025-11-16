@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/services/auth_service.dart';
@@ -99,56 +100,57 @@ class _CraftizenHomeState extends State<CraftizenHome> {
   }
 }
 
-class _HomeTabPage extends StatefulWidget {
+class _HomeTabPage extends StatelessWidget {
   const _HomeTabPage({Key? key}) : super(key: key);
 
   @override
-  State<_HomeTabPage> createState() => _HomeTabPageState();
-}
-
-class _HomeTabPageState extends State<_HomeTabPage> {
-  Map<String, dynamic>? _currentUser;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentUser = AuthService().getCurrentUser();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final String name = _currentUser?['name'] ?? '';
-    final List<String> skills = _currentUser?['skills']?.cast<String>() ?? [];
+    final currentUser = AuthService().getCurrentUser();
+    final String uid = currentUser?['uid'] ?? '';
 
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 16.0),
-            child: Column(
-              children: [
-                BilingualText(
-                  textKey: 'welcome_craftizen',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange.shade800),
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final userData = snapshot.data!.data() as Map<String, dynamic>?;
+        final String name = userData?['name'] ?? '';
+        final List<String> skills = (userData?['skills'] as List<dynamic>?)?.cast<String>() ?? [];
+        final bool isKycVerified = userData?['kyc']?['verified'] ?? false;
+
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 16.0),
+                child: Column(
+                  children: [
+                    BilingualText(
+                      textKey: 'welcome_craftizen',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange.shade800),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      name,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  name,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: _buildSkillsSection(skills),
-        ),
-        SliverToBoxAdapter(
-          child: _buildJobsSection(),
-        ),
-      ],
+            SliverToBoxAdapter(
+              child: _buildSkillsSection(skills),
+            ),
+            SliverToBoxAdapter(
+              child: _buildJobsSection(isKycVerified),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -185,7 +187,7 @@ class _HomeTabPageState extends State<_HomeTabPage> {
     );
   }
 
-  Widget _buildJobsSection() {
+  Widget _buildJobsSection(bool isKycVerified) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       padding: const EdgeInsets.all(16.0),
@@ -205,10 +207,15 @@ class _HomeTabPageState extends State<_HomeTabPage> {
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 24.0),
-              child: const BilingualText(
-                textKey: 'no_jobs_available',
-                style: TextStyle(color: Colors.grey),
-              ),
+              child: isKycVerified
+                  ? const BilingualText(
+                      textKey: 'no_jobs_available',
+                      style: TextStyle(color: Colors.grey),
+                    )
+                  : const BilingualText(
+                      textKey: 'kyc_not_verified_message',
+                      style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                    ),
             ),
           ),
         ],

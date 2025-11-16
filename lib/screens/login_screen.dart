@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:setulink_app/services/analytics_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'phone_auth_screen.dart';
 import '../services/auth_service.dart';
 import '../screens/citizen_home.dart';
 import '../screens/craftizen_home.dart';
+
+final AnalyticsService _analyticsService = AnalyticsService();
 
 class LoginScreen extends StatefulWidget {
   final String role; // "citizen" or "craftizen"
@@ -64,6 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (result == null) {
                         setState(() => errorKey = 'login_failed');
                       } else {
+                        await _analyticsService.logLogin(widget.role);
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(

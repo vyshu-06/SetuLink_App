@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /jobs/{jobId} {
+      allow read, write: if request.auth != null && 
+        (resource.data.citizenId == request.auth.uid || 
+         resource.data.craftizenId == request.auth.uid);
+
+      allow create: if request.auth != null && request.resource.data.citizenId == request.auth.uid;
+
+      allow update: if request.auth != null && 
+        ( 
+          // citizen can update their own job if craftizen not assigned or for rating
+          (request.resource.data.citizenId == request.auth.uid) || 
+          // craftizen can update only jobs accepted by them
+          (request.resource.data.craftizenId == request.auth.uid) 
+        ) && 
+        request.resource.data.citizenId == resource.data.citizenId && 
+        request.resource.data.craftizenId == resource.data.craftizenId;
+    }
+
+    match /chats/{chatId}/messages/{messageId} {
+      allow read, write: if request.auth != null && 
+        (chatId.split('-').contains(request.auth.uid));
+    }
+
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if false; // admin only writes through backend console
+    }
+  }
+}
