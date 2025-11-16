@@ -21,6 +21,7 @@
         "flutter",
         "flutter_local_notifications",
         "flutter_sound",
+        "geoflutterfire2",
         "google_maps_flutter",
         "google_mlkit_text_recognition",
         "image_picker",
@@ -76,6 +77,15 @@
       "name": "cupertino_icons",
       "version": "1.0.8",
       "dependencies": []
+    },
+    {
+      "name": "geoflutterfire2",
+      "version": "2.3.15",
+      "dependencies": [
+        "cloud_firestore",
+        "flutter",
+        "rxdart"
+      ]
     },
     {
       "name": "crypto",
@@ -426,6 +436,11 @@
         "string_scanner",
         "term_glyph"
       ]
+    },
+    {
+      "name": "rxdart",
+      "version": "0.27.7",
+      "dependencies": []
     },
     {
       "name": "typed_data",
