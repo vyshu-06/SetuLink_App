@@ -321,9 +321,9 @@
     },
     {
       "name": "flutter_lints",
-      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-2.0.3",
+      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-3.0.2",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.1"
     },
     {
       "name": "flutter_local_notifications",
@@ -441,13 +441,13 @@
     },
     {
       "name": "google_mlkit_commons",
-      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/google_mlkit_commons-0.6.1",
+      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/google_mlkit_commons-0.11.0",
       "packageUri": "lib/",
       "languageVersion": "2.16"
     },
     {
       "name": "google_mlkit_text_recognition",
-      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/google_mlkit_text_recognition-0.11.0",
+      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/google_mlkit_text_recognition-0.15.0",
       "packageUri": "lib/",
       "languageVersion": "2.16"
     },
@@ -555,7 +555,7 @@
     },
     {
       "name": "lints",
-      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/lints-2.1.1",
+      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/lints-3.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -657,13 +657,13 @@
     },
     {
       "name": "permission_handler",
-      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler-11.4.0",
+      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler-12.0.1",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
     {
       "name": "permission_handler_android",
-      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_android-12.1.0",
+      "rootUri": "file:///C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_android-13.0.1",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
@@ -899,7 +899,7 @@
       "name": "setulink_app",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.0"
     }
   ],
   "generator": "pub",
