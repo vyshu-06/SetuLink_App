@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/analytics_service.dart';
@@ -17,6 +18,8 @@ import 'package:setulink_app/screens/notifications_screen.dart';
 import 'package:setulink_app/screens/payment_screen.dart';
 import 'package:setulink_app/screens/subscription_plans_screen.dart';
 import 'package:setulink_app/screens/subscription_screen.dart';
+import 'package:setulink_app/screens/referral_screen.dart'; // Import ReferralScreen
+import 'package:setulink_app/widgets/offline_banner.dart';
 import 'firebase_options.dart';
 
 final AnalyticsService analyticsService = AnalyticsService();
@@ -26,6 +29,10 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  // Enable offline persistence
+  FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+
   await EasyLocalization.ensureInitialized();
 
   runApp(
@@ -58,10 +65,12 @@ class SetuLinkApp extends StatelessWidget {
       navigatorObservers: [analyticsService.getAnalyticsObserver()],
       builder: (context, child) {
         final media = MediaQuery.of(context);
-        return MediaQuery(
-          data: media.copyWith(
-              textScaler: TextScaler.linear(media.textScaler.scale(1).clamp(1.0, 1.3))),
-          child: child!,
+        return OfflineBanner(
+          child: MediaQuery(
+            data: media.copyWith(
+                textScaler: TextScaler.linear(media.textScaler.scale(1).clamp(1.0, 1.3))),
+            child: child!,
+          ),
         );
       },
       initialRoute: '/',
@@ -100,6 +109,7 @@ class SetuLinkApp extends StatelessWidget {
           final planId = ModalRoute.of(context)!.settings.arguments as String;
           return SubscriptionScreen(planId: planId);
         },
+        '/referral': (context) => const ReferralScreen(), // Add referral route
       },
     );
   }

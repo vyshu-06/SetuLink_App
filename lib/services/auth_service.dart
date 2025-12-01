@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,14 +23,23 @@ class AuthService {
     return digest.toString();
   }
 
+  String _generateReferralCode(String name) {
+    final random = Random();
+    final cleanName = name.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
+    final prefix = cleanName.length >= 4 ? cleanName.substring(0, 4) : cleanName.padRight(4, 'X');
+    final suffix = (1000 + random.nextInt(9000)).toString();
+    return '$prefix$suffix';
+  }
+
   // Register user with email/password
   Future<Map<String, dynamic>?> registerWithEmail(
     String email,
     String password,
     String name,
     String phone,
-    String role,
-  ) async {
+    String role, {
+    String? referralCode,
+  }) async {
     try {
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -38,12 +48,18 @@ class AuthService {
       User? user = userCredential.user;
 
       if (user != null) {
+        final myReferralCode = _generateReferralCode(name);
+        
         final userData = {
           'uid': user.uid,
           'email': email,
           'name': name,
           'phone': phone,
           'role': role,
+          'referralCode': myReferralCode,
+          'referredBy': referralCode, // Store who referred this user
+          'referralCount': 0,
+          'loyaltyPoints': 0,
           'createdAt': FieldValue.serverTimestamp(),
           'skills': role == 'craftizen' ? [] : null,
           'kyc': {'verified': false},
@@ -54,7 +70,9 @@ class AuthService {
 
         // Save FCM token
         final token = await _fcm.getToken();
-        await _db.collection('users').doc(user.uid).update({'fcmToken': token});
+        if (token != null) {
+            await _db.collection('users').doc(user.uid).update({'fcmToken': token});
+        }
 
         return userData;
       }
@@ -81,7 +99,9 @@ class AuthService {
 
           // Save FCM token
           final token = await _fcm.getToken();
-          await _db.collection('users').doc(user.uid).update({'fcmToken': token});
+          if (token != null) {
+            await _db.collection('users').doc(user.uid).update({'fcmToken': token});
+          }
 
           return _currentUserData;
         }
@@ -89,7 +109,7 @@ class AuthService {
       return null; // Return null if role does not match or user does not exist
     } catch (e) {
       print('SignIn error: $e');
-      return null;
+      rethrow;
     }
   }
 
@@ -126,10 +146,14 @@ class AuthService {
         _currentUserData = userDoc.data();
       } else {
         // Create new user document if signing in for the first time with phone
+        final myReferralCode = _generateReferralCode('User'); // Generic name for phone auth
         final userData = {
           'uid': userCredential.user!.uid,
           'phone': userCredential.user!.phoneNumber,
           'role': role,
+          'referralCode': myReferralCode,
+          'referralCount': 0,
+          'loyaltyPoints': 0,
           'createdAt': FieldValue.serverTimestamp(),
         };
         await _db.collection('users').doc(userCredential.user!.uid).set(userData);
@@ -137,7 +161,9 @@ class AuthService {
       }
 
       final token = await _fcm.getToken();
-      await _db.collection('users').doc(userCredential.user!.uid).update({'fcmToken': token});
+      if (token != null) {
+        await _db.collection('users').doc(userCredential.user!.uid).update({'fcmToken': token});
+      }
     }
   }
 

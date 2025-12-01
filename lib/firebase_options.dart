@@ -44,20 +44,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    authDomain: 'YOUR_AUTH_DOMAIN',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyDywqDmqmNhotb3ikQW3KgzKd4rxrA3aCQ',
+    appId: '1:60751051995:web:placeholder', // TODO: Replace with actual Web App ID from Firebase Console
+    messagingSenderId: '60751051995',
+    projectId: 'setulink-app-fb',
+    authDomain: 'setulink-app-fb.firebaseapp.com',
+    storageBucket: 'setulink-app-fb.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyDywqDmqmNhotb3ikQW3KgzKd4rxrA3aCQ',
+    appId: '1:60751051995:android:fdd8bc0dce6a0c730060fe',
+    messagingSenderId: '60751051995',
+    projectId: 'setulink-app-fb',
+    storageBucket: 'setulink-app-fb.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

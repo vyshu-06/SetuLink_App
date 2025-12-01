@@ -143,16 +143,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         name,
                         phone,
                         role,
+                        referralCode: referralCode.isNotEmpty ? referralCode : null,
                       );
                       setState(() => loading = false);
                       if (userObj == null) {
                         setState(() => errorKey = 'registration_failed');
                       } else {
-                        // Handle referral code
-                        if (referralCode.isNotEmpty) {
-                          // TODO: Find referrer and add to referrals collection
-                        }
-
                         await _analyticsService.logSignUp(role);
                         if (role == 'craftizen') {
                           Navigator.pushReplacement(
