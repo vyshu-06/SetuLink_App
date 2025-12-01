@@ -1,12 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:setulink_app/models/craftizen_model.dart';
 import 'package:setulink_app/services/analytics_service.dart';
 import 'package:setulink_app/services/auth_service.dart';
+import 'package:setulink_app/services/recommendation_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'chat_list_screen.dart';
 import 'greeting_page.dart';
 import 'profile_screen.dart';
-import 'map_nearby_craftizens.dart'; // Import the new map screen
+import 'payment_screen.dart';
+import 'craftizen_profile_view_screen.dart';
+import 'job_request_screen.dart';
 
 final AnalyticsService _analyticsService = AnalyticsService();
 
@@ -20,10 +25,15 @@ class CitizenHome extends StatefulWidget {
 class _CitizenHomeState extends State<CitizenHome> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _pages = <Widget>[
-    _HomeTabPage(),
-    _BookingsTabPage(),
-    ChatListScreen(),
+  // Pages for the bottom nav. Note: Wallet/Profile might just navigate directly.
+  // For simplicity in standard BottomNav structure, we can use placeholders or direct navigation logic.
+  // However, standard pattern is to have widgets for each tab.
+  static final List<Widget> _pages = <Widget>[
+    const _HomeTabPage(),
+    const _BookingsTabPage(),
+    const ChatListScreen(),
+    const PaymentScreen(category: 'wallet_topup'), // Placeholder for Wallet
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -40,12 +50,6 @@ class _CitizenHomeState extends State<CitizenHome> {
     );
   }
 
-  void _navigateToProfile() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const ProfileScreen()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,10 +59,6 @@ class _CitizenHomeState extends State<CitizenHome> {
         backgroundColor: Colors.teal,
         elevation: 1,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            onPressed: _navigateToProfile,
-          ),
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'logout') {
@@ -76,6 +76,7 @@ class _CitizenHomeState extends State<CitizenHome> {
       ),
       body: _pages.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed, // Needed for 4+ items
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: const Icon(Icons.home_outlined),
@@ -85,12 +86,22 @@ class _CitizenHomeState extends State<CitizenHome> {
           BottomNavigationBarItem(
             icon: const Icon(Icons.history_outlined),
             activeIcon: const Icon(Icons.history),
-            label: context.tr('bookings'),
+            label: context.tr('bookings'), // "Jobs" in prompt, usually means bookings
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.chat_bubble_outline),
             activeIcon: const Icon(Icons.chat_bubble),
             label: context.tr('chats'),
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+            activeIcon: const Icon(Icons.account_balance_wallet),
+            label: 'Wallet',
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: context.tr('profile'),
           ),
         ],
         currentIndex: _selectedIndex,
@@ -99,13 +110,26 @@ class _CitizenHomeState extends State<CitizenHome> {
         showUnselectedLabels: true,
         onTap: _onItemTapped,
       ),
+      floatingActionButton: _selectedIndex == 0 ? FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const JobRequestScreen()));
+        },
+        label: const Text('Post a Job'),
+        icon: const Icon(Icons.add),
+        backgroundColor: Colors.teal,
+      ) : null,
     );
   }
 }
 
-class _HomeTabPage extends StatelessWidget {
+class _HomeTabPage extends StatefulWidget {
   const _HomeTabPage({Key? key}) : super(key: key);
 
+  @override
+  State<_HomeTabPage> createState() => _HomeTabPageState();
+}
+
+class _HomeTabPageState extends State<_HomeTabPage> {
   static final List<Map<String, dynamic>> serviceCategories = [
     {
       'categoryKey': 'everyday_needs',
@@ -148,18 +172,88 @@ class _HomeTabPage extends StatelessWidget {
     },
   ];
 
+  Future<List<CraftizenModel>>? _recommendations;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendations();
+  }
+
+  void _loadRecommendations() {
+    // In real app, get current GPS location
+    // For now, mock location (0,0) or some default
+    final mockLocation = const GeoPoint(0, 0); 
+    _recommendations = RecommendationService().getRecommendedCraftizens(mockLocation);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return ListView(
       padding: const EdgeInsets.all(16.0),
-      itemCount: serviceCategories.length + 1,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return const _Header();
-        }
-        final category = serviceCategories[index - 1];
-        return _CategorySection(category: category);
-      },
+      children: [
+        const _Header(),
+        _buildRecommendedSection(),
+        ...serviceCategories.map((c) => _CategorySection(category: c)).toList(),
+      ],
+    );
+  }
+
+  Widget _buildRecommendedSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 12.0),
+          child: Text('Recommended Craftizens', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        ),
+        SizedBox(
+          height: 160,
+          child: FutureBuilder<List<CraftizenModel>>(
+            future: _recommendations,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+              if (!snapshot.hasData || snapshot.data!.isEmpty) return const Center(child: Text('No recommendations yet'));
+
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  final craftizen = snapshot.data![index];
+                  return Container(
+                    width: 140,
+                    margin: const EdgeInsets.only(right: 12),
+                    child: Card(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => CraftizenProfileViewScreen(craftizenId: craftizen.uid)));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircleAvatar(child: Text(craftizen.name[0])),
+                              const SizedBox(height: 8),
+                              Text(craftizen.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                const Icon(Icons.star, size: 14, color: Colors.amber),
+                                Text(craftizen.rating.toStringAsFixed(1)),
+                              ]),
+                              Text(craftizen.skills.firstOrNull ?? 'Craftizen', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
     );
   }
 }
@@ -238,10 +332,11 @@ class _CategorySection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(15),
                   onTap: () {
                     _analyticsService.logJobRequested(service['titleKey']!);
+                    // Pass category to JobRequestScreen flow
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MapNearbyCraftizens(skillCategory: service['titleKey']!),
+                        builder: (context) => JobRequestScreen(category: service['titleKey']),
                       ),
                     );
                   },
@@ -286,6 +381,7 @@ class _BookingsTabPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Implement Job History / Bookings List using JobService
     return const Center(
       child: BilingualText(textKey: 'bookings_page_title'),
     );

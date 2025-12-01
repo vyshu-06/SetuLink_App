@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:setulink_app/models/job_model.dart';
 import 'package:setulink_app/services/auth_service.dart';
+import 'package:setulink_app/services/job_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'chat_list_screen.dart';
 import 'greeting_page.dart';
 import 'profile_screen.dart';
+import 'job_detail_screen.dart';
+import 'edit_profile_screen.dart';
 
 class CraftizenHome extends StatefulWidget {
   const CraftizenHome({Key? key}) : super(key: key);
@@ -103,6 +107,12 @@ class _CraftizenHomeState extends State<CraftizenHome> {
 class _HomeTabPage extends StatelessWidget {
   const _HomeTabPage({Key? key}) : super(key: key);
 
+  void _toggleAvailability(String uid, bool currentStatus) {
+    FirebaseFirestore.instance.collection('users').doc(uid).update({
+      'isAvailable': !currentStatus,
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUser = AuthService().getCurrentUser();
@@ -119,6 +129,7 @@ class _HomeTabPage extends StatelessWidget {
         final String name = userData?['name'] ?? '';
         final List<String> skills = (userData?['skills'] as List<dynamic>?)?.cast<String>() ?? [];
         final bool isKycVerified = userData?['kyc']?['verified'] ?? false;
+        final bool isAvailable = userData?['isAvailable'] ?? false;
 
         return CustomScrollView(
           slivers: [
@@ -138,6 +149,41 @@ class _HomeTabPage extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
                     ),
+                    const SizedBox(height: 16),
+                    // Availability Toggle
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(color: isAvailable ? Colors.green : Colors.grey),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(isAvailable ? 'Available for Work' : 'Not Available', style: TextStyle(color: isAvailable ? Colors.green : Colors.grey, fontWeight: FontWeight.bold)),
+                          const SizedBox(width: 8),
+                          Switch(
+                            value: isAvailable,
+                            activeColor: Colors.green,
+                            onChanged: (val) => _toggleAvailability(uid, isAvailable),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.edit),
+                      label: const Text('Edit Professional Profile'),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.deepOrange,
+                        side: const BorderSide(color: Colors.deepOrange),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -146,7 +192,7 @@ class _HomeTabPage extends StatelessWidget {
               child: _buildSkillsSection(skills),
             ),
             SliverToBoxAdapter(
-              child: _buildJobsSection(isKycVerified),
+              child: _buildJobsSection(context, isKycVerified, skills),
             ),
           ],
         );
@@ -161,7 +207,7 @@ class _HomeTabPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), spreadRadius: 1, blurRadius: 10)],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), spreadRadius: 1, blurRadius: 10)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,14 +233,14 @@ class _HomeTabPage extends StatelessWidget {
     );
   }
 
-  Widget _buildJobsSection(bool isKycVerified) {
+  Widget _buildJobsSection(BuildContext context, bool isKycVerified, List<String> skills) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), spreadRadius: 1, blurRadius: 10)],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), spreadRadius: 1, blurRadius: 10)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,20 +250,21 @@ class _HomeTabPage extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24.0),
-              child: isKycVerified
-                  ? const BilingualText(
-                      textKey: 'no_jobs_available',
-                      style: TextStyle(color: Colors.grey),
-                    )
-                  : const BilingualText(
-                      textKey: 'kyc_not_verified_message',
-                      style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
-                    ),
-            ),
-          ),
+          if (!isKycVerified)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 24.0),
+                child: BilingualText(
+                  textKey: 'kyc_not_verified_message',
+                  style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                ),
+              ),
+            )
+          else if (skills.isEmpty)
+             const Center(child: Text('Add skills to see relevant jobs'))
+          else
+             // Sneak peek or shortcut
+             const Center(child: Text('Go to "Jobs" tab to find work!')),
         ],
       ),
     );
@@ -229,8 +276,130 @@ class _JobsTabPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: BilingualText(textKey: 'jobs_page_title'),
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          const TabBar(
+            labelColor: Colors.deepOrange,
+            indicatorColor: Colors.deepOrange,
+            tabs: [
+              Tab(text: 'New Jobs'),
+              Tab(text: 'My Jobs'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _NewJobsList(),
+                _MyJobsList(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NewJobsList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final currentUser = AuthService().getCurrentUser();
+    final String uid = currentUser?['uid'] ?? '';
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
+      builder: (context, userSnapshot) {
+        if (!userSnapshot.hasData) return const Center(child: CircularProgressIndicator());
+        
+        final userData = userSnapshot.data!.data() as Map<String, dynamic>?;
+        final List<String> skills = (userData?['skills'] as List<dynamic>?)?.cast<String>() ?? [];
+        final bool isKycVerified = userData?['kyc']?['verified'] ?? false;
+
+        if (!isKycVerified) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.verified_user_outlined, size: 64, color: Colors.orange),
+                SizedBox(height: 16),
+                BilingualText(textKey: 'kyc_not_verified_message'),
+              ],
+            ),
+          );
+        }
+
+        if (skills.isEmpty) {
+          return const Center(child: Text('Please add skills to your profile to see jobs.'));
+        }
+
+        return StreamBuilder<List<JobModel>>(
+          stream: JobService().getOpenJobsForCraftizen(skills),
+          builder: (context, jobSnapshot) {
+            if (jobSnapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+            if (!jobSnapshot.hasData || jobSnapshot.data!.isEmpty) return const Center(child: Text('No new jobs nearby.'));
+
+            final jobs = jobSnapshot.data!;
+            return ListView.builder(
+              itemCount: jobs.length,
+              itemBuilder: (context, index) => _JobCard(job: jobs[index]),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _MyJobsList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final currentUser = AuthService().getCurrentUser();
+    final String uid = currentUser?['uid'] ?? '';
+
+    return StreamBuilder<List<JobModel>>(
+      stream: JobService().getJobsStream(uid, isCraftizen: true),
+      builder: (context, jobSnapshot) {
+        if (jobSnapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+        if (!jobSnapshot.hasData || jobSnapshot.data!.isEmpty) return const Center(child: Text('No accepted jobs yet.'));
+
+        final jobs = jobSnapshot.data!;
+        return ListView.builder(
+          itemCount: jobs.length,
+          itemBuilder: (context, index) => _JobCard(job: jobs[index]),
+        );
+      },
+    );
+  }
+}
+
+class _JobCard extends StatelessWidget {
+  final JobModel job;
+  const _JobCard({Key? key, required this.job}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ListTile(
+        title: Text(job.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Budget: ₹${job.budget}'),
+            Text('Status: ${job.jobStatus.toUpperCase()}', style: TextStyle(color: job.jobStatus == 'open' ? Colors.green : Colors.blue)),
+            Text(job.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+          ],
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          Navigator.push(
+            context, 
+            MaterialPageRoute(builder: (_) => JobDetailScreen(jobId: job.id))
+          );
+        },
+      ),
     );
   }
 }

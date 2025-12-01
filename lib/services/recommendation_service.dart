@@ -38,6 +38,30 @@ class RecommendationService {
     return candidates.take(limit).toList();
   }
 
+  // General recommendation for Home screen based on location
+  Future<List<CraftizenModel>> getRecommendedCraftizens(GeoPoint userLocation, {int limit = 5}) async {
+    final querySnapshot = await _db.collection('users')
+        .where('role', isEqualTo: 'craftizen')
+        .limit(50) // Fetch a pool to sort
+        .get();
+
+    List<CraftizenModel> candidates = querySnapshot.docs
+        .map((doc) => CraftizenModel.fromMap(doc.data(), doc.id))
+        .toList();
+
+    // Simple sort by rating then distance
+    candidates.sort((a, b) {
+      int ratingComp = b.rating.compareTo(a.rating);
+      if (ratingComp != 0) return ratingComp;
+      
+      double distA = _haversineDistance(userLocation.latitude, userLocation.longitude, a.location.latitude, a.location.longitude);
+      double distB = _haversineDistance(userLocation.latitude, userLocation.longitude, b.location.latitude, b.location.longitude);
+      return distA.compareTo(distB);
+    });
+
+    return candidates.take(limit).toList();
+  }
+
   double computeMatchScore(CraftizenModel craftizen, JobModel job) {
     final double locationScore = _calculateLocationScore(
       job.location.latitude,

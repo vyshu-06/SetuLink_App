@@ -18,7 +18,10 @@ import 'package:setulink_app/screens/notifications_screen.dart';
 import 'package:setulink_app/screens/payment_screen.dart';
 import 'package:setulink_app/screens/subscription_plans_screen.dart';
 import 'package:setulink_app/screens/subscription_screen.dart';
-import 'package:setulink_app/screens/referral_screen.dart'; // Import ReferralScreen
+import 'package:setulink_app/screens/referral_screen.dart';
+import 'package:setulink_app/screens/earnings_screen.dart'; 
+import 'package:setulink_app/screens/admin_dashboard_screen.dart';
+import 'package:setulink_app/screens/citizen_profile_setup_screen.dart'; // Import new screen
 import 'package:setulink_app/widgets/offline_banner.dart';
 import 'firebase_options.dart';
 
@@ -30,7 +33,6 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  // Enable offline persistence
   FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
 
   await EasyLocalization.ensureInitialized();
@@ -91,6 +93,7 @@ class SetuLinkApp extends StatelessWidget {
           final role = ModalRoute.of(context)!.settings.arguments as String? ?? 'citizen';
           return PhoneAuthScreen(role: role);
         },
+        '/admin': (context) => const AdminDashboardScreen(),
         '/kyc': (context) => const KYCScreen(),
         '/admin_kyc_review': (context) {
           final userId = ModalRoute.of(context)!.settings.arguments as String;
@@ -109,7 +112,9 @@ class SetuLinkApp extends StatelessWidget {
           final planId = ModalRoute.of(context)!.settings.arguments as String;
           return SubscriptionScreen(planId: planId);
         },
-        '/referral': (context) => const ReferralScreen(), // Add referral route
+        '/referral': (context) => const ReferralScreen(),
+        '/earnings': (context) => const EarningsScreen(),
+        '/citizen_profile_setup': (context) => const CitizenProfileSetupScreen(), // Add route
       },
     );
   }

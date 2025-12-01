@@ -26,11 +26,24 @@ exports.onJobUpdate = functions.firestore
       // Update completed jobs count and re-calculate average rating if a rating was added
       // This uses a transaction or atomic increment for safety
       try {
-        await craftizenRef.update({
+        const batch = admin.firestore().batch();
+        
+        // Update stats
+        batch.update(craftizenRef, {
           'stats.completedJobs': admin.firestore.FieldValue.increment(1),
           'updatedAt': admin.firestore.FieldValue.serverTimestamp(),
         });
-        console.log(`Updated stats for craftizen ${craftizenId}`);
+
+        // Credit Wallet (Simple logic: Add job budget to wallet)
+        // In real app, deduct commission here.
+        if (after.budget && after.budget > 0) {
+             batch.update(craftizenRef, {
+                'walletBalance': admin.firestore.FieldValue.increment(after.budget),
+             });
+        }
+
+        await batch.commit();
+        console.log(`Updated stats and wallet for craftizen ${craftizenId}`);
       } catch (error) {
         console.error('Error updating craftizen stats:', error);
       }
@@ -126,5 +139,63 @@ exports.awardReferralBonus = functions.firestore
 
     await batch.commit();
     console.log(`Referral bonus awarded. Referrer: ${referrerId}, Referee: ${snap.id}`);
+    return null;
+  });
+
+/**
+ * Triggered when a new job is created.
+ * Matches eligible Craftizens and sends notifications.
+ */
+exports.onJobCreate = functions.firestore
+  .document('jobs/{jobId}')
+  .onCreate(async (snap, context) => {
+    const job = snap.data();
+    const requiredSkills = job.requiredSkills || [];
+    
+    if (requiredSkills.length === 0) return null;
+
+    // 1. Find matching Craftizens
+    // In production, use Geofire for location + array-contains for skills
+    const craftizensQuery = await admin.firestore().collection('users')
+      .where('role', '==', 'craftizen')
+      .where('skills', 'array-contains-any', requiredSkills)
+      .where('kyc.verified', '==', true) // Only verified pros
+      .limit(50)
+      .get();
+
+    if (craftizensQuery.empty) {
+      console.log('No matching craftizens found for job ' + context.params.jobId);
+      return null;
+    }
+
+    const tokens = [];
+    craftizensQuery.docs.forEach(doc => {
+      const userData = doc.data();
+      if (userData.fcmToken) {
+        tokens.push(userData.fcmToken);
+      }
+    });
+
+    if (tokens.length === 0) return null;
+
+    // 2. Send FCM Notification
+    const payload = {
+      notification: {
+        title: 'New Job Alert!',
+        body: `A new job for ${job.title} matches your skills. Check it out!`,
+      },
+      data: {
+        jobId: context.params.jobId,
+        type: 'new_job'
+      }
+    };
+
+    try {
+      await admin.messaging().sendToDevice(tokens, payload);
+      console.log(`Sent job invite to ${tokens.length} craftizens.`);
+    } catch (e) {
+      console.error('Error sending FCM:', e);
+    }
+    
     return null;
   });

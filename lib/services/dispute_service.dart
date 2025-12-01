@@ -36,6 +36,16 @@ class DisputeService {
             snapshot.docs.map((doc) => DisputeModel.fromSnapshot(doc)).toList());
   }
 
+  // Admin: Get all disputes, optionally filtered by status
+  Stream<List<DisputeModel>> getAllDisputes({String? status}) {
+    Query query = _db.collection(collection).orderBy('createdAt', descending: true);
+    if (status != null) {
+      query = query.where('status', isEqualTo: status);
+    }
+    return query.snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => DisputeModel.fromSnapshot(doc)).toList());
+  }
+
   Stream<DisputeModel> getDispute(String disputeId) {
     return _db
         .collection(collection)
@@ -61,6 +71,15 @@ class DisputeService {
     await _db.collection(collection).doc(disputeId).update({
       'escalationRequested': true,
       'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> resolveDispute(String disputeId, String outcome, String resolutionNote) async {
+    await _db.collection(collection).doc(disputeId).update({
+      'status': 'resolved',
+      'outcome': outcome, // e.g., 'refund_issued', 'claim_rejected'
+      'resolutionNote': resolutionNote,
+      'resolvedAt': FieldValue.serverTimestamp(),
     });
   }
 }

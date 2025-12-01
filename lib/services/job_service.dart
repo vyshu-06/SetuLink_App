@@ -13,20 +13,9 @@ class JobService {
   }
 
   Future<void> createJob(JobModel job) async {
-    // Conflict Resolution: Use set with merge option if updating, or add new.
-    // Using set here to specify ID if needed, or let Firestore auto-generate if ID is null.
-    // Since JobModel has an ID, we use set.
-    await _db.collection(collection).doc(job.id).set({
-      'title': job.title,
-      'location': job.location,
-      'requiredSkills': job.requiredSkills,
-      'preferences': job.preferences,
-      'createdAt': FieldValue.serverTimestamp(),
-      'jobStatus': 'open',
-    }, SetOptions(merge: true));
+    await _db.collection(collection).doc(job.id).set(job.toMap(), SetOptions(merge: true));
   }
 
-  // Stream jobs with offline metadata support
   Stream<List<JobModel>> getJobsStream(String userId, {bool isCraftizen = false}) {
     Query query = _db.collection(collection);
     if (isCraftizen) {
@@ -34,18 +23,22 @@ class JobService {
     } else {
       query = query.where('userId', isEqualTo: userId);
     }
-
-    // includeMetadataChanges: true allows us to receive events even for local cache updates
-    // and inspect snapshot.metadata.isFromCache
     return query
         .snapshots(includeMetadataChanges: true)
-        .map((snapshot) {
-          // You can inspect snapshot.metadata.isFromCache here if needed for logging
-          return snapshot.docs.map((doc) => JobModel.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList();
-        });
+        .map((snapshot) => snapshot.docs.map((doc) => JobModel.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList());
   }
-  
-  // Method to get raw snapshot to check metadata in UI if needed
+
+  Stream<List<JobModel>> getOpenJobsForCraftizen(List<String> skills) {
+    if (skills.isEmpty) return Stream.value([]); // Return empty if craftizen has no skills
+
+    return _db
+        .collection(collection)
+        .where('jobStatus', isEqualTo: 'open')
+        .where('requiredSkills', arrayContainsAny: skills)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => JobModel.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList());
+  }
+
   Stream<QuerySnapshot> getRawJobsSnapshot(String userId) {
     return _db.collection(collection)
         .where('userId', isEqualTo: userId)

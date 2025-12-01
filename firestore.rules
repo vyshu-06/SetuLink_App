@@ -1,38 +1,69 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
 
+    // Function to check if user is accessing their own document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Function to check if user is an admin
+    function isAdmin() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Users collection
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId;
+      // Users can read/write their own profile
+      allow read, update: if isOwner(userId);
+      allow create: if isAuthenticated(); // Allow creation during signup
+      
+      // Admins can read/write all users
+      allow read, write: if isAdmin();
+
+      // Public can read basic profile of craftizens (for job matching)
+      // Note: In production, consider a separate public 'profiles' collection to hide PII
+      allow read: if isAuthenticated() && resource.data.role == 'craftizen';
     }
 
+    // Jobs collection
     match /jobs/{jobId} {
-      allow read, write: if request.auth != null && 
-        (resource.data.citizenId == request.auth.uid || 
-         resource.data.craftizenId == request.auth.uid);
+      // Creator can read/write their job
+      allow create: if isAuthenticated();
+      allow read, update: if isAuthenticated() && (resource.data.userId == request.auth.uid || resource.data.assignedTo == request.auth.uid);
+      
+      // Admins can access all jobs
+      allow read, write: if isAdmin();
 
-      allow create: if request.auth != null && request.resource.data.citizenId == request.auth.uid;
-
-      allow update: if request.auth != null && 
-        ( 
-          // citizen can update their own job if craftizen not assigned or for rating
-          (request.resource.data.citizenId == request.auth.uid) || 
-          // craftizen can update only jobs accepted by them
-          (request.resource.data.craftizenId == request.auth.uid) 
-        ) && 
-        request.resource.data.citizenId == resource.data.citizenId && 
-        request.resource.data.craftizenId == resource.data.craftizenId;
+      // Craftizens can read open jobs (for applying)
+      allow read: if isAuthenticated() && resource.data.jobStatus == 'open'; 
+      // Note: More strict filtering should be done via queries/functions
     }
 
-    match /chats/{chatId}/messages/{messageId} {
-      allow read, write: if request.auth != null && 
-        (chatId.split('-').contains(request.auth.uid));
+    // Disputes collection
+    match /disputes/{disputeId} {
+      // Participants can read/write
+      allow create: if isAuthenticated();
+      allow read, update: if isAuthenticated() && (resource.data.raisedBy == request.auth.uid || resource.data.craftizenId == request.auth.uid);
+      
+      // Admins can manage disputes
+      allow read, write: if isAdmin();
     }
 
-    match /services/{serviceId} {
-      allow read: if true;
-      allow write: if false; // admin only writes through backend console
+    // Chats/Messages collection (assuming subcollection or root)
+    match /chats/{chatId} {
+      allow read, write: if isAuthenticated() && (resource.data.participants[request.auth.uid] == true);
+    }
+    
+    // Referrals collection (Internal/Admin mostly)
+    match /referrals/{refId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // Created via Cloud Function usually, but if client writes initial log
     }
   }
 }
