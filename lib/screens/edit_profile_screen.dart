@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:setulink_app/screens/craftizen_home.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({Key? key}) : super(key: key);
+  const EditProfileScreen({super.key});
 
   @override
-  _EditProfileScreenState createState() => _EditProfileScreenState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
@@ -29,9 +30,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
     final data = doc.data();
     if (data != null) {
-      _experienceController.text = (data['experienceYears'] ?? '').toString();
-      _radiusController.text = (data['serviceRadiusKm'] ?? '').toString();
-      _minChargeController.text = (data['minCharge'] ?? '').toString();
+      setState(() {
+        _experienceController.text = (data['experienceYears'] ?? '').toString();
+        _radiusController.text = (data['serviceRadiusKm'] ?? '').toString();
+        _minChargeController.text = (data['minCharge'] ?? '').toString();
+      });
     }
   }
 
@@ -48,16 +51,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'experienceYears': int.tryParse(_experienceController.text) ?? 0,
         'serviceRadiusKm': int.tryParse(_radiusController.text) ?? 5,
         'minCharge': double.tryParse(_minChargeController.text) ?? 0.0,
+        'profileCompleted': true, // Mark profile as completed
       });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully!')),
         );
-        Navigator.pop(context);
+        // Navigate to CraftizenHome if this is the first time setup (e.g., from registration)
+        // Or just pop if editing.
+        // Since we are reusing this screen, we can check if we can pop.
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        } else {
+           Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const CraftizenHome()),
+          );
+        }
       }
     } catch (e) {
-      // ... error handling ...
+       if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -74,30 +90,39 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  const Text(
+                    'Set up your professional details to get better job matches.',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 24),
                   TextFormField(
                     controller: _experienceController,
-                    decoration: const InputDecoration(labelText: 'Years of Experience'),
+                    decoration: const InputDecoration(labelText: 'Years of Experience', border: OutlineInputBorder()),
                     keyboardType: TextInputType.number,
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _radiusController,
-                    decoration: const InputDecoration(labelText: 'Service Radius (km)'),
+                    decoration: const InputDecoration(labelText: 'Service Radius (km)', border: OutlineInputBorder()),
                     keyboardType: TextInputType.number,
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _minChargeController,
-                    decoration: const InputDecoration(labelText: 'Minimum Charge (₹)'),
+                    decoration: const InputDecoration(labelText: 'Minimum Charge (₹)', border: OutlineInputBorder()),
                     keyboardType: TextInputType.number,
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: _saveProfile,
-                    child: const Text('Save Profile'),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      backgroundColor: Colors.deepOrange,
+                    ),
+                    child: const Text('Save Profile', style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),

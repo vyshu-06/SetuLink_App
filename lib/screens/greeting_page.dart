@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class GreetingPage extends StatelessWidget {
-  const GreetingPage({Key? key}) : super(key: key);
+  const GreetingPage({super.key});
 
   Future<void> _saveRole(String role) async {
     final prefs = await SharedPreferences.getInstance();

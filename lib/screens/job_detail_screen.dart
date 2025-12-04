@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:setulink_app/models/job_model.dart';
-import 'package:setulink_app/services/job_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:setulink_app/screens/raise_dispute_screen.dart';

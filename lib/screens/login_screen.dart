@@ -20,6 +20,10 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+  
   String email = '';
   String password = '';
   bool loading = false;
@@ -28,16 +32,20 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    // Set default test credentials
-    if (widget.role == 'citizen') {
-      email = 'citizen@test.com';
-    } else {
-      email = 'craftizen@test.com';
-    }
-    password = 'password123';
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   Future<void> _attemptLogin() async {
+    // Update email and password from controllers before validation
+    email = _emailController.text.trim();
+    password = _passwordController.text;
+
     if (_formKey.currentState!.validate()) {
       setState(() {
         loading = true;
@@ -48,9 +56,10 @@ class _LoginScreenState extends State<LoginScreen> {
         final result = await AuthService().signInWithEmail(email, password, widget.role);
         
         if (result == null) {
+          // Case: Authentication successful but user document logic failed (e.g. wrong role)
           setState(() {
             loading = false;
-            errorKey = 'login_failed';
+            errorKey = 'login_failed'; // Generic failure if user role doesn't match
           });
         } else {
           await _analyticsService.logLogin(widget.role);
@@ -66,64 +75,37 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         }
       } on FirebaseAuthException catch (e) {
-        if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
-          // If user not found and it's a test user, try to register automatically
-          if ((email == 'citizen@test.com' || email == 'craftizen@test.com') && password == 'password123') {
-            await _attemptAutoRegister();
-          } else {
-             setState(() {
-              loading = false;
-              errorKey = 'login_failed';
-            });
-          }
-        } else {
-           setState(() {
-            loading = false;
-            errorKey = 'login_failed';
-          });
+        // Debug print to see exact error code in console
+        debugPrint('FirebaseAuthException: ${e.code} - ${e.message}');
+        
+        String newErrorKey = 'login_failed';
+
+        if (e.code == 'user-not-found') {
+           newErrorKey = 'user_not_found'; 
+        } else if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+           newErrorKey = 'wrong_password'; 
+        } else if (e.code == 'invalid-email') {
+           newErrorKey = 'invalid_email';
+        } else if (e.code == 'user-disabled') {
+           newErrorKey = 'user_disabled';
+        } else if (e.code == 'too-many-requests') {
+           newErrorKey = 'too_many_requests';
+        } else if (e.code == 'configuration-not-found') {
+           newErrorKey = 'configuration_not_found';
         }
+        
+        setState(() {
+          loading = false;
+          errorKey = newErrorKey;
+        });
+
       } catch (e) {
+         debugPrint('Generic Login Error: $e');
          setState(() {
           loading = false;
           errorKey = 'login_failed';
         });
       }
-    }
-  }
-
-  Future<void> _attemptAutoRegister() async {
-    try {
-       final result = await AuthService().registerWithEmail(
-        email,
-        password,
-        widget.role == 'citizen' ? 'Test Citizen' : 'Test Craftizen',
-        '+910000000000',
-        widget.role,
-      );
-
-      if (result != null) {
-          await _analyticsService.logLogin(widget.role); // Log as login after registration
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => widget.role == 'citizen'
-                    ? const CitizenHome()
-                    : const CraftizenHome(),
-              ),
-            );
-          }
-      } else {
-        setState(() {
-          loading = false;
-          errorKey = 'registration_failed_test_user';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        loading = false;
-        errorKey = 'registration_failed_test_user';
-      });
     }
   }
 
@@ -142,18 +124,30 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: [
                 TextFormField(
-                  initialValue: email,
+                  controller: _emailController,
                   decoration: InputDecoration(labelText: context.tr('email')),
-                  onChanged: (val) => email = val.trim(),
+                  // onChanged removed, using controller
                   validator: (val) =>
                       (val != null && val.contains('@')) ? null : context.tr('enter_valid_email'),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  initialValue: password,
-                  decoration: InputDecoration(labelText: context.tr('password')),
-                  obscureText: true,
-                  onChanged: (val) => password = val,
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: context.tr('password'),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ),
+                  obscureText: _obscurePassword,
+                  // onChanged removed, using controller
                   validator: (val) =>
                       (val != null && val.length >= 6) ? null : context.tr('password_min_6'),
                 ),
@@ -180,7 +174,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
                 if (errorKey.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  BilingualText(textKey: errorKey, style: const TextStyle(color: Colors.redAccent)),
+                  // Show actual error message if translation key missing, or use simple Text as fallback
+                   Text(
+                      context.tr(errorKey) == errorKey ? _getReadableError(errorKey) : context.tr(errorKey),
+                      style: const TextStyle(color: Colors.redAccent),
+                      textAlign: TextAlign.center,
+                    ),
                 ],
               ],
             ),
@@ -188,5 +187,20 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  // Helper to show readable error messages if translations are missing
+  String _getReadableError(String key) {
+    switch(key) {
+      case 'user_not_found': return 'No user found with this email.';
+      case 'wrong_password': return 'Incorrect password.';
+      case 'invalid_email': return 'The email address is badly formatted.';
+      case 'user_disabled': return 'This user has been disabled.';
+      case 'too_many_requests': return 'Too many attempts. Try again later.';
+      case 'configuration_not_found': return 'Authentication not configured properly. Please contact support.';
+      case 'login_failed': return 'Login failed. Please check your credentials.';
+      case 'registration_failed_test_user': return 'Failed to create test user.';
+      default: return 'An unexpected error occurred.';
+    }
   }
 }

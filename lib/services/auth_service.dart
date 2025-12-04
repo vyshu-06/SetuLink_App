@@ -94,19 +94,26 @@ class AuthService {
 
       if (user != null) {
         final userDoc = await _db.collection('users').doc(user.uid).get();
-        if (userDoc.exists && userDoc.data()?['role'] == role) {
-          _currentUserData = userDoc.data();
-
-          // Save FCM token
-          final token = await _fcm.getToken();
-          if (token != null) {
-            await _db.collection('users').doc(user.uid).update({'fcmToken': token});
-          }
-
-          return _currentUserData;
+        
+        if (!userDoc.exists) {
+          throw FirebaseAuthException(code: 'user-doc-missing', message: 'User profile data missing.');
         }
+        
+        if (userDoc.data()?['role'] != role) {
+           throw FirebaseAuthException(code: 'wrong-role', message: 'Account exists but role does not match.');
+        }
+
+        _currentUserData = userDoc.data();
+
+        // Save FCM token
+        final token = await _fcm.getToken();
+        if (token != null) {
+          await _db.collection('users').doc(user.uid).update({'fcmToken': token});
+        }
+
+        return _currentUserData;
       }
-      return null; // Return null if role does not match or user does not exist
+      return null; 
     } catch (e) {
       print('SignIn error: $e');
       rethrow;

@@ -4,10 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:setulink_app/screens/citizen_home.dart';
 
 class CitizenProfileSetupScreen extends StatefulWidget {
-  const CitizenProfileSetupScreen({Key? key}) : super(key: key);
+  const CitizenProfileSetupScreen({super.key});
 
   @override
-  _CitizenProfileSetupScreenState createState() => _CitizenProfileSetupScreenState();
+  State<CitizenProfileSetupScreen> createState() => _CitizenProfileSetupScreenState();
 }
 
 class _CitizenProfileSetupScreenState extends State<CitizenProfileSetupScreen> {

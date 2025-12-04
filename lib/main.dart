@@ -21,7 +21,7 @@ import 'package:setulink_app/screens/subscription_screen.dart';
 import 'package:setulink_app/screens/referral_screen.dart';
 import 'package:setulink_app/screens/earnings_screen.dart'; 
 import 'package:setulink_app/screens/admin_dashboard_screen.dart';
-import 'package:setulink_app/screens/citizen_profile_setup_screen.dart'; // Import new screen
+import 'package:setulink_app/screens/citizen_profile_setup_screen.dart';
 import 'package:setulink_app/widgets/offline_banner.dart';
 import 'firebase_options.dart';
 
@@ -29,13 +29,28 @@ final AnalyticsService analyticsService = AnalyticsService();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await EasyLocalization.ensureInitialized();
+
+  // DEBUG: Print the options being used
+  try {
+    final options = DefaultFirebaseOptions.currentPlatform;
+    debugPrint('------------------------------------------------');
+    debugPrint('FIREBASE INIT STARTING');
+    debugPrint('API Key: ${options.apiKey}');
+    debugPrint('App ID: ${options.appId}');
+    debugPrint('Project ID: ${options.projectId}');
+    debugPrint('Auth Domain: ${options.authDomain}');
+    debugPrint('------------------------------------------------');
+    
+    await Firebase.initializeApp(
+      options: options,
+    );
+    debugPrint('FIREBASE INIT SUCCESS');
+  } catch (e) {
+    debugPrint('FIREBASE INIT FAILED: $e');
+  }
   
   FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
-
-  await EasyLocalization.ensureInitialized();
 
   runApp(
     EasyLocalization(
@@ -53,7 +68,7 @@ Future<void> main() async {
 }
 
 class SetuLinkApp extends StatelessWidget {
-  const SetuLinkApp({Key? key}) : super(key: key);
+  const SetuLinkApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +129,7 @@ class SetuLinkApp extends StatelessWidget {
         },
         '/referral': (context) => const ReferralScreen(),
         '/earnings': (context) => const EarningsScreen(),
-        '/citizen_profile_setup': (context) => const CitizenProfileSetupScreen(), // Add route
+        '/citizen_profile_setup': (context) => const CitizenProfileSetupScreen(),
       },
     );
   }

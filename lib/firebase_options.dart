@@ -45,7 +45,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDywqDmqmNhotb3ikQW3KgzKd4rxrA3aCQ',
-    appId: '1:60751051995:web:placeholder', // TODO: Replace with actual Web App ID from Firebase Console
+    appId: '1:60751051995:web:f43d66486004ff780060fe',
     messagingSenderId: '60751051995',
     projectId: 'setulink-app-fb',
     authDomain: 'setulink-app-fb.firebaseapp.com',

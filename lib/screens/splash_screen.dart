@@ -3,7 +3,7 @@ import 'package:setulink_app/screens/greeting_page.dart';
 import 'dart:async';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             Icon(Icons.handshake_outlined, size: 100, color: Colors.teal[700]),
             const SizedBox(height: 20),
-            Text(
+            const Text(
               'SetuLink',
               style: TextStyle(
                 fontSize: 40,
