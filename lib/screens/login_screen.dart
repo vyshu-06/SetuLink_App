@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart'; // Added to access Firebase.app()
 import 'package:setulink_app/services/analytics_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'phone_auth_screen.dart';
@@ -27,7 +28,8 @@ class _LoginScreenState extends State<LoginScreen> {
   String email = '';
   String password = '';
   bool loading = false;
-  String errorKey = ''; // Holds the translation key for the error
+  String errorKey = ''; 
+  String rawErrorMessage = ''; // To show detailed error if needed
 
   @override
   void initState() {
@@ -42,7 +44,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _attemptLogin() async {
-    // Update email and password from controllers before validation
     email = _emailController.text.trim();
     password = _passwordController.text;
 
@@ -50,16 +51,16 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         loading = true;
         errorKey = '';
+        rawErrorMessage = '';
       });
 
       try {
         final result = await AuthService().signInWithEmail(email, password, widget.role);
         
         if (result == null) {
-          // Case: Authentication successful but user document logic failed (e.g. wrong role)
           setState(() {
             loading = false;
-            errorKey = 'login_failed'; // Generic failure if user role doesn't match
+            errorKey = 'login_failed'; 
           });
         } else {
           await _analyticsService.logLogin(widget.role);
@@ -75,7 +76,6 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         }
       } on FirebaseAuthException catch (e) {
-        // Debug print to see exact error code in console
         debugPrint('FirebaseAuthException: ${e.code} - ${e.message}');
         
         String newErrorKey = 'login_failed';
@@ -97,6 +97,8 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           loading = false;
           errorKey = newErrorKey;
+          // Store raw message for specific errors to help debugging
+          rawErrorMessage = '${e.code}: ${e.message}';
         });
 
       } catch (e) {
@@ -104,8 +106,46 @@ class _LoginScreenState extends State<LoginScreen> {
          setState(() {
           loading = false;
           errorKey = 'login_failed';
+          rawErrorMessage = e.toString();
         });
       }
+    }
+  }
+
+  void _showConfigDebugDialog() {
+    try {
+      final options = Firebase.app().options;
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Firebase Config Debug'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('App ID: ${options.appId}'),
+                const SizedBox(height: 8),
+                Text('API Key: ${options.apiKey}'),
+                const SizedBox(height: 8),
+                Text('Project ID: ${options.projectId}'),
+                const SizedBox(height: 8),
+                Text('Auth Domain: ${options.authDomain}'),
+                const SizedBox(height: 16),
+                const Text('Compare these with your Firebase Console > Project Settings.', style: TextStyle(color: Colors.grey, fontSize: 12)),
+              ],
+            ),
+          ),
+          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close'))],
+        ),
+      );
+    } catch (e) {
+       showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          content: Text('Could not read config: $e'),
+        ),
+      );
     }
   }
 
@@ -115,6 +155,14 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: BilingualText(textKey: widget.role == "citizen" ? 'citizen_login' : 'craftizen_login'),
         backgroundColor: widget.role == 'citizen' ? Colors.teal : Colors.deepOrange,
+        actions: [
+          // Debug button to verify config loaded in browser
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: _showConfigDebugDialog,
+            tooltip: 'Debug Config',
+          )
+        ],
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -126,7 +174,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(labelText: context.tr('email')),
-                  // onChanged removed, using controller
                   validator: (val) =>
                       (val != null && val.contains('@')) ? null : context.tr('enter_valid_email'),
                 ),
@@ -147,7 +194,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   obscureText: _obscurePassword,
-                  // onChanged removed, using controller
                   validator: (val) =>
                       (val != null && val.length >= 6) ? null : context.tr('password_min_6'),
                 ),
@@ -174,12 +220,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
                 if (errorKey.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  // Show actual error message if translation key missing, or use simple Text as fallback
                    Text(
-                      context.tr(errorKey) == errorKey ? _getReadableError(errorKey) : context.tr(errorKey),
+                      _getReadableError(errorKey),
                       style: const TextStyle(color: Colors.redAccent),
                       textAlign: TextAlign.center,
                     ),
+                    if (errorKey == 'configuration_not_found' || errorKey == 'login_failed')
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: Text(
+                          '($rawErrorMessage)',
+                          style: const TextStyle(color: Colors.red, fontSize: 10),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                 ],
               ],
             ),
@@ -189,7 +243,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Helper to show readable error messages if translations are missing
   String _getReadableError(String key) {
     switch(key) {
       case 'user_not_found': return 'No user found with this email.';
@@ -197,10 +250,10 @@ class _LoginScreenState extends State<LoginScreen> {
       case 'invalid_email': return 'The email address is badly formatted.';
       case 'user_disabled': return 'This user has been disabled.';
       case 'too_many_requests': return 'Too many attempts. Try again later.';
-      case 'configuration_not_found': return 'Authentication not configured properly. Please contact support.';
-      case 'login_failed': return 'Login failed. Please check your credentials.';
+      case 'configuration_not_found': return 'Firebase Config Error (See below).';
+      case 'login_failed': return 'Login failed.';
       case 'registration_failed_test_user': return 'Failed to create test user.';
-      default: return 'An unexpected error occurred.';
+      default: return context.tr(key);
     }
   }
 }
