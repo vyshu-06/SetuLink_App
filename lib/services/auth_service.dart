@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -65,20 +66,31 @@ class AuthService {
           'kyc': {'verified': false},
         };
 
-        await _db.collection('users').doc(user.uid).set(userData);
-        _currentUserData = userData;
+        try {
+            await _db.collection('users').doc(user.uid).set(userData);
+            _currentUserData = userData;
+            
+            // Save FCM token
+            try {
+                final token = await _fcm.getToken();
+                if (token != null) {
+                    await _db.collection('users').doc(user.uid).update({'fcmToken': token});
+                }
+            } catch (fcmError) {
+                debugPrint('FCM Token Error (Ignored for Web): $fcmError');
+            }
 
-        // Save FCM token
-        final token = await _fcm.getToken();
-        if (token != null) {
-            await _db.collection('users').doc(user.uid).update({'fcmToken': token});
+            return userData;
+        } catch (dbError) {
+             debugPrint('Firestore Write Error: $dbError');
+             // If writing to DB fails, delete the Auth user so they aren't stuck in limbo
+             await user.delete(); 
+             return null;
         }
-
-        return userData;
       }
       return null;
     } catch (e) {
-      print('Register error: $e');
+      debugPrint('Register error: $e');
       return null;
     }
   }
@@ -106,9 +118,13 @@ class AuthService {
         _currentUserData = userDoc.data();
 
         // Save FCM token
-        final token = await _fcm.getToken();
-        if (token != null) {
-          await _db.collection('users').doc(user.uid).update({'fcmToken': token});
+        try {
+            final token = await _fcm.getToken();
+            if (token != null) {
+              await _db.collection('users').doc(user.uid).update({'fcmToken': token});
+            }
+        } catch (e) {
+            debugPrint("FCM Token error: $e");
         }
 
         return _currentUserData;

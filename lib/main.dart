@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // Added for kIsWeb
+import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Added for FirebaseAuth
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/analytics_service.dart';
@@ -34,43 +34,25 @@ Future<void> main() async {
   await EasyLocalization.ensureInitialized();
 
   try {
-    // FORCE use of these options for Web to bypass any potential weird file caching issues
-    // The values are taken directly from your successful screenshot confirmation
-    FirebaseOptions? platformOptions;
-    if (kIsWeb) {
-      platformOptions = const FirebaseOptions(
-        apiKey: 'AIzaSyDywqDmqmNhotb3ikQW3KgzKd4rxrA3aCQ',
-        appId: '1:60751051995:web:f43d66486004ff780060fe',
-        messagingSenderId: '60751051995',
-        projectId: 'setulink-app-fb',
-        authDomain: 'setulink-app-fb.firebaseapp.com',
-        storageBucket: 'setulink-app-fb.firebasestorage.app',
-      );
-    } else {
-      platformOptions = DefaultFirebaseOptions.currentPlatform;
-    }
-
-    debugPrint('------------------------------------------------');
-    debugPrint('FIREBASE INIT STARTING (HARDCODED CHECK)');
-    debugPrint('Platform: ${kIsWeb ? "Web" : "Native"}');
-    debugPrint('App ID: ${platformOptions.appId}');
-    debugPrint('------------------------------------------------');
-    
     await Firebase.initializeApp(
-      options: platformOptions,
+      options: DefaultFirebaseOptions.currentPlatform,
     );
-
-    if (kIsWeb) {
-      // Ensure we are using the standard Auth instance
-      await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
-    }
     
+    // Fix for "client is offline" error on Web:
+    // Persistence can cause issues on Web if multiple tabs are open or 
+    // if the browser environment restricts it. Disabling it for Web usually resolves connectivity issues.
+    if (kIsWeb) {
+      FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: false);
+      // Ensure Auth persistence is local
+      await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+    } else {
+      FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+    }
+
     debugPrint('FIREBASE INIT SUCCESS');
   } catch (e) {
     debugPrint('FIREBASE INIT FAILED: $e');
   }
-  
-  FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
 
   runApp(
     EasyLocalization(
