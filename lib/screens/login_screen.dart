@@ -8,11 +8,12 @@ import 'phone_auth_screen.dart';
 import '../services/auth_service.dart';
 import '../screens/citizen_home.dart';
 import '../screens/craftizen_home.dart';
+import '../screens/admin_dashboard_screen.dart'; // Import Admin Dashboard
 
 final AnalyticsService _analyticsService = AnalyticsService();
 
 class LoginScreen extends StatefulWidget {
-  final String role; // "citizen" or "craftizen"
+  final String role; // "citizen" or "craftizen" or "admin"
   const LoginScreen({required this.role, Key? key}) : super(key: key);
 
   @override
@@ -34,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    // Removed pre-filled credentials
   }
 
   @override
@@ -65,12 +67,23 @@ class _LoginScreenState extends State<LoginScreen> {
         } else {
           await _analyticsService.logLogin(widget.role);
           if (mounted) {
+            // Handle navigation based on role
+            Widget destination;
+            if (widget.role == 'citizen') {
+              destination = const CitizenHome();
+            } else if (widget.role == 'craftizen') {
+              destination = const CraftizenHome();
+            } else if (widget.role == 'admin') {
+              destination = const AdminDashboardScreen();
+            } else {
+              // Fallback
+              destination = const CitizenHome();
+            }
+
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => widget.role == 'citizen'
-                    ? const CitizenHome()
-                    : const CraftizenHome(),
+                builder: (context) => destination,
               ),
             );
           }
@@ -151,10 +164,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    String titleKey;
+    Color appColor;
+
+    if (widget.role == 'citizen') {
+      titleKey = 'citizen_login';
+      appColor = Colors.teal;
+    } else if (widget.role == 'craftizen') {
+      titleKey = 'craftizen_login';
+      appColor = Colors.deepOrange;
+    } else {
+      titleKey = 'Admin Login'; // Assuming translation key or direct text
+      appColor = Colors.blueGrey;
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: BilingualText(textKey: widget.role == "citizen" ? 'citizen_login' : 'craftizen_login'),
-        backgroundColor: widget.role == 'citizen' ? Colors.teal : Colors.deepOrange,
+        title: widget.role == 'admin' 
+            ? const Text('Admin Login') 
+            : BilingualText(textKey: titleKey),
+        backgroundColor: appColor,
         actions: [
           // Debug button to verify config loaded in browser
           IconButton(
@@ -203,17 +232,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: _attemptLogin,
                 ),
                 const SizedBox(height: 12),
-                OutlinedButton(
-                  child: const BilingualText(textKey: 'login_with_phone'),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PhoneAuthScreen(role: widget.role),
-                      ),
-                    );
-                  },
-                ),
+                if (widget.role != 'admin') // Only show phone login for regular users
+                  OutlinedButton(
+                    child: const BilingualText(textKey: 'login_with_phone'),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PhoneAuthScreen(role: widget.role),
+                        ),
+                      );
+                    },
+                  ),
                 if (loading) ...[
                   const SizedBox(height: 20),
                   const CircularProgressIndicator(),

@@ -74,7 +74,7 @@ class GreetingPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/admin'),
+                    onPressed: () => _navigateToLogin(context, 'admin'),
                     child: const Text('Admin Panel'),
                   ),
                   const SizedBox(height: 40),
