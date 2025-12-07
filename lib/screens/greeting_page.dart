@@ -35,7 +35,12 @@ class GreetingPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 40),
-                  Icon(Icons.handshake_outlined, size: 80, color: Colors.teal[700]),
+                  Image.asset(
+                    'assets/images/app_logo.png',
+                    height: 80,
+                    width: 80,
+                  ),
+
                   const SizedBox(height: 20),
                   const BilingualText(
                     textKey: 'SetuLink',

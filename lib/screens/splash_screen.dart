@@ -29,7 +29,11 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.handshake_outlined, size: 100, color: Colors.teal[700]),
+            Image.asset(
+              'assets/images/app_logo.png', // Ensure this matches your file path exactly
+              height: 100,
+              width: 100,
+            ),
             const SizedBox(height: 20),
             const Text(
               'SetuLink',
