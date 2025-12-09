@@ -1,15 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:setulink_app/screens/craftizen_home.dart';
-import 'package:setulink_app/screens/document_upload_screen.dart';
-import 'package:setulink_app/screens/edit_profile_screen.dart'; // Import EditProfileScreen
-import 'package:setulink_app/screens/kyc_questionnaire_screen.dart';
-import 'package:setulink_app/screens/skill_demo_upload_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // FIX: Import FirebaseAuth
+import 'package:setulink_app/screens/citizen_home.dart';
+import 'package:setulink_app/screens/craftizen_skill_selection_screen.dart';
 import 'package:setulink_app/services/analytics_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import '../services/auth_service.dart';
-import 'citizen_home.dart';
 
 final AnalyticsService _analyticsService = AnalyticsService();
 
@@ -31,7 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String name = '';
   String referralCode = '';
   bool loading = false;
-  String errorKey = ''; // Holds the translation key for the error
+  String errorKey = '';
 
   @override
   void initState() {
@@ -53,7 +50,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             key: _formKey,
             child: Column(
               children: [
-                const SizedBox(height: 20),
                 TextFormField(
                   key: const ValueKey('register_name'),
                   decoration: InputDecoration(labelText: context.tr('name')),
@@ -138,7 +134,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         loading = true;
                         errorKey = '';
                       });
-                      final userObj = await AuthService().registerWithEmail(
+
+                      final authService = AuthService();
+                      final User? user = await authService.registerWithEmail(
                         email,
                         password,
                         name,
@@ -146,8 +144,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         role,
                         referralCode: referralCode.isNotEmpty ? referralCode : null,
                       );
+
                       setState(() => loading = false);
-                      if (userObj == null) {
+
+                      if (user == null) {
                         setState(() => errorKey = 'registration_failed');
                       } else {
                         await _analyticsService.logSignUp(role);
@@ -155,49 +155,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => KYCQuestionnaireScreen(
-                                onCompleted: (answers) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => DocumentUploadScreen(
-                                        onUploadComplete: (docUrls) {
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => SkillDemoUploadScreen(
-                                                onUploadComplete: (videoUrl) async {
-                                                  await FirebaseFirestore.instance
-                                                      .collection('users')
-                                                      .doc(userObj['uid'])
-                                                      .update({
-                                                    'kyc': {
-                                                      'questionnaire': answers,
-                                                      'aadharUrl': docUrls['aadhar'],
-                                                      'passportUrl': docUrls['passport'],
-                                                      'videoUrl': videoUrl,
-                                                      'verified': false,
-                                                      'submittedAt':
-                                                          FieldValue.serverTimestamp(),
-                                                    }
-                                                  });
-                                                  // Navigate to Edit Profile for professional setup instead of Home
-                                                  Navigator.pushReplacement(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (_) =>
-                                                            const EditProfileScreen()),
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                              builder: (_) => CraftizenSkillSelectionScreen(userId: user.uid),
                             ),
                           );
                         } else {
