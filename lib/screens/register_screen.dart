@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:setulink_app/screens/craftizen_home.dart';
+// import 'package:setulink_app/screens/craftizen_home.dart'; // Removed unused import
 import 'package:setulink_app/screens/document_upload_screen.dart';
-import 'package:setulink_app/screens/edit_profile_screen.dart'; // Import EditProfileScreen
+import 'package:setulink_app/screens/edit_profile_screen.dart'; 
 import 'package:setulink_app/screens/kyc_questionnaire_screen.dart';
 import 'package:setulink_app/screens/skill_demo_upload_screen.dart';
 import 'package:setulink_app/services/analytics_service.dart';
@@ -31,7 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String name = '';
   String referralCode = '';
   bool loading = false;
-  String errorKey = ''; // Holds the translation key for the error
+  String errorKey = ''; 
 
   @override
   void initState() {
@@ -181,7 +181,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                           FieldValue.serverTimestamp(),
                                                     }
                                                   });
-                                                  // Navigate to Edit Profile for professional setup instead of Home
                                                   Navigator.pushReplacement(
                                                     context,
                                                     MaterialPageRoute(

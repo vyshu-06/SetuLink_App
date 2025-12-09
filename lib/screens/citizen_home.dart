@@ -1,22 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:setulink_app/models/craftizen_model.dart';
-import 'package:setulink_app/services/analytics_service.dart';
 import 'package:setulink_app/services/auth_service.dart';
-import 'package:setulink_app/services/recommendation_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'chat_list_screen.dart';
 import 'greeting_page.dart';
 import 'profile_screen.dart';
 import 'payment_screen.dart';
-import 'craftizen_profile_view_screen.dart';
 import 'job_request_screen.dart';
 
-final AnalyticsService _analyticsService = AnalyticsService();
-
 class CitizenHome extends StatefulWidget {
-  const CitizenHome({Key? key}) : super(key: key);
+  const CitizenHome({super.key});
 
   @override
   State<CitizenHome> createState() => _CitizenHomeState();
@@ -25,14 +18,11 @@ class CitizenHome extends StatefulWidget {
 class _CitizenHomeState extends State<CitizenHome> {
   int _selectedIndex = 0;
 
-  // Pages for the bottom nav. Note: Wallet/Profile might just navigate directly.
-  // For simplicity in standard BottomNav structure, we can use placeholders or direct navigation logic.
-  // However, standard pattern is to have widgets for each tab.
   static final List<Widget> _pages = <Widget>[
     const _HomeTabPage(),
     const _BookingsTabPage(),
     const ChatListScreen(),
-    const PaymentScreen(category: 'wallet_topup'), // Placeholder for Wallet
+    const PaymentScreen(category: 'wallet_topup'), 
     const ProfileScreen(),
   ];
 
@@ -44,6 +34,7 @@ class _CitizenHomeState extends State<CitizenHome> {
 
   Future<void> _handleLogout() async {
     await AuthService().signOut();
+    if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const GreetingPage()),
       (Route<dynamic> route) => false,
@@ -74,9 +65,12 @@ class _CitizenHomeState extends State<CitizenHome> {
           ),
         ],
       ),
-      body: _pages.elementAt(_selectedIndex),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed, // Needed for 4+ items
+        type: BottomNavigationBarType.fixed,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: const Icon(Icons.home_outlined),
@@ -86,7 +80,7 @@ class _CitizenHomeState extends State<CitizenHome> {
           BottomNavigationBarItem(
             icon: const Icon(Icons.history_outlined),
             activeIcon: const Icon(Icons.history),
-            label: context.tr('bookings'), // "Jobs" in prompt, usually means bookings
+            label: context.tr('bookings'),
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.chat_bubble_outline),
@@ -123,15 +117,18 @@ class _CitizenHomeState extends State<CitizenHome> {
 }
 
 class _HomeTabPage extends StatefulWidget {
-  const _HomeTabPage({Key? key}) : super(key: key);
+  const _HomeTabPage();
 
   @override
   State<_HomeTabPage> createState() => _HomeTabPageState();
 }
 
 class _HomeTabPageState extends State<_HomeTabPage> {
-  static final List<Map<String, dynamic>> serviceCategories = [
-    {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  final List<Map<String, dynamic>> _allServiceCategories = [
+     {
       'categoryKey': 'everyday_needs',
       'services': [
         {'titleKey': 'plumber', 'icon': Icons.plumbing},
@@ -172,94 +169,61 @@ class _HomeTabPageState extends State<_HomeTabPage> {
     },
   ];
 
-  Future<List<CraftizenModel>>? _recommendations;
+  List<Map<String, dynamic>> _filteredCategories = [];
 
   @override
   void initState() {
     super.initState();
-    _loadRecommendations();
+    _filteredCategories = _allServiceCategories;
+    _searchController.addListener(_onSearchChanged);
   }
 
-  void _loadRecommendations() {
-    // In real app, get current GPS location
-    // For now, mock location (0,0) or some default
-    final mockLocation = const GeoPoint(0, 0); 
-    _recommendations = RecommendationService().getRecommendedCraftizens(mockLocation);
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
   }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase();
+      if (_searchQuery.isEmpty) {
+        _filteredCategories = _allServiceCategories;
+      } else {
+        _filteredCategories = _allServiceCategories.map((category) {
+          final filteredServices = (category['services'] as List<Map<String, dynamic>>).where((service) {
+            final title = context.tr(service['titleKey']).toLowerCase();
+            return title.contains(_searchQuery);
+          }).toList();
+
+          if (filteredServices.isNotEmpty) {
+            return {...category, 'services': filteredServices};
+          } else {
+            return null;
+          }
+        }).whereType<Map<String, dynamic>>().toList();
+      }
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        const _Header(),
-        _buildRecommendedSection(),
-        ...serviceCategories.map((c) => _CategorySection(category: c)).toList(),
-      ],
-    );
-  }
-
-  Widget _buildRecommendedSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(bottom: 12.0),
-          child: Text('Recommended Craftizens', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        ),
-        SizedBox(
-          height: 160,
-          child: FutureBuilder<List<CraftizenModel>>(
-            future: _recommendations,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-              if (!snapshot.hasData || snapshot.data!.isEmpty) return const Center(child: Text('No recommendations yet'));
-
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  final craftizen = snapshot.data![index];
-                  return Container(
-                    width: 140,
-                    margin: const EdgeInsets.only(right: 12),
-                    child: Card(
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => CraftizenProfileViewScreen(craftizenId: craftizen.uid)));
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircleAvatar(child: Text(craftizen.name[0])),
-                              const SizedBox(height: 8),
-                              Text(craftizen.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
-                              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                const Icon(Icons.star, size: 14, color: Colors.amber),
-                                Text(craftizen.rating.toStringAsFixed(1)),
-                              ]),
-                              Text(craftizen.skills.firstOrNull ?? 'Craftizen', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ),
+        _Header(searchController: _searchController),
         const SizedBox(height: 24),
+        ..._filteredCategories.map((c) => _CategorySection(category: c)).toList(),
       ],
     );
   }
 }
 
 class _Header extends StatelessWidget {
-  const _Header({Key? key}) : super(key: key);
+  final TextEditingController searchController;
+  const _Header({required this.searchController});
 
   @override
   Widget build(BuildContext context) {
@@ -280,6 +244,7 @@ class _Header extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           TextField(
+            controller: searchController,
             decoration: InputDecoration(
               hintText: context.tr('search_services'),
               prefixIcon: const Icon(Icons.search),
@@ -296,7 +261,7 @@ class _Header extends StatelessWidget {
 
 class _CategorySection extends StatelessWidget {
   final Map<String, dynamic> category;
-  const _CategorySection({Key? key, required this.category}) : super(key: key);
+  const _CategorySection({required this.category});
 
   @override
   Widget build(BuildContext context) {
@@ -331,8 +296,6 @@ class _CategorySection extends StatelessWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(15),
                   onTap: () {
-                    _analyticsService.logJobRequested(service['titleKey']!);
-                    // Pass category to JobRequestScreen flow
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -377,7 +340,7 @@ class _CategorySection extends StatelessWidget {
 }
 
 class _BookingsTabPage extends StatelessWidget {
-  const _BookingsTabPage({Key? key}) : super(key: key);
+  const _BookingsTabPage();
 
   @override
   Widget build(BuildContext context) {

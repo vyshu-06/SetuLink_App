@@ -25,7 +25,7 @@ class JobService {
     }
     return query
         .snapshots(includeMetadataChanges: true)
-        .map((snapshot) => snapshot.docs.map((doc) => JobModel.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList());
+        .map((snapshot) => snapshot.docs.map((doc) => JobModel.fromMap(doc.data(), doc.id)).toList());
   }
 
   Stream<List<JobModel>> getOpenJobsForCraftizen(List<String> skills) {
@@ -36,7 +36,7 @@ class JobService {
         .where('jobStatus', isEqualTo: 'open')
         .where('requiredSkills', arrayContainsAny: skills)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => JobModel.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList());
+        .map((snapshot) => snapshot.docs.map((doc) => JobModel.fromMap(doc.data(), doc.id)).toList());
   }
 
   Stream<QuerySnapshot> getRawJobsSnapshot(String userId) {

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:setulink_app/models/job_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:setulink_app/screens/payment_screen.dart';
 import 'package:setulink_app/screens/raise_dispute_screen.dart';
 
 class JobDetailScreen extends StatelessWidget {
@@ -19,7 +20,7 @@ class JobDetailScreen extends StatelessWidget {
       stream: FirebaseFirestore.instance.collection('jobs').doc(jobId).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-        
+
         final job = JobModel.fromMap(snapshot.data!.data() as Map<String, dynamic>, snapshot.data!.id);
         final bool isCitizen = job.userId == currentUser.uid;
         final bool isCraftizen = job.assignedTo == currentUser.uid;
@@ -60,7 +61,25 @@ class JobDetailScreen extends StatelessWidget {
   List<Widget> _buildCitizenActions(BuildContext context, JobModel job) {
     return [
       if (job.jobStatus == 'completed')
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PaymentScreen(
+                  jobId: job.id,
+                  amount: job.budget,
+                  craftizenId: job.assignedTo,
+                  category: 'job_payment',
+                ),
+              ),
+            );
+          },
+          child: const Text('Pay for Service'),
+        ),
+      if (job.jobStatus == 'paid') // Assuming a paid status
         ElevatedButton(onPressed: () { /* TODO: Navigate to Rating Screen */ }, child: const Text('Rate Craftizen')),
+
       const SizedBox(height: 10),
       ElevatedButton(
         onPressed: () {

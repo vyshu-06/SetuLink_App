@@ -111,42 +111,56 @@ class _DisputeList extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Resolve Dispute'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DropdownButtonFormField<String>(
-              value: outcome,
-              items: const [
-                DropdownMenuItem(value: 'refund_full', child: Text('Full Refund')),
-                DropdownMenuItem(value: 'refund_partial', child: Text('Partial Refund')),
-                DropdownMenuItem(value: 'no_refund', child: Text('No Refund / Rejected')),
-                DropdownMenuItem(value: 'warning_issued', child: Text('Issue Warning')),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Resolve Dispute'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                InputDecorator(
+                  decoration: const InputDecoration(labelText: 'Outcome', border: OutlineInputBorder()),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: outcome,
+                      isDense: true,
+                      items: const [
+                        DropdownMenuItem(value: 'refund_full', child: Text('Full Refund')),
+                        DropdownMenuItem(value: 'refund_partial', child: Text('Partial Refund')),
+                        DropdownMenuItem(value: 'no_refund', child: Text('No Refund / Rejected')),
+                        DropdownMenuItem(value: 'warning_issued', child: Text('Issue Warning')),
+                      ],
+                      onChanged: (val) {
+                        setState(() {
+                           outcome = val!;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: noteController,
+                  decoration: const InputDecoration(labelText: 'Resolution Note'),
+                  maxLines: 3,
+                ),
               ],
-              onChanged: (val) => outcome = val!,
-              decoration: const InputDecoration(labelText: 'Outcome'),
             ),
-            TextField(
-              controller: noteController,
-              decoration: const InputDecoration(labelText: 'Resolution Note'),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              service.resolveDispute(dispute.id, outcome, noteController.text);
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Dispute Resolved')),
-              );
-            },
-            child: const Text('Submit Resolution'),
-          ),
-        ],
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              ElevatedButton(
+                onPressed: () {
+                  service.resolveDispute(dispute.id, outcome, noteController.text);
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Dispute Resolved')),
+                  );
+                },
+                child: const Text('Submit Resolution'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

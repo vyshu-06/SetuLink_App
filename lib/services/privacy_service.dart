@@ -2,10 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart'; // For sharing the exported file
-// Note: You need to add share_plus to pubspec.yaml if not present, or I can use a simpler mock for now.
-// I will use a basic file write and print path if share_plus is missing, but the prompt asks for "File download or email delivery".
-// I'll implement the logic to generate the string and rely on UI to handle the "download" action or just return the string.
+// import 'package:share_plus/share_plus.dart'; // Removed unused import
 
 class PrivacyService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -29,7 +26,6 @@ class PrivacyService {
       final userDoc = await _db.collection('users').doc(userId).get();
       
       // Fetch Jobs (Raised by user or assigned to user)
-      // Note: Indexes might be required for these queries
       final jobsRaisedSnap = await _db.collection('jobs').where('userId', isEqualTo: userId).get();
       final jobsAssignedSnap = await _db.collection('jobs').where('assignedTo', isEqualTo: userId).get();
       
@@ -43,7 +39,6 @@ class PrivacyService {
         'jobs_requested': jobsRaisedSnap.docs.map((d) => d.data()).toList(),
         'jobs_assigned': jobsAssignedSnap.docs.map((d) => d.data()).toList(),
         'disputes': disputesSnap.docs.map((d) => d.data()).toList(),
-        // Add other collections as needed (e.g., reviews, chats)
       };
 
       return jsonEncode(exportData);
@@ -64,8 +59,6 @@ class PrivacyService {
       'consent.withdrawnAt': FieldValue.serverTimestamp(),
       'accountStatus': 'deletion_requested', // Flag for app logic
     });
-    
-    // In a real system, a Cloud Function would pick this up to perform the actual deletion after a grace period.
   }
 
   // Helper to save string to file

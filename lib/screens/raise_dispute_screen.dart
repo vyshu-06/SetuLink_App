@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:setulink_app/services/dispute_service.dart';
-// Removed unused import: bilingual_text.dart
 
 class RaiseDisputeScreen extends StatefulWidget {
   final String jobId;
@@ -72,13 +71,7 @@ class _RaiseDisputeScreenState extends State<RaiseDisputeScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             DropdownButtonFormField<String>(
-              // Using key + initialValue to satisfy deprecation warning while keeping reactivity
-              key: ValueKey(_disputeType), 
-              value: _disputeType, // Kept value as it's standard, but if warning persists, the key helps.
-              // Actually, if I keep value, the warning persists. 
-              // I will remove 'value' and use 'initialValue' + 'key'.
-              // But wait, if I remove 'value', DropdownButtonFormField might complain if items don't contain null? 
-              // It works if I provide initialValue.
+              value: _disputeType, 
               items: ['quality', 'payment', 'other']
                   .map((e) => DropdownMenuItem(
                         value: e,

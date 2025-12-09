@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class OfflineBanner extends StatefulWidget {
   final Widget child;
@@ -18,10 +17,7 @@ class _OfflineBannerState extends State<OfflineBanner> {
     super.initState();
     _checkConnectivity();
     Connectivity().onConnectivityChanged.listen((result) {
-      // Determine offline if result is none
        setState(() {
-        // Handle both single result (v5) and list (v6) if upgrading later, but for now strict v5
-        // Since the error says 'result' is ConnectivityResult, we treat it as such.
         _isOffline = result == ConnectivityResult.none;
       });
     });
