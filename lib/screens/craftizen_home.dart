@@ -165,8 +165,7 @@ class _HomeTabPage extends StatelessWidget {
                           const SizedBox(width: 8),
                           Switch(
                             value: isAvailable,
-                            activeThumbImage: null, // Use activeThumbColor instead of activeColor
-                            activeThumbColor: Colors.green,
+                            activeColor: Colors.green,
                             onChanged: (val) => _toggleAvailability(uid, isAvailable),
                           ),
                         ],
@@ -208,7 +207,7 @@ class _HomeTabPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), spreadRadius: 1, blurRadius: 10)],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), spreadRadius: 1, blurRadius: 10)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,7 +240,7 @@ class _HomeTabPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), spreadRadius: 1, blurRadius: 10)],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), spreadRadius: 1, blurRadius: 10)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -24,7 +24,8 @@ class _CraftizenJobListScreenState extends State<CraftizenJobListScreen> {
   Future<void> _checkKycStatus() async {
     final currentUser = _authService.getCurrentUser();
     if (currentUser != null) {
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(currentUser['uid']).get();
+      // FIX: Access uid directly on the User object
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(currentUser.uid).get();
       if (userDoc.exists) {
         final kycData = userDoc.data()?['kyc'];
         if (kycData != null && kycData['verified'] == true) {

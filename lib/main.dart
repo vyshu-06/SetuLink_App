@@ -25,6 +25,8 @@ import 'package:setulink_app/screens/earnings_screen.dart';
 import 'package:setulink_app/screens/admin_dashboard_screen.dart';
 import 'package:setulink_app/screens/citizen_profile_setup_screen.dart';
 import 'package:setulink_app/widgets/offline_banner.dart';
+import 'package:setulink_app/screens/craftizen_experience_screen.dart';
+import 'package:setulink_app/screens/pending_verification_screen.dart'; // Import the new screen
 import 'firebase_options.dart';
 
 final AnalyticsService analyticsService = AnalyticsService();
@@ -38,12 +40,8 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     
-    // Fix for "client is offline" error on Web:
-    // Persistence can cause issues on Web if multiple tabs are open or 
-    // if the browser environment restricts it. Disabling it for Web usually resolves connectivity issues.
     if (kIsWeb) {
       FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: false);
-      // Ensure Auth persistence is local
       await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
     } else {
       FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
@@ -132,6 +130,12 @@ class SetuLinkApp extends StatelessWidget {
         '/referral': (context) => const ReferralScreen(),
         '/earnings': (context) => const EarningsScreen(),
         '/citizen_profile_setup': (context) => const CitizenProfileSetupScreen(),
+        '/craftizen_experience': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return CraftizenExperienceScreen(userId: args['userId']!, selectedSkills: args['selectedSkills']! as List<String>);
+        },
+        // ADDED: Route for the Pending Verification Screen
+        '/pending_verification': (context) => const PendingVerificationScreen(),
       },
     );
   }
