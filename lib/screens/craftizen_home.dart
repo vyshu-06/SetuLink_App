@@ -116,7 +116,7 @@ class _HomeTabPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = AuthService().getCurrentUser();
-    final String uid = currentUser?['uid'] ?? '';
+    final String uid = currentUser?.uid ?? '';
 
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
@@ -165,7 +165,7 @@ class _HomeTabPage extends StatelessWidget {
                           const SizedBox(width: 8),
                           Switch(
                             value: isAvailable,
-                            activeColor: Colors.green,
+                            activeThumbColor: Colors.green,
                             onChanged: (val) => _toggleAvailability(uid, isAvailable),
                           ),
                         ],
@@ -207,7 +207,7 @@ class _HomeTabPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), spreadRadius: 1, blurRadius: 10)],
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), spreadRadius: 1, blurRadius: 10)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,7 +240,7 @@ class _HomeTabPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), spreadRadius: 1, blurRadius: 10)],
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), spreadRadius: 1, blurRadius: 10)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +306,7 @@ class _NewJobsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = AuthService().getCurrentUser();
-    final String uid = currentUser?['uid'] ?? '';
+    final String uid = currentUser?.uid ?? '';
 
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
@@ -356,7 +356,7 @@ class _MyJobsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = AuthService().getCurrentUser();
-    final String uid = currentUser?['uid'] ?? '';
+    final String uid = currentUser?.uid ?? '';
 
     return StreamBuilder<List<JobModel>>(
       stream: JobService().getJobsStream(uid, isCraftizen: true),

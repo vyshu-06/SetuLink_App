@@ -1,15 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:setulink_app/screens/craftizen_home.dart';
+import 'package:setulink_app/screens/citizen_home.dart';
 import 'package:setulink_app/screens/document_upload_screen.dart';
-import 'package:setulink_app/screens/edit_profile_screen.dart'; // Import EditProfileScreen
 import 'package:setulink_app/screens/kyc_questionnaire_screen.dart';
 import 'package:setulink_app/screens/skill_demo_upload_screen.dart';
 import 'package:setulink_app/services/analytics_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import '../services/auth_service.dart';
-import 'citizen_home.dart';
 
 final AnalyticsService _analyticsService = AnalyticsService();
 
@@ -152,59 +150,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       } else {
                         await _analyticsService.logSignUp(role);
                         if (role == 'craftizen') {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => KYCQuestionnaireScreen(
-                                onCompleted: (answers) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => DocumentUploadScreen(
-                                        onUploadComplete: (docUrls) {
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => SkillDemoUploadScreen(
-                                                onUploadComplete: (videoUrl) async {
-                                                  await FirebaseFirestore.instance
-                                                      .collection('users')
-                                                      .doc(userObj['uid'])
-                                                      .update({
-                                                    'kyc': {
-                                                      'questionnaire': answers,
-                                                      'aadharUrl': docUrls['aadhar'],
-                                                      'passportUrl': docUrls['passport'],
-                                                      'videoUrl': videoUrl,
-                                                      'verified': false,
-                                                      'submittedAt':
-                                                          FieldValue.serverTimestamp(),
-                                                    }
-                                                  });
-                                                  // Navigate to Edit Profile for professional setup instead of Home
-                                                  Navigator.pushReplacement(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (_) =>
-                                                            const EditProfileScreen()),
-                                                  );
-                                                },
+                          if (context.mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => KYCQuestionnaireScreen(
+                                  onCompleted: (answers) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => DocumentUploadScreen(
+                                          onUploadComplete: (docUrls) {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => SkillDemoUploadScreen(
+                                                  userId: userObj.uid,
+                                                ),
                                               ),
-                                            ),
-                                          );
-                                        },
+                                            );
+                                          },
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          }
                         } else {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => const CitizenHome()),
-                          );
+                          if (context.mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => const CitizenHome()),
+                            );
+                          }
                         }
                       }
                     }

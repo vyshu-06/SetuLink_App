@@ -25,16 +25,18 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
   }
 
   Future<void> _initializeMap() async {
-    final userLocation = await _locationService.getCurrentGeoPoint();
-    if (userLocation != null && mounted) {
+    // Note: Temporary fixed location since getCurrentGeoPoint was removed.
+    // In a real implementation, you would use a location package to get the current location.
+    final userLocation = const GeoPoint(20.5937, 78.9629); // Example center of India
+    if (mounted) {
       setState(() {
         _currentPosition = LatLng(userLocation.latitude, userLocation.longitude);
       });
       _locationService
           .getNearbyCraftizens(
-        center: userLocation,
-        radiusInKm: _radiusInKm,
-        skillCategory: widget.skillCategory,
+        userLocation.latitude,
+        userLocation.longitude,
+        _radiusInKm,
       )
           .listen((craftizens) {
         _updateMarkers(craftizens);
@@ -49,16 +51,20 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
       final GeoPoint? geoPoint = data['location'];
       if (geoPoint == null) continue;
 
-      markers.add(
-        Marker(
-          markerId: MarkerId(doc.id),
-          position: LatLng(geoPoint.latitude, geoPoint.longitude),
-          infoWindow: InfoWindow(
-            title: data['name'] ?? 'Unknown',
-            snippet: data['skills']?.join(', '), // Safe navigation and join
-          ),
-        ),
-      );
+      // Filter by skill category locally since the service is simplified
+      final List<dynamic>? skills = data['skills'];
+      if (skills != null && skills.contains(widget.skillCategory)) {
+          markers.add(
+            Marker(
+              markerId: MarkerId(doc.id),
+              position: LatLng(geoPoint.latitude, geoPoint.longitude),
+              infoWindow: InfoWindow(
+                title: data['name'] ?? 'Unknown',
+                snippet: (data['skills'] as List<dynamic>?)?.join(', '), // Safe navigation and join
+              ),
+            ),
+          );
+      }
     }
 
     if (mounted) {

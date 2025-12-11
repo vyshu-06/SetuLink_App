@@ -59,8 +59,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
     _paymentService.openCheckout(
       amount: _finalAmount,
-      userName: currentUser['name'] ?? 'Customer',
-      userEmail: currentUser['email'] ?? 'customer@example.com',
+      userName: currentUser.displayName ?? 'Customer', // Use displayName which is standard User property or fallback
+      userEmail: currentUser.email ?? 'customer@example.com',
       category: widget.category,
       onSuccess: (paymentId) {
         if (!mounted) return;
@@ -72,7 +72,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           category: widget.category,
           jobId: widget.jobId ?? '',
           craftizenId: widget.craftizenId ?? '',
-          userId: currentUser['uid'],
+          userId: currentUser.uid,
         );
 
         ScaffoldMessenger.of(context).showSnackBar(

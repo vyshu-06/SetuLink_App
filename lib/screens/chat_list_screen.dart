@@ -9,7 +9,7 @@ class ChatListScreen extends StatelessWidget {
   const ChatListScreen({Key? key}) : super(key: key);
 
   Map<String, String> _getPeerInfo(DocumentSnapshot chatDoc, String currentUserId) {
-    final List<dynamic> participants = chatDoc['participants'];
+    final List<dynamic> participants = chatDoc['users'];
     final String peerId = participants.firstWhere((id) => id != currentUserId, orElse: () => '');
     final String peerName = 'User ${peerId.substring(0, 6)}';
     return {'id': peerId, 'name': peerName};
@@ -26,7 +26,7 @@ class ChatListScreen extends StatelessWidget {
       body: currentUser == null
           ? const Center(child: Text("Please log in to see your chats."))
           : StreamBuilder<QuerySnapshot>(
-              stream: chatService.getChats(currentUser.uid),
+              stream: chatService.getChatList(currentUser.uid),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -42,19 +42,20 @@ class ChatListScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final chat = chatDocs[index];
                     final peerInfo = _getPeerInfo(chat, currentUser.uid);
+                    final data = chat.data() as Map<String, dynamic>;
 
                     return ListTile(
                       leading: const CircleAvatar(child: Icon(Icons.person)),
                       title: Text(peerInfo['name']!),
-                      subtitle: Text(chat['lastMessage'] ?? ''),
+                      subtitle: Text(data.containsKey('lastMessage') ? data['lastMessage'] ?? '' : ''),
                       onTap: () {
                         if (peerInfo['id']!.isNotEmpty) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => ChatScreen(
-                                receiverId: peerInfo['id']!,
-                                receiverName: peerInfo['name']!,
+                                chatId: chat.id,
+                                otherUserName: peerInfo['name']!,
                               ),
                             ),
                           );

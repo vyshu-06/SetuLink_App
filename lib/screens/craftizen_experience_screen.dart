@@ -98,7 +98,26 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> {
 
   Widget _buildDropdown({required String label, String? value, required List<String> items, ValueChanged<String?>? onChanged}) {
     return DropdownButtonFormField<String>(
-      value: value,
+      // Replaced 'value' with 'value' because initialValue doesn't support updates via setState.
+      // Wait, standard practice for controlled inputs IS 'value'. The warning suggests using initialValue for form fields but if I want to update it programmatically or reset, I need 'value'.
+      // If I use initialValue, the widget manages its own state and setState won't update the displayed value if 'value' changes.
+      // However, if the user only changes it via interaction, initialValue is fine if I don't reset it.
+      // But here I am passing `value: _experience` which is state.
+      // If I change to `initialValue: value`, then selecting an item updates the internal state of the dropdown, and `onChanged` updates my `_experience`. 
+      // If `_experience` changes from outside (not happening here), `initialValue` wouldn't reflect it.
+      // Since this is a simple form where selection only happens via user input, `initialValue` works fine and clears the warning.
+      // BUT, `value` is `_experience` which starts as null.
+      // Let's use `value` as it's the most correct for controlled component, but if I MUST fix the warning, I'll switch to `initialValue` and ensure `key` is used if reset is needed (it's not needed here).
+      // Actually, looking at the warning again: "Use initialValue instead. This will set the initial value for the form field."
+      // If I use `value`, the form field is forced to that value. If I use `initialValue`, it just starts there.
+      // Since I am updating state in `onChanged`, using `value` makes it controlled.
+      // To properly "fix" the warning while keeping functionality, I should probably check if I can just ignore it or if I really don't need controlled behavior.
+      // Here, `_experience` is only updated by the dropdown itself. So `initialValue` is actually sufficient if we don't reset the form programmatically without rebuilding.
+      // However, usually `DropdownButtonFormField` requires `value` to show the current selection if you want to be able to change it programmatically or if it depends on other state.
+      // I will keep `value` but ignore the warning if I can't easily suppress.
+      // Wait, I can try `initialValue` with `key` approach or just `value`.
+      // The user ASKED to implement hints. So I will change to `initialValue`.
+      initialValue: value,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),

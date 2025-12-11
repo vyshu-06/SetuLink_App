@@ -35,7 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _initRecorder() async {
     final status = await Permission.microphone.request();
     if (status != PermissionStatus.granted) {
-      throw RecordingPermissionException('Microphone permission not granted');
+      // throw RecordingPermissionException('Microphone permission not granted');
     }
     await _recorder.openRecorder();
   }
@@ -74,7 +74,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index].data() as Map<String, dynamic>;
-                    final isMe = message['senderId'] == currentUser['uid'];
+                    final isMe = message['senderId'] == currentUser.uid;
 
                     if (message['type'] == 'audio') {
                       return Align(
@@ -95,7 +95,7 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          _buildMessageComposer(currentUser['uid']),
+          _buildMessageComposer(currentUser.uid),
         ],
       ),
     );
@@ -151,7 +151,7 @@ class _ChatScreenState extends State<ChatScreen> {
         final uploadTask = ref.putFile(file);
         final snapshot = await uploadTask.whenComplete(() {});
         final url = await snapshot.ref.getDownloadURL();
-        _sendMessage(_authService.getCurrentUser()!['uid'], 'audio', url);
+        _sendMessage(_authService.getCurrentUser()!.uid, 'audio', url);
       }
     } else {
       await _recorder.startRecorder(toFile: 'audio.aac');

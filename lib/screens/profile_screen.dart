@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:setulink_app/screens/greeting_page.dart';
 import 'package:setulink_app/screens/kyc_screen.dart';
-import 'package:setulink_app/services/auth_service.dart';
+import 'package:setulink_app/services/auth_service.dart' as app_auth;
 import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -16,21 +17,42 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final AuthService _authService = AuthService();
-  Map<String, dynamic>? _currentUser; 
+  final app_auth.AuthService _authService = app_auth.AuthService();
+  User? _authUser;
+  Map<String, dynamic>? _userData;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _currentUser = _authService.getCurrentUser();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    _authUser = _authService.getCurrentUser();
+    if (_authUser != null) {
+      try {
+        DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(_authUser!.uid).get();
+        if (mounted) {
+           setState(() {
+             _userData = doc.data() as Map<String, dynamic>?;
+             _isLoading = false;
+           });
+        }
+      } catch (e) {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    } else {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _pickAndUploadImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
-    if (image != null && _currentUser != null) {
-      final String userId = _currentUser!['uid'];
+    if (image != null && _authUser != null) {
+      final String userId = _authUser!.uid;
       final File imageFile = File(image.path);
 
       try {
@@ -50,7 +72,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         // Refresh user data
         setState(() {
-          _currentUser!['profilePictureUrl'] = downloadUrl;
+          if (_userData != null) {
+            _userData!['profilePictureUrl'] = downloadUrl;
+          }
         });
 
         if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile picture updated!')));
@@ -78,11 +102,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final String name = _currentUser?['name'] ?? 'N/A';
-    final String email = _currentUser?['email'] ?? 'N/A';
-    final String phone = _currentUser?['phone'] ?? 'N/A';
-    final String role = _currentUser?['role'] ?? 'N/A';
-    final String? profilePictureUrl = _currentUser?['profilePictureUrl'];
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final String name = _userData?['name'] ?? 'N/A';
+    final String email = _userData?['email'] ?? 'N/A';
+    final String phone = _userData?['phone'] ?? 'N/A';
+    final String role = _userData?['role'] ?? 'N/A';
+    final String? profilePictureUrl = _userData?['profilePictureUrl'];
 
     return Scaffold(
       appBar: AppBar(

@@ -85,8 +85,7 @@ class JobDetailScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) => RaiseDisputeScreen(
             jobId: job.id,
-            craftizenId: job.assignedTo ?? '',
-            userId: job.userId,
+            respondentId: job.assignedTo ?? '',
           )));
         },
         style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
