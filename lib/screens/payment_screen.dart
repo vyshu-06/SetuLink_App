@@ -126,13 +126,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
             const Spacer(),
             ElevatedButton(
               onPressed: _isLoading ? null : _startPayment,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
               child: _isLoading 
                 ? const CircularProgressIndicator(color: Colors.white) 
-                : Text(context.tr('proceed_to_pay'), style: const TextStyle(color: Colors.white, fontSize: 16)),
+                : Text(context.tr('proceed_to_pay')),
             ),
           ],
         ),
@@ -146,8 +142,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: const TextStyle(fontSize: 16, color: Colors.grey)),
-          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(title, style: Theme.of(context).textTheme.bodyMedium),
+          Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
         ],
       ),
     );

@@ -50,10 +50,9 @@ class _CraftizenHomeState extends State<CraftizenHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const BilingualText(textKey: 'craftizen_dashboard'),
-        backgroundColor: Colors.deepOrange,
         elevation: 1,
         actions: [
           IconButton(
@@ -95,9 +94,6 @@ class _CraftizenHomeState extends State<CraftizenHome> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.deepOrange,
-        unselectedItemColor: Colors.grey[600],
-        showUnselectedLabels: true,
         onTap: _onItemTapped,
       ),
     );
@@ -141,20 +137,20 @@ class _HomeTabPage extends StatelessWidget {
                     BilingualText(
                       textKey: 'welcome_craftizen',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange.shade800),
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.primary),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       name,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 16),
                     // Availability Toggle
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(30),
                         border: Border.all(color: isAvailable ? Colors.green : Colors.grey),
                       ),
@@ -165,7 +161,7 @@ class _HomeTabPage extends StatelessWidget {
                           const SizedBox(width: 8),
                           Switch(
                             value: isAvailable,
-                            activeThumbColor: Colors.green,
+                            activeColor: Colors.green,
                             onChanged: (val) => _toggleAvailability(uid, isAvailable),
                           ),
                         ],
@@ -178,18 +174,13 @@ class _HomeTabPage extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()));
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.deepOrange,
-                        side: const BorderSide(color: Colors.deepOrange),
-                      ),
                     ),
                   ],
                 ),
               ),
             ),
             SliverToBoxAdapter(
-              child: _buildSkillsSection(skills),
+              child: _buildSkillsSection(skills, context),
             ),
             SliverToBoxAdapter(
               child: _buildJobsSection(context, isKycVerified, skills),
@@ -200,14 +191,20 @@ class _HomeTabPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSkillsSection(List<String> skills) {
+  Widget _buildSkillsSection(List<String> skills, BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), spreadRadius: 1, blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).shadowColor.withAlpha(25),
+            spreadRadius: 1,
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,8 +220,6 @@ class _HomeTabPage extends StatelessWidget {
             children: skills
                 .map((skill) => Chip(
                       label: Text(skill),
-                      backgroundColor: Colors.deepOrange.shade50,
-                      labelStyle: TextStyle(color: Colors.deepOrange.shade800),
                     ))
                 .toList(),
           ),
@@ -238,9 +233,15 @@ class _HomeTabPage extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), spreadRadius: 1, blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).shadowColor.withAlpha(25),
+            spreadRadius: 1,
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,8 +282,6 @@ class _JobsTabPage extends StatelessWidget {
       child: Column(
         children: [
           const TabBar(
-            labelColor: Colors.deepOrange,
-            indicatorColor: Colors.deepOrange,
             tabs: [
               Tab(text: 'New Jobs'),
               Tab(text: 'My Jobs'),

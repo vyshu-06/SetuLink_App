@@ -78,7 +78,22 @@ class SetuLinkApp extends StatelessWidget {
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
-      theme: ThemeData(primarySwatch: Colors.teal),
+      theme: ThemeData(
+        primarySwatch: Colors.teal,
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF7B1FA2)),
+        inputDecorationTheme: const InputDecorationTheme(
+          border: UnderlineInputBorder(),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            backgroundColor: const Color(0xFFF3E5F5),
+            foregroundColor: const Color(0xFF7B1FA2),
+          ),
+        ),
+      ),
       navigatorObservers: [analyticsService.getAnalyticsObserver()],
       builder: (context, child) {
         final media = MediaQuery.of(context);

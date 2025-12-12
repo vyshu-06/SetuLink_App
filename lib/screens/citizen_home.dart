@@ -44,10 +44,9 @@ class _CitizenHomeState extends State<CitizenHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const BilingualText(textKey: 'citizen_dashboard'),
-        backgroundColor: Colors.teal,
         elevation: 1,
         actions: [
           PopupMenuButton<String>(
@@ -99,9 +98,6 @@ class _CitizenHomeState extends State<CitizenHome> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey[600],
-        showUnselectedLabels: true,
         onTap: _onItemTapped,
       ),
       floatingActionButton: _selectedIndex == 0 ? FloatingActionButton.extended(
@@ -110,7 +106,6 @@ class _CitizenHomeState extends State<CitizenHome> {
         },
         label: const Text('Post a Job'),
         icon: const Icon(Icons.add),
-        backgroundColor: Colors.teal,
       ) : null,
     );
   }
@@ -234,13 +229,13 @@ class _Header extends StatelessWidget {
           BilingualText(
             textKey: 'welcome_citizen',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.teal.shade800),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.primary),
           ),
           const SizedBox(height: 8),
           BilingualText(
             textKey: 'what_service_looking_for',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 24),
           TextField(
@@ -250,7 +245,7 @@ class _Header extends StatelessWidget {
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Theme.of(context).colorScheme.surface,
             ),
           ),
         ],
@@ -275,7 +270,7 @@ class _CategorySection extends StatelessWidget {
             padding: const EdgeInsets.only(left: 4.0, bottom: 16.0),
             child: BilingualText(
               textKey: category['categoryKey']!,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
           GridView.builder(
@@ -291,7 +286,7 @@ class _CategorySection extends StatelessWidget {
               final service = services[serviceIndex];
               return Card(
                 elevation: 3.0,
-                shadowColor: Colors.black.withAlpha(26),
+                shadowColor: Theme.of(context).shadowColor.withAlpha(26),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(15),
@@ -310,13 +305,13 @@ class _CategorySection extends StatelessWidget {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Colors.teal.shade50, Colors.teal.shade100],
+                            colors: [Theme.of(context).colorScheme.primary.withAlpha(25), Theme.of(context).colorScheme.primary.withAlpha(50)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(service['icon'] as IconData?, size: 30, color: Colors.teal.shade800),
+                        child: Icon(service['icon'] as IconData?, size: 30, color: Theme.of(context).colorScheme.primary),
                       ),
                       const SizedBox(height: 8),
                       Padding(
@@ -324,7 +319,7 @@ class _CategorySection extends StatelessWidget {
                         child: BilingualText(
                           textKey: service['titleKey']!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 12),
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
                     ],

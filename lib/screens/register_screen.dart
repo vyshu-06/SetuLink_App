@@ -30,6 +30,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String referralCode = '';
   bool loading = false;
   String errorKey = ''; // Holds the translation key for the error
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void initState() {
@@ -42,7 +44,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const BilingualText(textKey: 'register'),
-        backgroundColor: Colors.teal,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -81,8 +82,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 12),
                 TextFormField(
                   key: const ValueKey('register_password'),
-                  decoration: InputDecoration(labelText: context.tr('password')),
-                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: context.tr('password'),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ),
+                  obscureText: _obscurePassword,
                   onChanged: (val) => password = val,
                   validator: (val) => (val != null && val.length >= 6)
                       ? null
@@ -91,8 +102,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 12),
                 TextFormField(
                   key: const ValueKey('register_confirm'),
-                  decoration: InputDecoration(labelText: context.tr('confirm_password')),
-                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: context.tr('confirm_password'),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
+                    ),
+                  ),
+                  obscureText: _obscureConfirmPassword,
                   onChanged: (val) => confirmPwd = val,
                   validator: (val) =>
                       val != password ? context.tr('passwords_not_matching') : null,

@@ -17,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String password = '';
   bool loading = false;
   String error = '';
+  bool _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +37,20 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                decoration: InputDecoration(labelText: tr('password')),
-                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: tr('password'),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  ),
+                ),
+                obscureText: _obscureText,
                 onChanged: (val) => password = val,
                 validator: (val) => val!.length < 6 ? tr('password_min_6') : null,
               ),
