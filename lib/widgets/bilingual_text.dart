@@ -1,85 +1,30 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class BilingualText extends StatefulWidget {
+class BilingualText extends StatelessWidget {
   final String textKey;
   final TextStyle? style;
   final TextAlign? textAlign;
+  final int? maxLines;
+  final TextOverflow? overflow;
 
   const BilingualText({
-    Key? key,
     required this.textKey,
     this.style,
     this.textAlign,
+    this.maxLines,
+    this.overflow,
+    Key? key,
   }) : super(key: key);
 
   @override
-  _BilingualTextState createState() => _BilingualTextState();
-}
-
-class _BilingualTextState extends State<BilingualText> {
-  Future<Map<String, String>>? _translations;
-
-  @override
-  void initState() {
-    super.initState();
-    _translations = _loadTranslations();
-  }
-
-  @override
-  void didUpdateWidget(covariant BilingualText oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.textKey != widget.textKey) {
-      _translations = _loadTranslations();
-    }
-  }
-
-  Future<Map<String, String>> _loadTranslations() async {
-    try {
-      final enJson = await rootBundle.loadString('assets/translations/en.json');
-      final teJson = await rootBundle.loadString('assets/translations/te.json');
-
-      final Map<String, dynamic> enMap = json.decode(enJson);
-      final Map<String, dynamic> teMap = json.decode(teJson);
-
-      final enText = enMap[widget.textKey] as String? ?? widget.textKey;
-      final teText = teMap[widget.textKey] as String? ?? widget.textKey;
-
-      return {'en': enText, 'te': teText};
-    } catch (e) {
-      return {'en': widget.textKey, 'te': widget.textKey};
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, String>>(
-      future: _translations,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-          final englishText = snapshot.data!['en']!;
-          final teluguText = snapshot.data!['te']!;
-          final currentLocale = context.locale;
-
-          final bilingualText = currentLocale.languageCode == 'te'
-              ? '$teluguText ($englishText)'
-              : '$englishText ($teluguText)';
-
-          return Text(
-            bilingualText,
-            style: widget.style,
-            textAlign: widget.textAlign,
-          );
-        }
-        
-        return Text(
-          widget.textKey,
-          style: widget.style,
-          textAlign: widget.textAlign,
-        );
-      },
+    return Text(
+      textKey.tr(),
+      style: style,
+      textAlign: textAlign,
+      maxLines: maxLines,
+      overflow: overflow,
     );
   }
 }

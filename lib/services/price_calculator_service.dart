@@ -1,63 +1,64 @@
-import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PriceCalculatorService {
-  // Calculate final price with app profit guaranteed
-  static Future<double> calculateServicePrice({
-    required String serviceId,
-    required Map<String, dynamic> serviceData,
-    double? customMultiplier,
-    int units = 1,
-    bool isPeakTime = false,
-    double distanceKm = 0,
-  }) async {
-    double basePrice = (serviceData['basePrice'] ?? 0).toDouble();
-    double pricePerUnit = (serviceData['pricePerUnit'] ?? 0).toDouble();
-    double minPrice = (serviceData['minPrice'] ?? 0).toDouble();
-    double craftMultiplier = customMultiplier ?? 1.0;
-    
-    // Step 1: Base calculation
-    double totalPrice = basePrice + (pricePerUnit * units);
-    
-    // Step 2: Apply Craftizen premium
-    totalPrice *= craftMultiplier;
-    
-    // Step 3: Distance/travel charges (e.g., ₹10/km)
-    totalPrice += (distanceKm * 10); 
-    
-    // Step 4: Peak time surge
-    if (isPeakTime) {
-      double surgeMultiplier = (serviceData['surgeMultiplier'] ?? 1.5).toDouble();
-      totalPrice *= surgeMultiplier;
-    }
-    
-    // Step 5: Ensure minimum price is met
-    totalPrice = max(totalPrice, minPrice);
+  // Base commission rate
+  static const double _baseCommissionRate = 0.10; // 10%
 
-    // Step 6: Clamp to max price if it exists
-    if (serviceData['maxPrice'] != null) {
-      double maxPrice = (serviceData['maxPrice'] ?? double.infinity).toDouble();
-      totalPrice = totalPrice.clamp(minPrice, maxPrice);
+  // Peak time surcharge (e.g., for bookings made during evenings or weekends)
+  static const double _peakTimeSurcharge = 1.20; // 20% surcharge
+
+  /// Fetches the list of predefined problems for a given service from Firestore.
+  static Future<List<QueryDocumentSnapshot>> getProblemsForService(String serviceId) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('services')
+          .doc(serviceId)
+          .collection('problems')
+          .get();
+      return querySnapshot.docs;
+    } catch (e) {
+      print('Error fetching problems for service $serviceId: $e');
+      return [];
     }
-    
-    // Step 7: Round up to nearest 10 for customer psychology
-    totalPrice = (totalPrice / 10).ceil() * 10;
-    
+  }
+
+  /// Calculates the total price based on a selected problem.
+  /// This is a local calculation and does not require a paid Firebase plan.
+  static Future<double> calculateServicePrice({
+    required Map<String, dynamic> problemData,
+    bool isPeakTime = false,
+  }) async {
+    // Get the price from the selected problem data.
+    double basePrice = (problemData['price'] as num?)?.toDouble() ?? 0.0;
+
+    double totalPrice = basePrice;
+
+    // Apply a surcharge for peak time bookings.
+    if (isPeakTime) {
+      totalPrice *= _peakTimeSurcharge;
+    }
+
     return totalPrice;
   }
-  
-  // Breakdown for transparency
+
+  /// Calculates the platform commission from the total price.
+  /// This is also a local calculation.
+  static double getCommission(double totalPrice) {
+    return totalPrice * _baseCommissionRate;
+  }
+
+  /// Returns a breakdown of the price components for display to the user.
   static Map<String, double> getPriceBreakdown({
     required double totalPrice,
-    required Map<String, dynamic> serviceData,
+    required Map<String, dynamic> problemData,
   }) {
-    double appCommissionRate = (serviceData['appCommission'] ?? 0.12).toDouble();
-    double appCommission = totalPrice * appCommissionRate;
-    double craftizenEarns = totalPrice - appCommission;
-    
+    double commission = getCommission(totalPrice);
+    double netToCraftizen = totalPrice - commission;
+
     return {
-      'totalPrice': totalPrice,
-      'appCommission': appCommission,
-      'craftizenEarnings': craftizenEarns,
+      'base_price': (problemData['price'] as num?)?.toDouble() ?? 0.0,
+      'platform_commission': commission,
+      'net_payout_to_craftizen': netToCraftizen,
     };
   }
 }

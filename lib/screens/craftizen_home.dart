@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/models/job_model.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/job_service.dart';
-import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'chat_list_screen.dart';
 import 'greeting_page.dart';
 import 'profile_screen.dart';
@@ -21,9 +19,9 @@ class CraftizenHome extends StatefulWidget {
 class _CraftizenHomeState extends State<CraftizenHome> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _pages = <Widget>[
-    _HomeTabPage(),
-    _JobsTabPage(),
+  static final List<Widget> _pages = <Widget>[
+    const _HomeTabPage(),
+    const _JobsTabPage(),
     ChatListScreen(),
   ];
 
@@ -49,52 +47,55 @@ class _CraftizenHomeState extends State<CraftizenHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(
-        title: const BilingualText(textKey: 'craftizen_dashboard'),
-        elevation: 1,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            onPressed: _navigateToProfile,
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'logout') {
-                _handleLogout();
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: BilingualText(textKey: 'logout'),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: _pages.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home_outlined),
-            activeIcon: const Icon(Icons.home),
-            label: context.tr('home'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.work_outline),
-            activeIcon: const Icon(Icons.work),
-            label: context.tr('jobs'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.chat_bubble_outline),
-            activeIcon: const Icon(Icons.chat_bubble),
-            label: context.tr('chats'),
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.background,
+        appBar: AppBar(
+          title: const Text('Craftizen Dashboard'),
+          elevation: 1,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.person_outline),
+              onPressed: _navigateToProfile,
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'logout') {
+                  _handleLogout();
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'logout',
+                  child: Text('Logout'),
+                ),
+              ],
+            ),
+          ],
+        ),
+        body: _pages.elementAt(_selectedIndex),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.work_outline),
+              activeIcon: Icon(Icons.work),
+              label: 'Jobs',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline),
+              activeIcon: Icon(Icons.chat_bubble),
+              label: 'Chats',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+        ),
       ),
     );
   }
@@ -134,8 +135,8 @@ class _HomeTabPage extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 16.0),
                 child: Column(
                   children: [
-                    BilingualText(
-                      textKey: 'welcome_craftizen',
+                    Text(
+                      'Welcome, Craftizen!',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.primary),
                     ),
@@ -209,8 +210,8 @@ class _HomeTabPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const BilingualText(
-            textKey: 'my_skills',
+          const Text(
+            'My Skills',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
@@ -246,8 +247,8 @@ class _HomeTabPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const BilingualText(
-            textKey: 'job_requests',
+          const Text(
+            'Job Requests',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
@@ -255,8 +256,8 @@ class _HomeTabPage extends StatelessWidget {
             const Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 24.0),
-                child: BilingualText(
-                  textKey: 'kyc_not_verified_message',
+                child: Text(
+                  'Your KYC is not verified. Please complete KYC to see job requests.',
                   style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -302,6 +303,8 @@ class _JobsTabPage extends StatelessWidget {
 }
 
 class _NewJobsList extends StatelessWidget {
+  const _NewJobsList();
+
   @override
   Widget build(BuildContext context) {
     final currentUser = AuthService().getCurrentUser();
@@ -323,7 +326,7 @@ class _NewJobsList extends StatelessWidget {
               children: const [
                 Icon(Icons.verified_user_outlined, size: 64, color: Colors.orange),
                 SizedBox(height: 16),
-                BilingualText(textKey: 'kyc_not_verified_message'),
+                Text('Your KYC is not verified. Please complete KYC to see job requests.'),
               ],
             ),
           );
@@ -352,6 +355,8 @@ class _NewJobsList extends StatelessWidget {
 }
 
 class _MyJobsList extends StatelessWidget {
+  const _MyJobsList();
+
   @override
   Widget build(BuildContext context) {
     final currentUser = AuthService().getCurrentUser();

@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/screens/greeting_page.dart';
 import 'package:setulink_app/screens/kyc_screen.dart';
 import 'package:setulink_app/services/auth_service.dart' as app_auth;
@@ -77,10 +78,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         });
 
-        if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile picture updated!')));
+        if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('profile_picture_updated'))));
 
       } catch (e) {
-        if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to upload image: $e')));
+        if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${tr('failed_to_upload_image')}: $e')));
       }
     }
   }
@@ -114,7 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const BilingualText(textKey: 'profile'),
+        title: BilingualText(textKey: 'profile'),
         backgroundColor: role == 'citizen' ? Colors.teal : (role == 'admin' ? Colors.blueGrey : Colors.deepOrange),
       ),
       body: ListView(
@@ -146,12 +147,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildInfoCard(icon: Icons.work, text: role.toUpperCase()),
           const SizedBox(height: 24),
           if (role == 'craftizen') ...[
-            _buildOptionButton(context, text: 'Verify KYC', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KYCScreen()))),
-            _buildOptionButton(context, text: 'Subscription Plans', onTap: () => Navigator.pushNamed(context, '/subscription_plans')),
+            _buildOptionButton(context, text: tr('verify_kyc'), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KYCScreen()))),
+            _buildOptionButton(context, text: tr('subscription_plans'), onTap: () => Navigator.pushNamed(context, '/subscription_plans')),
           ],
           const Divider(),
-          _buildOptionTile(context, icon: Icons.logout, text: 'Logout', onTap: _handleLogout),
-          _buildOptionTile(context, icon: Icons.switch_account, text: 'Switch Accounts', onTap: _handleSwitchAccount),
+          _buildOptionTile(context, icon: Icons.logout, text: tr('logout'), onTap: _handleLogout),
+          _buildOptionTile(context, icon: Icons.switch_account, text: tr('switch_accounts'), onTap: _handleSwitchAccount),
         ],
       ),
     );

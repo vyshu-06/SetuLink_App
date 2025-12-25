@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -50,7 +51,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = _authService.getCurrentUser();
-    if (currentUser == null) return const Scaffold(body: Center(child: Text('Not logged in')));
+    if (currentUser == null) return Scaffold(body: Center(child: Text(tr('not_logged_in'))));
 
     final messageStream = _db
         .collection('chats')
@@ -109,7 +110,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: TextField(
               controller: _messageController,
-              decoration: const InputDecoration(hintText: 'Enter message'),
+              decoration: InputDecoration(hintText: tr('enter_message')),
             ),
           ),
           IconButton(

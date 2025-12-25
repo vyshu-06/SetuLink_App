@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/screens/admin_kyc_review_screen.dart';
 import 'package:setulink_app/screens/admin_user_detail_screen.dart';
 
@@ -12,11 +13,11 @@ class UserManagementScreen extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('User Management'),
-          bottom: const TabBar(
+          title: Text(tr('user_management')),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Craftizens'),
-              Tab(text: 'Citizens'),
+              Tab(text: tr('craftizens')),
+              Tab(text: tr('citizens')),
             ],
           ),
         ),
@@ -43,19 +44,19 @@ class _UserList extends StatelessWidget {
           .where('role', isEqualTo: role)
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.hasError) return const Center(child: Text('Error loading users'));
+        if (snapshot.hasError) return Center(child: Text(tr('error_loading_users')));
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
         final users = snapshot.data!.docs;
 
-        if (users.isEmpty) return const Center(child: Text('No users found'));
+        if (users.isEmpty) return Center(child: Text(tr('no_users_found')));
 
         return ListView.builder(
           itemCount: users.length,
           itemBuilder: (context, index) {
             final user = users[index].data() as Map<String, dynamic>;
             final userId = users[index].id;
-            final userName = user['name'] ?? 'Unknown';
+            final userName = user['name'] ?? tr('unknown');
             final isKycVerified = user['kyc']?['verified'] ?? false;
             final accountStatus = user['accountStatus'] ?? 'active';
 
@@ -68,17 +69,17 @@ class _UserList extends StatelessWidget {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user['email'] ?? user['phone'] ?? 'No contact info'),
+                  Text(user['email'] ?? user['phone'] ?? tr('no_contact_info')),
                   if (role == 'craftizen')
                     Text(
-                      isKycVerified ? 'KYC Verified' : 'KYC Pending',
+                      isKycVerified ? tr('kyc_verified') : tr('kyc_pending'),
                       style: TextStyle(
                         color: isKycVerified ? Colors.green : Colors.orange,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   if (accountStatus == 'suspended')
-                    const Text('SUSPENDED', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                    Text(tr('suspended').toUpperCase(), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                 ],
               ),
               onTap: () {
@@ -101,11 +102,11 @@ class _UserList extends StatelessWidget {
                 },
                 itemBuilder: (context) => [
                   if (role == 'craftizen' && !isKycVerified)
-                    const PopupMenuItem(value: 'verify_kyc', child: Text('Review KYC')),
+                    PopupMenuItem(value: 'verify_kyc', child: Text(tr('review_kyc'))),
                   if (accountStatus == 'active')
-                    const PopupMenuItem(value: 'suspend', child: Text('Suspend Account')),
+                    PopupMenuItem(value: 'suspend', child: Text(tr('suspend_account'))),
                   if (accountStatus == 'suspended')
-                    const PopupMenuItem(value: 'activate', child: Text('Activate Account')),
+                    PopupMenuItem(value: 'activate', child: Text(tr('activate_account'))),
                 ],
               ),
             );

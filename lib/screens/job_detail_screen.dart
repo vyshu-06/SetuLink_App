@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/models/job_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +15,7 @@ class JobDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return const Center(child: Text('Not logged in'));
+    if (currentUser == null) return Center(child: Text(tr('not_logged_in')));
 
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance.collection('jobs').doc(jobId).snapshots(),
@@ -30,10 +31,10 @@ class JobDetailScreen extends StatelessWidget {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _buildDetailRow('Status', job.jobStatus.toUpperCase()),
-              _buildDetailRow('Budget', '₹${job.budget}'),
-              _buildDetailRow('Time', DateFormat('dd MMM, yyyy - hh:mm a').format(job.scheduledTime)),
-              _buildDetailRow('Description', job.description),
+              _buildDetailRow(tr('status'), job.jobStatus.toUpperCase()),
+              _buildDetailRow(tr('budget'), '₹${job.budget}'),
+              _buildDetailRow(tr('time'), DateFormat('dd MMM, yyyy - hh:mm a').format(job.scheduledTime)),
+              _buildDetailRow(tr('description'), job.description),
               const SizedBox(height: 20),
               if (isCitizen) ..._buildCitizenActions(context, job),
               if (isCraftizen) ..._buildCraftizenActions(context, job),
@@ -75,10 +76,10 @@ class JobDetailScreen extends StatelessWidget {
               ),
             );
           },
-          child: const Text('Pay for Service'),
+          child: Text(tr('pay_for_service')),
         ),
       if (job.jobStatus == 'paid') // Assuming a paid status
-        ElevatedButton(onPressed: () { /* TODO: Navigate to Rating Screen */ }, child: const Text('Rate Craftizen')),
+        ElevatedButton(onPressed: () { /* TODO: Navigate to Rating Screen */ }, child: Text(tr('rate_craftizen'))),
 
       const SizedBox(height: 10),
       ElevatedButton(
@@ -89,7 +90,7 @@ class JobDetailScreen extends StatelessWidget {
           )));
         },
         style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-        child: const Text('Raise Dispute'),
+        child: Text(tr('raise_dispute')),
       ),
     ];
   }
@@ -97,17 +98,17 @@ class JobDetailScreen extends StatelessWidget {
   List<Widget> _buildCraftizenActions(BuildContext context, JobModel job) {
     return [
       if (job.jobStatus == 'confirmed' || job.jobStatus == 'in_progress')
-        ElevatedButton(onPressed: () => _updateJobStatus(job.id, 'on_the_way'), child: const Text('On the Way')),
+        ElevatedButton(onPressed: () => _updateJobStatus(job.id, 'on_the_way'), child: Text(tr('on_the_way'))),
       if (job.jobStatus == 'on_the_way')
-        ElevatedButton(onPressed: () => _updateJobStatus(job.id, 'started'), child: const Text('Start Work')),
+        ElevatedButton(onPressed: () => _updateJobStatus(job.id, 'started'), child: Text(tr('start_work'))),
       if (job.jobStatus == 'started')
-        ElevatedButton(onPressed: () => _updateJobStatus(job.id, 'completed'), child: const Text('Mark as Completed')),
+        ElevatedButton(onPressed: () => _updateJobStatus(job.id, 'completed'), child: Text(tr('mark_as_completed'))),
     ];
   }
 
   List<Widget> _buildApplicantActions(BuildContext context, JobModel job, String craftizenId) {
     return [
-      ElevatedButton(onPressed: () => _applyForJob(job.id, craftizenId), child: const Text('Apply for this Job')),
+      ElevatedButton(onPressed: () => _applyForJob(job.id, craftizenId), child: Text(tr('apply_for_this_job'))),
     ];
   }
 

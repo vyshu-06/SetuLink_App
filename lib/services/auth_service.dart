@@ -44,6 +44,10 @@ class AuthService {
     }
   }
 
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
   Future<void> sendOtp(String phoneNumber, { 
     required Function(PhoneAuthCredential) verificationCompleted, 
     required Function(FirebaseAuthException) verificationFailed, 

@@ -1,22 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:setulink_app/models/job_model.dart';
 import 'package:setulink_app/services/auth_service.dart';
+import 'package:setulink_app/services/job_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'chat_list_screen.dart';
 import 'greeting_page.dart';
 import 'profile_screen.dart';
 import 'payment_screen.dart';
 import 'job_request_screen.dart';
+import 'job_detail_screen.dart';
 
 class CitizenHome extends StatefulWidget {
-  const CitizenHome({super.key});
+  final int initialIndex;
+  const CitizenHome({super.key, this.initialIndex = 0});
 
   @override
   State<CitizenHome> createState() => _CitizenHomeState();
 }
 
 class _CitizenHomeState extends State<CitizenHome> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   static final List<Widget> _pages = <Widget>[
     const _HomeTabPage(),
@@ -43,70 +53,73 @@ class _CitizenHomeState extends State<CitizenHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(
-        title: const BilingualText(textKey: 'citizen_dashboard'),
-        elevation: 1,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'logout') {
-                _handleLogout();
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: BilingualText(textKey: 'logout'),
-              ),
-            ],
-          ),
-        ],
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.background,
+        appBar: AppBar(
+          title: BilingualText(textKey: 'citizen_dashboard'),
+          elevation: 1,
+          actions: [
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'logout') {
+                  _handleLogout();
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'logout',
+                  child: BilingualText(textKey: 'logout'),
+                ),
+              ],
+            ),
+          ],
+        ),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _pages,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.home_outlined),
+              activeIcon: const Icon(Icons.home),
+              label: context.tr('home'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.history_outlined),
+              activeIcon: const Icon(Icons.history),
+              label: context.tr('bookings'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.chat_bubble_outline),
+              activeIcon: const Icon(Icons.chat_bubble),
+              label: context.tr('chats'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              activeIcon: const Icon(Icons.account_balance_wallet),
+              label: context.tr('wallet'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.person_outline),
+              activeIcon: const Icon(Icons.person),
+              label: context.tr('profile'),
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+        ),
+        floatingActionButton: _selectedIndex == 0 ? FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const JobRequestScreen()));
+          },
+          label: Text(context.tr('post_a_job')),
+          icon: const Icon(Icons.add),
+        ) : null,
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home_outlined),
-            activeIcon: const Icon(Icons.home),
-            label: context.tr('home'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.history_outlined),
-            activeIcon: const Icon(Icons.history),
-            label: context.tr('bookings'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.chat_bubble_outline),
-            activeIcon: const Icon(Icons.chat_bubble),
-            label: context.tr('chats'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.account_balance_wallet_outlined),
-            activeIcon: const Icon(Icons.account_balance_wallet),
-            label: 'Wallet',
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person_outline),
-            activeIcon: const Icon(Icons.person),
-            label: context.tr('profile'),
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
-      floatingActionButton: _selectedIndex == 0 ? FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const JobRequestScreen()));
-        },
-        label: const Text('Post a Job'),
-        icon: const Icon(Icons.add),
-      ) : null,
     );
   }
 }
@@ -277,9 +290,10 @@ class _CategorySection extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
+              crossAxisCount: 3, // Changed from 4 to 3 for better spacing
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
+              childAspectRatio: 0.85, // Adjusted aspect ratio
             ),
             itemCount: services.length,
             itemBuilder: (context, serviceIndex) {
@@ -320,6 +334,8 @@ class _CategorySection extends StatelessWidget {
                           textKey: service['titleKey']!,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodySmall,
+                          maxLines: 2, // Allow 2 lines for title
+                          overflow: TextOverflow.ellipsis, // Add ellipsis if title is too long
                         ),
                       ),
                     ],
@@ -339,9 +355,56 @@ class _BookingsTabPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Implement Job History / Bookings List using JobService
-    return const Center(
-      child: BilingualText(textKey: 'bookings_page_title'),
+    final currentUser = AuthService().getCurrentUser();
+    if (currentUser == null) {
+      return Center(child: BilingualText(textKey: 'log_in_to_see_bookings'));
+    }
+    return StreamBuilder<List<JobModel>>(
+      stream: JobService().getJobsStream(currentUser.uid),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: BilingualText(textKey: 'no_bookings_yet'));
+        }
+
+        final jobs = snapshot.data!;
+        return ListView.builder(
+          itemCount: jobs.length,
+          itemBuilder: (context, index) => _JobCard(job: jobs[index]),
+        );
+      },
+    );
+  }
+}
+
+class _JobCard extends StatelessWidget {
+  final JobModel job;
+  const _JobCard({Key? key, required this.job}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ListTile(
+        title: Text(job.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${tr('budget')}: ₹${job.budget}'),
+            Text('${tr('status')}: ${job.jobStatus.toUpperCase()}', style: TextStyle(color: job.jobStatus == 'open' ? Colors.green : Colors.blue)),
+            Text(job.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+          ],
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          Navigator.push(
+            context, 
+            MaterialPageRoute(builder: (_) => JobDetailScreen(jobId: job.id))
+          );
+        },
+      ),
     );
   }
 }

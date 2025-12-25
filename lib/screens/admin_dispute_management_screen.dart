@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/models/dispute_model.dart';
 import 'package:setulink_app/services/dispute_service.dart';
 import 'package:intl/intl.dart';
@@ -25,12 +26,12 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> with 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dispute Resolution'),
+        title: Text(tr('dispute_resolution')),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Active Disputes'),
-            Tab(text: 'Resolved'),
+          tabs: [
+            Tab(text: tr('active_disputes')),
+            Tab(text: tr('resolved')),
           ],
         ),
       ),
@@ -56,11 +57,11 @@ class _DisputeList extends StatelessWidget {
     return StreamBuilder<List<DisputeModel>>(
       stream: service.getAllDisputes(status: status),
       builder: (context, snapshot) {
-        if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
+        if (snapshot.hasError) return Center(child: Text('${tr('error')}: ${snapshot.error}'));
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
         final disputes = snapshot.data!;
-        if (disputes.isEmpty) return const Center(child: Text('No disputes found'));
+        if (disputes.isEmpty) return Center(child: Text(tr('no_disputes_found')));
 
         return ListView.builder(
           itemCount: disputes.length,
@@ -69,21 +70,21 @@ class _DisputeList extends StatelessWidget {
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ListTile(
-                title: Text('Dispute #${dispute.id.substring(0, 6)}'),
+                title: Text('${tr('dispute')} #${dispute.id.substring(0, 6)}'),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Type: ${dispute.type}'),
-                    Text('Raised by: ${dispute.raisedBy}'),
-                    Text('Date: ${DateFormat('dd MMM yyyy').format(dispute.createdAt.toDate())}'),
+                    Text('${tr('type')}: ${dispute.type}'),
+                    Text('${tr('raised_by')}: ${dispute.raisedBy}'),
+                    Text('${tr('date')}: ${DateFormat('dd MMM yyyy').format(dispute.createdAt.toDate())}'),
                     if (dispute.escalationRequested)
-                      const Text('ESCALATED', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                      Text(tr('escalated').toUpperCase(), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                   ],
                 ),
                 trailing: status == 'open'
                     ? ElevatedButton(
                         onPressed: () => _showResolveDialog(context, dispute),
-                        child: const Text('Resolve'),
+                        child: Text(tr('resolve')),
                       )
                     : const Icon(Icons.check_circle, color: Colors.green),
                 onTap: () {
@@ -114,21 +115,21 @@ class _DisputeList extends StatelessWidget {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Resolve Dispute'),
+            title: Text(tr('resolve_dispute')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 InputDecorator(
-                  decoration: const InputDecoration(labelText: 'Outcome', border: OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: tr('outcome'), border: const OutlineInputBorder()),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: outcome,
                       isDense: true,
-                      items: const [
-                        DropdownMenuItem(value: 'refund_full', child: Text('Full Refund')),
-                        DropdownMenuItem(value: 'refund_partial', child: Text('Partial Refund')),
-                        DropdownMenuItem(value: 'no_refund', child: Text('No Refund / Rejected')),
-                        DropdownMenuItem(value: 'warning_issued', child: Text('Issue Warning')),
+                      items: [
+                        DropdownMenuItem(value: 'refund_full', child: Text(tr('full_refund'))),
+                        DropdownMenuItem(value: 'refund_partial', child: Text(tr('partial_refund'))),
+                        DropdownMenuItem(value: 'no_refund', child: Text(tr('no_refund_rejected'))),
+                        DropdownMenuItem(value: 'warning_issued', child: Text(tr('issue_warning'))),
                       ],
                       onChanged: (val) {
                         setState(() {
@@ -141,22 +142,22 @@ class _DisputeList extends StatelessWidget {
                 const SizedBox(height: 16),
                 TextField(
                   controller: noteController,
-                  decoration: const InputDecoration(labelText: 'Resolution Note'),
+                  decoration: InputDecoration(labelText: tr('resolution_note')),
                   maxLines: 3,
                 ),
               ],
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('cancel'))),
               ElevatedButton(
                 onPressed: () {
                   service.resolveDispute(dispute.id, outcome, noteController.text);
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Dispute Resolved')),
+                    SnackBar(content: Text(tr('dispute_resolved'))),
                   );
                 },
-                child: const Text('Submit Resolution'),
+                child: Text(tr('submit_resolution')),
               ),
             ],
           );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/screens/citizen_home.dart';
 
 class CitizenProfileSetupScreen extends StatefulWidget {
@@ -49,30 +50,30 @@ class _CitizenProfileSetupScreenState extends State<CitizenProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Complete Your Profile')),
+      appBar: AppBar(title: Text(tr('complete_your_profile'))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              const Text(
-                'Please tell us your location to find better services.',
-                style: TextStyle(fontSize: 16),
+              Text(
+                tr('tell_us_your_location'),
+                style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _cityController,
-                decoration: const InputDecoration(labelText: 'City/Town', border: OutlineInputBorder()),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                decoration: InputDecoration(labelText: tr('city_town'), border: const OutlineInputBorder()),
+                validator: (v) => v!.isEmpty ? tr('required') : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _pincodeController,
-                decoration: const InputDecoration(labelText: 'Pincode', border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: tr('pincode'), border: const OutlineInputBorder()),
                 keyboardType: TextInputType.number,
-                validator: (v) => v!.length != 6 ? 'Enter valid 6-digit pincode' : null,
+                validator: (v) => v!.length != 6 ? tr('enter_valid_pincode') : null,
               ),
               const SizedBox(height: 32),
               ElevatedButton(
@@ -83,7 +84,7 @@ class _CitizenProfileSetupScreenState extends State<CitizenProfileSetupScreen> {
                 ),
                 child: _isLoading 
                   ? const CircularProgressIndicator(color: Colors.white) 
-                  : const Text('Save & Continue', style: TextStyle(color: Colors.white)),
+                  : Text(tr('save_and_continue'), style: const TextStyle(color: Colors.white)),
               ),
             ],
           ),

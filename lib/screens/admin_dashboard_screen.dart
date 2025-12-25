@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/screens/admin_user_management_screen.dart';
 import 'package:setulink_app/screens/admin_dispute_management_screen.dart';
 import 'package:setulink_app/screens/admin_analytics_screen.dart';
@@ -11,14 +12,14 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Dashboard')),
+      appBar: AppBar(title: Text(tr('admin_dashboard'))),
       body: GridView.count(
         crossAxisCount: 2,
         padding: const EdgeInsets.all(16),
         children: [
           _buildDashboardCard(
             context,
-            title: 'User Management',
+            title: tr('user_management'),
             icon: Icons.people,
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const UserManagementScreen()));
@@ -26,7 +27,7 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
           _buildDashboardCard(
             context,
-            title: 'Job Monitor',
+            title: tr('job_monitor'),
             icon: Icons.work,
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminJobsListScreen()));
@@ -34,7 +35,7 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
           _buildDashboardCard(
             context,
-            title: 'Dispute Resolution',
+            title: tr('dispute_resolution'),
             icon: Icons.gavel,
              onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const DisputeManagementScreen()));
@@ -42,7 +43,7 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
           _buildDashboardCard(
             context,
-            title: 'Finance & Payouts', 
+            title: tr('finance_and_payouts'), 
             icon: Icons.monetization_on, 
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminPaymentsScreen()));
@@ -50,7 +51,7 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
           _buildDashboardCard(
             context,
-            title: 'Analytics', 
+            title: tr('analytics'), 
             icon: Icons.analytics, 
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminAnalyticsScreen()));

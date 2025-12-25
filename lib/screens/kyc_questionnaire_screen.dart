@@ -15,17 +15,17 @@ class _KYCQuestionnaireScreenState extends State<KYCQuestionnaireScreen> {
 
   final List<Map<String, dynamic>> questions = [
     {
-      'question': 'How many years of experience do you have in your craft?',
+      'question': 'kyc_question_1',
       'type': 'number',
       'field': 'experienceYears'
     },
     {
-      'question': 'Are you certified or formally trained?',
+      'question': 'kyc_question_2',
       'type': 'boolean',
       'field': 'certified'
     },
     {
-      'question': 'Do you own your own tools and materials?',
+      'question': 'kyc_question_3',
       'type': 'boolean',
       'field': 'ownsTools'
     },
@@ -43,13 +43,13 @@ class _KYCQuestionnaireScreenState extends State<KYCQuestionnaireScreen> {
       case 'number':
         inputWidget = TextFormField(
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(hintText: context.tr('enter_a_number')),
+          decoration: InputDecoration(hintText: tr('enter_a_number')),
           validator: (val) {
             if (val == null || val.isEmpty) {
-              return context.tr('please_enter_value');
+              return tr('please_enter_value');
             }
             if (int.tryParse(val) == null) {
-              return context.tr('enter_valid_number');
+              return tr('enter_valid_number');
             }
             return null;
           },
@@ -60,12 +60,12 @@ class _KYCQuestionnaireScreenState extends State<KYCQuestionnaireScreen> {
         break;
       case 'boolean':
         inputWidget = DropdownButtonFormField<String>(
-          items: [context.tr('yes'), context.tr('no')]
+          items: [tr('yes'), tr('no')]
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
-          validator: (val) => val == null ? context.tr('please_select_option') : null,
+          validator: (val) => val == null ? tr('please_select_option') : null,
           onSaved: (val) {
-            answers[question['field']] = val == context.tr('yes');
+            answers[question['field']] = val == tr('yes');
           },
           onChanged: (_) {},
         );
@@ -75,14 +75,14 @@ class _KYCQuestionnaireScreenState extends State<KYCQuestionnaireScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text('${context.tr('skill_verification_title')} - ${currentQuestionIndex + 1}/${questions.length}')),
+      appBar: AppBar(title: Text('${tr('skill_verification')} - ${currentQuestionIndex + 1}/${questions.length}')),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              Text(question['question'], style: const TextStyle(fontSize: 18)),
+              Text(tr(question['question']), style: const TextStyle(fontSize: 18)),
               const SizedBox(height: 24),
               inputWidget,
               const Spacer(),
@@ -92,7 +92,7 @@ class _KYCQuestionnaireScreenState extends State<KYCQuestionnaireScreen> {
                   if (currentQuestionIndex > 0)
                     TextButton(
                         onPressed: () => setState(() => currentQuestionIndex--),
-                        child: Text(context.tr('back'))),
+                        child: Text(tr('back'))),
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
@@ -108,8 +108,8 @@ class _KYCQuestionnaireScreenState extends State<KYCQuestionnaireScreen> {
                       }
                     },
                     child: Text(currentQuestionIndex < questions.length - 1
-                        ? context.tr('next')
-                        : context.tr('complete')),
+                        ? tr('next')
+                        : tr('complete')),
                   ),
                 ],
               ),

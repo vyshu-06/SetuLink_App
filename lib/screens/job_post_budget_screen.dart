@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:setulink_app/models/job_model.dart';
+import 'package:setulink_app/services/auth_service.dart';
+import 'package:setulink_app/services/job_service.dart';
 import 'package:setulink_app/services/price_calculator_service.dart';
 import 'package:setulink_app/screens/citizen_home.dart';
 
 class JobPostBudgetScreen extends StatefulWidget {
   final String serviceId;
-  final Map<String, dynamic> serviceData;
   final String? craftizenId; // optional specific Craftizen
-  final String jobTitle;
-  final String jobDescription;
   final DateTime scheduledTime;
 
   const JobPostBudgetScreen({
     super.key,
     required this.serviceId,
-    required this.serviceData,
     this.craftizenId,
-    required this.jobTitle,
-    required this.jobDescription,
     required this.scheduledTime,
   });
 
@@ -27,22 +24,34 @@ class JobPostBudgetScreen extends StatefulWidget {
 }
 
 class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> {
-  int _selectedUnits = 1;
+  QueryDocumentSnapshot? _selectedProblem;
   double _calculatedPrice = 0;
   bool _isPeakTime = false;
   bool _isLoading = false;
+  final JobService _jobService = JobService();
+  List<QueryDocumentSnapshot> _problems = [];
 
   @override
   void initState() {
     super.initState();
-    _calculatePrice();
+    _fetchProblems();
+  }
+
+  void _fetchProblems() async {
+    _problems = await PriceCalculatorService.getProblemsForService(widget.serviceId);
+    if (_problems.isNotEmpty) {
+      setState(() {
+        _selectedProblem = _problems.first;
+        _calculatePrice();
+      });
+    }
   }
 
   void _calculatePrice() async {
+    if (_selectedProblem == null) return;
+
     double price = await PriceCalculatorService.calculateServicePrice(
-      serviceId: widget.serviceId,
-      serviceData: widget.serviceData,
-      units: _selectedUnits,
+      problemData: _selectedProblem!.data() as Map<String, dynamic>,
       isPeakTime: _isPeakTime,
     );
     setState(() => _calculatedPrice = price);
@@ -51,46 +60,63 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> {
   Future<void> _confirmBooking() async {
     setState(() => _isLoading = true);
 
+    final currentUser = AuthService().getCurrentUser();
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('you_must_be_logged_in'))));
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    if (_selectedProblem == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('please_select_a_problem'))));
+      setState(() => _isLoading = false);
+      return;
+    }
+
     try {
-      final priceData = await FirebaseFunctions.instance.httpsCallable('validateJobPrice').call({
-        'serviceId': widget.serviceId,
-        'units': _selectedUnits,
-        'distanceKm': 10, // Mock distance
-      });
+      final problemData = _selectedProblem!.data() as Map<String, dynamic>;
+      final newJob = JobModel(
+        id: FirebaseFirestore.instance.collection('jobs').doc().id,
+        userId: currentUser.uid,
+        title: problemData['title'] ?? 'Job',
+        description: problemData['description'] ?? '',
+        budget: _calculatedPrice,
+        scheduledTime: widget.scheduledTime,
+        location: const GeoPoint(0, 0), // MOCK location
+        requiredSkills: [widget.serviceId], // MOCK skills
+        images: [], // MOCK images
+        assignedTo: widget.craftizenId,
+      );
 
-      await FirebaseFirestore.instance.collection('jobs').add({
-        'title': widget.jobTitle,
-        'description': widget.jobDescription,
-        'serviceId': widget.serviceId,
-        'calculatedPrice': priceData.data['totalPrice'],
-        'appCommission': priceData.data['appCommission'],
-        'status': 'open',
-        'scheduledTime': widget.scheduledTime,
-      });
+      await _jobService.createJob(newJob);
 
-      if(mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Job posted successfully!')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('job_posted_successfully'))));
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const CitizenHome()), 
-          (route) => false
+          MaterialPageRoute(builder: (_) => const CitizenHome(initialIndex: 1)),
+          (route) => false,
         );
       }
     } catch (e) {
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to post job: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${tr('failed_to_post_job')}: $e')));
+      }
     } finally {
-      if(mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
   
   @override
   Widget build(BuildContext context) {
-    final breakdown = PriceCalculatorService.getPriceBreakdown(
-      totalPrice: _calculatedPrice,
-      serviceData: widget.serviceData,
-    );
+    final breakdown = _selectedProblem != null
+        ? PriceCalculatorService.getPriceBreakdown(
+            totalPrice: _calculatedPrice,
+            problemData: _selectedProblem!.data() as Map<String, dynamic>,
+          )
+        : <String, double>{};
     
     return Scaffold(
-      appBar: AppBar(title: const Text('Price Summary')),
+      appBar: AppBar(title: Text(tr('price_summary'))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -102,32 +128,42 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> {
                   children: [
                     Text('₹${_calculatedPrice.toStringAsFixed(0)}', 
                          style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
-                    const Text('Total Estimated Price'),
+                    Text(tr('total_estimated_price')),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            if (widget.serviceData['units'] != 'visit')
-              Slider(
-                value: _selectedUnits.toDouble(),
-                min: 1,
-                max: 5,
-                divisions: 4,
-                label: '$_selectedUnits ${widget.serviceData['units']}',
+            if (_problems.isNotEmpty)
+              DropdownButtonFormField<QueryDocumentSnapshot>(
+                value: _selectedProblem,
+                items: _problems.map((problem) {
+                  final problemData = problem.data() as Map<String, dynamic>;
+                  return DropdownMenuItem<QueryDocumentSnapshot>(
+                    value: problem,
+                    child: Text(problemData['title'] ?? 'N/A'),
+                  );
+                }).toList(),
                 onChanged: (value) {
-                  setState(() => _selectedUnits = value.toInt());
-                  _calculatePrice();
+                  setState(() {
+                    _selectedProblem = value;
+                    _calculatePrice();
+                  });
                 },
+                decoration: InputDecoration(
+                  labelText: tr('select_problem'),
+                  border: const OutlineInputBorder(),
+                ),
               ),
             
-            ExpansionTile(
-              title: const Text('Price Breakdown'),
-              children: breakdown.entries.map((e) => ListTile(
-                title: Text(e.key.replaceAll('_', ' ').toUpperCase()),
-                trailing: Text('₹${e.value.toStringAsFixed(0)}'),
-              )).toList(),
-            ),
+            if (_selectedProblem != null)
+              ExpansionTile(
+                title: Text(tr('price_breakdown')),
+                children: breakdown.entries.map((e) => ListTile(
+                  title: Text(tr(e.key.replaceAll('_', ' ').toLowerCase())),
+                  trailing: Text('₹${e.value.toStringAsFixed(0)}'),
+                )).toList(),
+              ),
             const Spacer(),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -137,7 +173,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> {
               onPressed: _isLoading ? null : _confirmBooking,
               child: _isLoading 
                 ? const CircularProgressIndicator(color: Colors.white)
-                : Text('Book for ₹${_calculatedPrice.toStringAsFixed(0)}'),
+                : Text('${tr('book_now')} ₹${_calculatedPrice.toStringAsFixed(0)}'),
             ),
           ],
         ),

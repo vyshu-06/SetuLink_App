@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/models/job_model.dart';
 import 'package:setulink_app/screens/job_detail_screen.dart';
 import 'package:intl/intl.dart';
@@ -13,12 +14,12 @@ class AdminJobsListScreen extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('All Jobs'),
-          bottom: const TabBar(
+          title: Text(tr('all_jobs')),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Open'),
-              Tab(text: 'Active'), // Confirmed, In Progress
-              Tab(text: 'Completed'),
+              Tab(text: tr('open')),
+              Tab(text: tr('active')),
+              Tab(text: tr('completed')),
             ],
           ),
         ),
@@ -47,11 +48,11 @@ class _JobList extends StatelessWidget {
           .orderBy('scheduledTime', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
+        if (snapshot.hasError) return Center(child: Text('${tr('error')}: ${snapshot.error}'));
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
         final jobs = snapshot.data!.docs;
-        if (jobs.isEmpty) return const Center(child: Text('No jobs found'));
+        if (jobs.isEmpty) return Center(child: Text(tr('no_jobs_found')));
 
         return ListView.builder(
           itemCount: jobs.length,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/chat_service.dart';
 import 'package:setulink_app/screens/chat_screen.dart';
@@ -22,9 +23,9 @@ class ChatListScreen extends StatelessWidget {
     final currentUser = authService.currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Chats')),
+      appBar: AppBar(title: Text(tr('chats'))),
       body: currentUser == null
-          ? const Center(child: Text("Please log in to see your chats."))
+          ? Center(child: Text(tr('log_in_to_see_chats')))
           : StreamBuilder<QuerySnapshot>(
               stream: chatService.getChatList(currentUser.uid),
               builder: (context, snapshot) {
@@ -32,7 +33,7 @@ class ChatListScreen extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text("No chats found."));
+                  return Center(child: Text(tr('no_chats_found')));
                 }
 
                 final chatDocs = snapshot.data!.docs;

@@ -33,7 +33,7 @@ class _RaiseDisputeScreenState extends State<RaiseDisputeScreen> {
     try {
       final currentUser = AuthService().getCurrentUser();
       if (currentUser == null) {
-        throw Exception('User not logged in');
+        throw Exception(tr('user_not_logged_in'));
       }
 
       await _disputeService.raiseDispute(
@@ -46,14 +46,14 @@ class _RaiseDisputeScreenState extends State<RaiseDisputeScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.tr('dispute_raised_success'))),
+          SnackBar(content: Text(tr('dispute_raised_successfully'))),
         );
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('${tr('error')}: $e')),
         );
       }
     } finally {
@@ -64,7 +64,7 @@ class _RaiseDisputeScreenState extends State<RaiseDisputeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.tr('raise_dispute'))),
+      appBar: AppBar(title: Text(tr('raise_dispute'))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -72,16 +72,16 @@ class _RaiseDisputeScreenState extends State<RaiseDisputeScreen> {
           child: Column(
             children: [
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: context.tr('reason')),
+                decoration: InputDecoration(labelText: tr('reason')),
                 items: [
-                  'Incomplete Work',
-                  'Poor Quality',
-                  'Payment Issue',
-                  'Behavioral Issue',
-                  'Other'
+                  tr('incomplete_work'),
+                  tr('poor_quality'),
+                  tr('payment_issue'),
+                  tr('behavioral_issue'),
+                  tr('other')
                 ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                 onChanged: (val) => setState(() => _reason = val!),
-                validator: (val) => val == null ? context.tr('required_field') : null,
+                validator: (val) => val == null ? tr('required_field') : null,
                 // Leaving 'value' unset so 'initialValue' is implicitly null which starts empty. 
                 // We rely on onChanged to update internal state for submission, but visual update is handled by the widget itself until reset.
                 // To properly pre-select or control, 'value' is needed but triggers warning. 
@@ -89,18 +89,18 @@ class _RaiseDisputeScreenState extends State<RaiseDisputeScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                decoration: InputDecoration(labelText: context.tr('description')),
+                decoration: InputDecoration(labelText: tr('description')),
                 maxLines: 4,
                 onSaved: (val) => _description = val ?? '',
                 validator: (val) =>
-                    (val == null || val.isEmpty) ? context.tr('required_field') : null,
+                    (val == null || val.isEmpty) ? tr('required_field') : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitDispute,
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(context.tr('submit')),
+                    : Text(tr('submit')),
               ),
             ],
           ),

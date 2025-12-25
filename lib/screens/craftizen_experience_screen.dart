@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:setulink_app/screens/skill_demo_upload_screen.dart'; // Import the correct next screen
+import 'package:setulink_app/screens/craftizen_common_questions_screen.dart';
 
 class CraftizenExperienceScreen extends StatefulWidget {
   final String userId;
@@ -38,11 +38,14 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> {
       });
 
       if (mounted) {
-        // UPDATED: Navigate to the Skill Demo Upload screen.
+        // UPDATED: Navigate to the Common Questions screen.
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => SkillDemoUploadScreen(userId: widget.userId), // Pass userId
+            builder: (_) => CraftizenCommonQuestionsScreen(
+              userId: widget.userId,
+              selectedSkills: widget.selectedSkills,
+            ), 
           ),
         );
       }
@@ -67,29 +70,29 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> {
                 padding: const EdgeInsets.all(24.0),
                 children: [
                   _buildDropdown(
-                    label: tr('years_of_experience'),
+                    label: tr('How many years of experience do you have?'),
                     value: _experience,
                     items: ['0-1', '1-3', '3-5', '5+'],
                     onChanged: (val) => setState(() => _experience = val),
                   ),
                   const SizedBox(height: 24),
                   _buildDropdown(
-                    label: tr('travel_radius'),
+                    label: tr('Mention your travel radius'),
                     value: _radius,
                     items: ['5 km', '10 km', '25 km', '50 km+'],
                     onChanged: (val) => setState(() => _radius = val),
                   ),
                   const SizedBox(height: 24),
                   _buildDropdown(
-                    label: tr('are_you_certified'),
+                    label: tr('Are you certified for your Skill?'),
                     value: _isCertified,
-                    items: ['yes', 'no'],
+                    items: ['Yes', 'No'],
                     onChanged: (val) => setState(() => _isCertified = val),
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: _saveAndContinue,
-                    child: Text(tr('next')),
+                    child: Text(tr('Next')),
                   ),
                 ],
               ),
@@ -108,7 +111,7 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> {
       ),
       items: items.map((item) => DropdownMenuItem(value: item, child: Text(tr(item)))).toList(),
       onChanged: onChanged,
-      validator: (val) => val == null ? tr('please_select_an_option') : null,
+      validator: (val) => val == null ? tr('Please select an option') : null,
     );
   }
 }

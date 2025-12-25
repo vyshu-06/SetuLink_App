@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:setulink_app/services/payment_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/services/auth_service.dart';
+import 'package:setulink_app/services/price_calculator_service.dart';
 
+// Final, corrected version of the PaymentScreen.
 class PaymentScreen extends StatefulWidget {
   final String? jobId;
   final double amount;
   final String? craftizenId;
-  final String category; // To determine if it's a job payment or wallet top-up
+  final String category;
 
   const PaymentScreen({
     super.key,
@@ -31,9 +33,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void initState() {
     super.initState();
     _paymentService = PaymentService();
+    // The amount is passed directly to the screen. No calculation is needed here.
     _finalAmount = widget.amount;
     _amountController.text = _finalAmount > 0 ? _finalAmount.toStringAsFixed(2) : '';
-    
+
     _amountController.addListener(() {
       setState(() {
         _finalAmount = double.tryParse(_amountController.text) ?? 0.0;
@@ -44,28 +47,28 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void _startPayment() {
     if (_finalAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.tr('enter_valid_amount'))),
+        SnackBar(content: Text(tr('enter_valid_amount'))),
       );
       return;
     }
 
     final currentUser = AuthService().getCurrentUser();
     if (currentUser == null) {
-       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("You must be logged in to pay.")));
-       return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("you_must_be_logged_in_to_pay"))));
+      return;
     }
 
     setState(() => _isLoading = true);
 
     _paymentService.openCheckout(
       amount: _finalAmount,
-      userName: currentUser.displayName ?? 'Customer', // Use displayName which is standard User property or fallback
+      userName: currentUser.displayName ?? 'Customer',
       userEmail: currentUser.email ?? 'customer@example.com',
       category: widget.category,
       onSuccess: (paymentId) {
         if (!mounted) return;
         setState(() => _isLoading = false);
-        
+
         _paymentService.saveTransaction(
           paymentId: paymentId,
           amount: _finalAmount,
@@ -76,15 +79,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Payment successful! ID: $paymentId')),
+          SnackBar(content: Text('${tr('payment_successful_id')}: $paymentId')),
         );
-        Navigator.pop(context); // Go back after payment
+        Navigator.pop(context);
       },
       onError: (error) {
         if (!mounted) return;
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Payment failed: $error')),
+          SnackBar(content: Text('${tr('payment_failed')}: $error')),
         );
       },
     );
@@ -99,11 +102,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final commission = _paymentService.calculateCommission(_finalAmount, widget.category);
+    // The only call to PriceCalculatorService is for the commission, which is correct.
+    final commission = PriceCalculatorService.getCommission(_finalAmount);
     final payoutAmount = _finalAmount - commission;
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.tr(widget.category == 'wallet_topup' ? 'Add Money to Wallet' : 'pay_for_service_title'))),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      appBar: AppBar(title: Text(tr(widget.category == 'wallet_topup' ? 'add_money_to_wallet' : 'pay_for_service_title'))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -112,23 +117,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
             TextFormField(
               controller: _amountController,
               keyboardType: TextInputType.number,
-              readOnly: widget.amount > 0, // Make it read-only if amount is pre-filled from a job
+              readOnly: widget.amount > 0,
               decoration: InputDecoration(
-                labelText: context.tr('enter_amount_inr'),
+                labelText: tr('enter_amount_inr'),
                 border: const OutlineInputBorder(),
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surface,
               ),
             ),
             const SizedBox(height: 20),
             if (widget.category != 'wallet_topup') ...[
-              _buildPaymentDetailRow(context.tr('platform_commission'), '₹${commission.toStringAsFixed(2)}'),
-              _buildPaymentDetailRow(context.tr('amount_to_craftizen'), '₹${payoutAmount.toStringAsFixed(2)}'),
+              _buildPaymentDetailRow(tr('platform_commission'), '₹\${commission.toStringAsFixed(2)}'),
+              _buildPaymentDetailRow(tr('amount_to_craftizen'), '₹\${payoutAmount.toStringAsFixed(2)}'),
             ],
             const Spacer(),
             ElevatedButton(
               onPressed: _isLoading ? null : _startPayment,
-              child: _isLoading 
-                ? const CircularProgressIndicator(color: Colors.white) 
-                : Text(context.tr('proceed_to_pay')),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : Text(tr('proceed_to_pay')),
             ),
           ],
         ),

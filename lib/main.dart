@@ -11,6 +11,8 @@ import 'package:setulink_app/screens/citizen_home.dart';
 import 'package:setulink_app/screens/craftizen_home.dart';
 import 'package:setulink_app/screens/login_screen.dart';
 import 'package:setulink_app/screens/register_screen.dart';
+import 'package:setulink_app/screens/citizen_register_screen.dart';
+import 'package:setulink_app/screens/craftizen_register_screen.dart';
 import 'package:setulink_app/screens/phone_auth_screen.dart';
 import 'package:setulink_app/screens/greeting_page.dart';
 import 'package:setulink_app/screens/splash_screen.dart';
@@ -109,20 +111,13 @@ class SetuLinkApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/greeting': (context) => const GreetingPage(),
-        '/login': (context) {
-          final role = ModalRoute.of(context)!.settings.arguments as String? ?? 'citizen';
-          return LoginScreen(role: role);
-        },
-        '/register': (context) {
-          final role = ModalRoute.of(context)!.settings.arguments as String? ?? 'citizen';
-          return RegisterScreen(role: role);
-        },
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/citizen_register': (context) => const CitizenRegisterScreen(),
+        '/craftizen_register': (context) => const CraftizenRegisterScreen(),
         '/citizen_home': (context) => const CitizenHome(),
         '/craftizen_home': (context) => const CraftizenHome(),
-        '/phone_auth': (context) {
-          final role = ModalRoute.of(context)!.settings.arguments as String? ?? 'citizen';
-          return PhoneAuthScreen(role: role);
-        },
+        '/phone_auth': (context) => const PhoneAuthScreen(role: 'citizen'),
         '/admin': (context) => const AdminDashboardScreen(),
         '/kyc': (context) => const KYCScreen(),
         '/admin_kyc_review': (context) {
@@ -150,7 +145,15 @@ class SetuLinkApp extends StatelessWidget {
           return CraftizenExperienceScreen(userId: args['userId']!, selectedSkills: args['selectedSkills']! as List<String>);
         },
         // ADDED: Route for the Pending Verification Screen
-        '/pending_verification': (context) => const PendingVerificationScreen(),
+        '/pending_verification': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
+          return PendingVerificationScreen(
+            userId: args['userId'] as String? ?? '',
+            commonAnswers: (args['commonAnswers'] as Map<dynamic, dynamic>?)?.map((k, v) => MapEntry(k.toString(), v.toString())) ?? {},
+            passedSkills: (args['passedSkills'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+            videoUrls: (args['videoUrls'] as Map<dynamic, dynamic>?)?.map((k, v) => MapEntry(k.toString(), v.toString())) ?? {},
+          );
+        },
       },
     );
   }

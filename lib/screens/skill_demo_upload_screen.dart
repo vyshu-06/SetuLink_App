@@ -59,7 +59,12 @@ class _SkillDemoUploadScreenState extends State<SkillDemoUploadScreen> {
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const PendingVerificationScreen()),
+          MaterialPageRoute(builder: (_) => PendingVerificationScreen(
+            userId: widget.userId,
+            commonAnswers: const {},
+            passedSkills: const [],
+            videoUrls: const {},
+          )),
           (route) => false, // Clear all previous routes
         );
       }

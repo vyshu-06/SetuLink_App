@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/models/craftizen_model.dart';
 import 'package:setulink_app/screens/chat_screen.dart';
 import 'package:setulink_app/screens/job_request_screen.dart';
@@ -19,10 +20,10 @@ class CraftizenProfileViewScreen extends StatelessWidget {
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance.collection('users').doc(craftizenId).snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        if (!snapshot.hasData) return Scaffold(body: Center(child: CircularProgressIndicator()));
         
         final data = snapshot.data!.data() as Map<String, dynamic>?;
-        if (data == null) return const Scaffold(body: Center(child: Text('User not found')));
+        if (data == null) return Scaffold(body: Center(child: Text(tr('user_not_found'))));
 
         // Map to CraftizenModel for easier access if needed, or use raw data
         final craftizen = CraftizenModel.fromMap(data, snapshot.data!.id);
@@ -52,25 +53,25 @@ class CraftizenProfileViewScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(Icons.star, color: Colors.amber),
-                      Text(' ${craftizen.rating.toStringAsFixed(1)} Rating'),
+                      Text(' ${craftizen.rating.toStringAsFixed(1)} ${tr('rating')}'),
                       const SizedBox(width: 10),
                       const Icon(Icons.check_circle, color: Colors.green, size: 16),
-                      Text(' ${data['stats']?['completedJobs'] ?? 0} Jobs Done'),
+                      Text(' ${data['stats']?['completedJobs'] ?? 0} ${tr('jobs_done')}'),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text('Skills', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(tr('skills'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 Wrap(
                   spacing: 8,
                   children: craftizen.skills.map((s) => Chip(label: Text(s))).toList(),
                 ),
                 const SizedBox(height: 24),
-                const Text('About', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text(data['bio'] ?? 'No bio provided.'),
+                Text(tr('about'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(data['bio'] ?? tr('no_bio_provided')),
                 const SizedBox(height: 24),
-                const Text('Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const Center(child: Text('No reviews yet.')), // Placeholder for reviews list
+                Text(tr('reviews'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Center(child: Text(tr('no_reviews_yet'))), // Placeholder for reviews list
               ],
             ),
           ),
@@ -83,7 +84,7 @@ class CraftizenProfileViewScreen extends StatelessWidget {
                     onPressed: () {
                       final currentUserId = FirebaseAuth.instance.currentUser?.uid;
                       if (currentUserId == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please login to chat")));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('please_login_to_chat'))));
                         return;
                       }
                       final chatId = _getChatId(currentUserId, craftizenId);
@@ -97,7 +98,7 @@ class CraftizenProfileViewScreen extends StatelessWidget {
                         )
                       );
                     },
-                    child: const Text('Chat'),
+                    child: Text(tr('chat')),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -107,7 +108,7 @@ class CraftizenProfileViewScreen extends StatelessWidget {
                       // Pre-fill category if possible, or just open generic job post
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const JobRequestScreen()));
                     },
-                    child: const Text('Request Job'),
+                    child: Text(tr('request_job')),
                   ),
                 ),
               ],

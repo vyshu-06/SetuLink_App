@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/models/dispute_model.dart';
 import 'package:setulink_app/services/dispute_service.dart';
 import 'package:intl/intl.dart';
@@ -34,7 +35,7 @@ class _DisputeChatScreenState extends State<DisputeChatScreen> {
   void _requestEscalation() {
     _disputeService.requestEscalation(widget.disputeId);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Escalation requested. Support team will review this shortly.')),
+      SnackBar(content: Text(tr('escalation_requested_message'))),
     );
   }
 
@@ -42,29 +43,28 @@ class _DisputeChatScreenState extends State<DisputeChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dispute Chat'),
+        title: Text(tr('dispute_chat')),
         actions: [
           IconButton(
             icon: const Icon(Icons.report_problem),
-            tooltip: 'Request Escalation',
+            tooltip: tr('request_escalation'),
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Escalate Dispute?'),
-                  content: const Text(
-                      'If you cannot resolve this with the other party, our support team can intervene.'),
+                  title: Text(tr('escalate_dispute_title')),
+                  content: Text(tr('escalate_dispute_content')),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cancel'),
+                      child: Text(tr('cancel')),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(ctx);
                         _requestEscalation();
                       },
-                      child: const Text('Escalate'),
+                      child: Text(tr('escalate')),
                     ),
                   ],
                 ),
@@ -93,12 +93,12 @@ class _DisputeChatScreenState extends State<DisputeChatScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Status: ${dispute.status.toUpperCase()}',
+                          Text('${tr('status')}: ${dispute.status.toUpperCase()}',
                               style: const TextStyle(fontWeight: FontWeight.bold)),
-                          Text('Type: ${dispute.type}'),
+                          Text('${tr('type')}: ${dispute.type}'),
                           if (dispute.escalationRequested)
-                            const Text('Escalation Requested',
-                                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                            Text(tr('escalation_requested'),
+                                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -153,9 +153,9 @@ class _DisputeChatScreenState extends State<DisputeChatScreen> {
                     Expanded(
                       child: TextField(
                         controller: _messageController,
-                        decoration: const InputDecoration(
-                          hintText: 'Type a message...',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          hintText: tr('type_a_message'),
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                     ),

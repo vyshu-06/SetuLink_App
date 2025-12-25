@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/services/notification_service.dart';
 
 class AdminKycReviewScreen extends StatefulWidget {
@@ -30,7 +31,7 @@ class _AdminKycReviewScreenState extends State<AdminKycReviewScreen> {
     final userDocStream = FirebaseFirestore.instance.collection('users').doc(widget.userId).snapshots();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('KYC Review')),
+      appBar: AppBar(title: Text(tr('kyc_review'))),
       body: StreamBuilder<DocumentSnapshot>(
         stream: userDocStream,
         builder: (context, snapshot) {
@@ -43,11 +44,11 @@ class _AdminKycReviewScreenState extends State<AdminKycReviewScreen> {
             padding: const EdgeInsets.all(16.0),
             child: ListView(
               children: [
-                Text('Questionnaire Answers:', style: Theme.of(context).textTheme.titleLarge),
+                Text(tr('questionnaire_answers'), style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
                 Text(kyc['questionnaire']?.toString() ?? 'N/A'),
                 const SizedBox(height: 16),
-                Text('Skill Demo Video:', style: Theme.of(context).textTheme.titleLarge),
+                Text(tr('skill_demo_video'), style: Theme.of(context).textTheme.titleLarge),
                 if (kyc['videoUrl'] != null)
                   GestureDetector(
                     onTap: () {
@@ -56,9 +57,9 @@ class _AdminKycReviewScreenState extends State<AdminKycReviewScreen> {
                     child: Text(kyc['videoUrl'], style: const TextStyle(color: Colors.blue)),
                   )
                 else
-                  const Text('No video uploaded'),
+                  Text(tr('no_video_uploaded')),
                 const SizedBox(height: 16),
-                Text('Aadhaar Document:', style: Theme.of(context).textTheme.titleLarge),
+                Text(tr('aadhaar_document'), style: Theme.of(context).textTheme.titleLarge),
                 if (kyc['aadharUrl'] != null)
                   GestureDetector(
                     onTap: () {
@@ -67,9 +68,9 @@ class _AdminKycReviewScreenState extends State<AdminKycReviewScreen> {
                     child: Text(kyc['aadharUrl'], style: const TextStyle(color: Colors.blue)),
                   )
                 else
-                  const Text('Not uploaded'),
+                  Text(tr('not_uploaded')),
                 const SizedBox(height: 16),
-                Text('Passport Document:', style: Theme.of(context).textTheme.titleLarge),
+                Text(tr('passport_document'), style: Theme.of(context).textTheme.titleLarge),
                 if (kyc['passportUrl'] != null)
                   GestureDetector(
                     onTap: () {
@@ -78,12 +79,12 @@ class _AdminKycReviewScreenState extends State<AdminKycReviewScreen> {
                     child: Text(kyc['passportUrl'], style: const TextStyle(color: Colors.blue)),
                   )
                 else
-                  const Text('Not uploaded'),
+                  Text(tr('not_uploaded')),
                 const SizedBox(height: 16),
                 TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Rejection Reason (optional)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: tr('rejection_reason_optional'),
+                    border: const OutlineInputBorder(),
                   ),
                   maxLines: 3,
                   onChanged: (val) {
@@ -95,7 +96,7 @@ class _AdminKycReviewScreenState extends State<AdminKycReviewScreen> {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        child: const Text('Approve'),
+                        child: Text(tr('approve')),
                         onPressed: () {
                           _updateVerification(true);
                           Navigator.pop(context);
@@ -106,7 +107,7 @@ class _AdminKycReviewScreenState extends State<AdminKycReviewScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
-                        child: const Text('Reject'),
+                        child: Text(tr('reject')),
                         onPressed: () {
                           _updateVerification(false);
                           Navigator.pop(context);
