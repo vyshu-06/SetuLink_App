@@ -29,6 +29,7 @@ import 'package:setulink_app/screens/citizen_profile_setup_screen.dart';
 import 'package:setulink_app/widgets/offline_banner.dart';
 import 'package:setulink_app/screens/craftizen_experience_screen.dart';
 import 'package:setulink_app/screens/pending_verification_screen.dart'; // Import the new screen
+import 'package:setulink_app/theme/app_theme.dart';
 import 'firebase_options.dart';
 
 final AnalyticsService analyticsService = AnalyticsService();
@@ -80,22 +81,7 @@ class SetuLinkApp extends StatelessWidget {
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
-      theme: ThemeData(
-        primarySwatch: Colors.teal,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF7B1FA2)),
-        inputDecorationTheme: const InputDecorationTheme(
-          border: UnderlineInputBorder(),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            backgroundColor: const Color(0xFFF3E5F5),
-            foregroundColor: const Color(0xFF7B1FA2),
-          ),
-        ),
-      ),
+      theme: AppTheme.lightTheme,
       navigatorObservers: [analyticsService.getAnalyticsObserver()],
       builder: (context, child) {
         final media = MediaQuery.of(context);

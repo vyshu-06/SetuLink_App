@@ -4,6 +4,7 @@ import 'package:setulink_app/models/job_model.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/job_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
+import 'package:setulink_app/theme/app_colors.dart';
 import 'chat_list_screen.dart';
 import 'greeting_page.dart';
 import 'profile_screen.dart';
@@ -32,7 +33,7 @@ class _CitizenHomeState extends State<CitizenHome> {
     const _HomeTabPage(),
     const _BookingsTabPage(),
     const ChatListScreen(),
-    const PaymentScreen(category: 'wallet_topup'), 
+    const PaymentScreen(category: 'wallet_topup'),
     const ProfileScreen(),
   ];
 
@@ -56,12 +57,15 @@ class _CitizenHomeState extends State<CitizenHome> {
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.background,
+        extendBody: true,
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: BilingualText(textKey: 'citizen_dashboard'),
-          elevation: 1,
+          title: BilingualText(textKey: 'citizen_dashboard', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           actions: [
             PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, color: Colors.white),
               onSelected: (value) {
                 if (value == 'logout') {
                   _handleLogout();
@@ -76,49 +80,65 @@ class _CitizenHomeState extends State<CitizenHome> {
             ),
           ],
         ),
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: _pages,
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: _pages,
+          ),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.home_outlined),
-              activeIcon: const Icon(Icons.home),
-              label: context.tr('Home'),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
             ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.history_outlined),
-              activeIcon: const Icon(Icons.history),
-              label: context.tr('Bookings'),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                spreadRadius: 5,
+              )
+            ]
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
             ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.chat_bubble_outline),
-              activeIcon: const Icon(Icons.chat_bubble),
-              label: context.tr('Chats'),
+            child: BottomNavigationBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              type: BottomNavigationBarType.fixed,
+              items: <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: context.tr('Home')),
+                BottomNavigationBarItem(icon: const Icon(Icons.history_outlined), activeIcon: const Icon(Icons.history), label: context.tr('Bookings')),
+                BottomNavigationBarItem(icon: const Icon(Icons.chat_bubble_outline), activeIcon: const Icon(Icons.chat_bubble), label: context.tr('Chats')),
+                BottomNavigationBarItem(icon: const Icon(Icons.account_balance_wallet_outlined), activeIcon: const Icon(Icons.account_balance_wallet), label: context.tr('Wallet')),
+                BottomNavigationBarItem(icon: const Icon(Icons.person_outline), activeIcon: const Icon(Icons.person), label: context.tr('Profile')),
+              ],
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+              selectedItemColor: AppColors.primaryColor,
+              unselectedItemColor: Colors.grey[600],
             ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.account_balance_wallet_outlined),
-              activeIcon: const Icon(Icons.account_balance_wallet),
-              label: context.tr('Wallet'),
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline),
-              activeIcon: const Icon(Icons.person),
-              label: context.tr('Profile'),
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
+          ),
         ),
-        floatingActionButton: _selectedIndex == 0 ? FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const JobRequestScreen()));
-          },
-          label: Text(context.tr('Post a job')),
-          icon: const Icon(Icons.add),
-        ) : null,
+        floatingActionButton: _selectedIndex == 0
+            ? FloatingActionButton.extended(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const JobRequestScreen())),
+                label: Text(context.tr('Post a job')),
+                icon: const Icon(Icons.add),
+              )
+            : null,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
     );
   }
@@ -131,50 +151,16 @@ class _HomeTabPage extends StatefulWidget {
   State<_HomeTabPage> createState() => _HomeTabPageState();
 }
 
-class _HomeTabPageState extends State<_HomeTabPage> {
+class _HomeTabPageState extends State<_HomeTabPage> with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   final List<Map<String, dynamic>> _allServiceCategories = [
-     {
-      'categoryKey': 'everyday_needs',
-      'services': [
-        {'titleKey': 'plumber', 'icon': Icons.plumbing},
-        {'titleKey': 'electrician', 'icon': Icons.electrical_services},
-        {'titleKey': 'carpenter', 'icon': Icons.handyman},
-        {'titleKey': 'house_cleaner', 'icon': Icons.cleaning_services},
-        {'titleKey': 'gardener', 'icon': Icons.local_florist},
-        {'titleKey': 'tailor', 'icon': Icons.cut},
-        {'titleKey': 'painter', 'icon': Icons.format_paint},
-        {'titleKey': 'babysitter', 'icon': Icons.child_friendly},
-        {'titleKey': 'laundry', 'icon': Icons.local_laundry_service},
-        {'titleKey': 'elderly_caregiver', 'icon': Icons.elderly},
-        {'titleKey': 'pet_care', 'icon': Icons.pets},
-        {'titleKey': 'driver', 'icon': Icons.drive_eta},
-      ],
-    },
-    {
-      'categoryKey': 'semi_technical',
-      'services': [
-        {'titleKey': 'mobile_repair', 'icon': Icons.phonelink_setup},
-        {'titleKey': 'appliance_repair', 'icon': Icons.build_circle},
-        {'titleKey': 'tv_setup', 'icon': Icons.tv},
-        {'titleKey': 'cctv', 'icon': Icons.videocam},
-        {'titleKey': 'wifi', 'icon': Icons.wifi},
-        {'titleKey': 'home_automation', 'icon': Icons.settings_remote},
-        {'titleKey': 'solar_installers', 'icon': Icons.solar_power},
-      ],
-    },
-    {
-      'categoryKey': 'community_skills',
-      'services': [
-        {'titleKey': 'tutor', 'icon': Icons.school},
-        {'titleKey': 'yoga_trainer', 'icon': Icons.self_improvement},
-        {'titleKey': 'music_teacher', 'icon': Icons.music_note},
-        {'titleKey': 'event_assistant', 'icon': Icons.event},
-        {'titleKey': 'errand_helper', 'icon': Icons.run_circle},
-      ],
-    },
+    {'categoryKey': 'everyday_needs', 'services': [{'titleKey': 'plumber', 'icon': Icons.plumbing}, {'titleKey': 'electrician', 'icon': Icons.electrical_services}, {'titleKey': 'carpenter', 'icon': Icons.handyman}, {'titleKey': 'house_cleaner', 'icon': Icons.cleaning_services}, {'titleKey': 'gardener', 'icon': Icons.local_florist}, {'titleKey': 'tailor', 'icon': Icons.cut}, {'titleKey': 'painter', 'icon': Icons.format_paint}, {'titleKey': 'babysitter', 'icon': Icons.child_friendly}, {'titleKey': 'laundry', 'icon': Icons.local_laundry_service}, {'titleKey': 'elderly_caregiver', 'icon': Icons.elderly}, {'titleKey': 'pet_care', 'icon': Icons.pets}, {'titleKey': 'driver', 'icon': Icons.drive_eta}]},
+    {'categoryKey': 'semi_technical', 'services': [{'titleKey': 'mobile_repair', 'icon': Icons.phonelink_setup}, {'titleKey': 'appliance_repair', 'icon': Icons.build_circle}, {'titleKey': 'tv_setup', 'icon': Icons.tv}, {'titleKey': 'cctv', 'icon': Icons.videocam}, {'titleKey': 'wifi', 'icon': Icons.wifi}, {'titleKey': 'home_automation', 'icon': Icons.settings_remote}, {'titleKey': 'solar_installers', 'icon': Icons.solar_power}]},
+    {'categoryKey': 'community_skills', 'services': [{'titleKey': 'tutor', 'icon': Icons.school}, {'titleKey': 'yoga_trainer', 'icon': Icons.self_improvement}, {'titleKey': 'music_teacher', 'icon': Icons.music_note}, {'titleKey': 'event_assistant', 'icon': Icons.event}, {'titleKey': 'errand_helper', 'icon': Icons.run_circle}]},
   ];
 
   List<Map<String, dynamic>> _filteredCategories = [];
@@ -184,12 +170,16 @@ class _HomeTabPageState extends State<_HomeTabPage> {
     super.initState();
     _filteredCategories = _allServiceCategories;
     _searchController.addListener(_onSearchChanged);
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+    _animationController.forward();
   }
 
   @override
   void dispose() {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -215,16 +205,25 @@ class _HomeTabPageState extends State<_HomeTabPage> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        _Header(searchController: _searchController),
-        const SizedBox(height: 24),
-        ..._filteredCategories.map((c) => _CategorySection(category: c)).toList(),
-      ],
+    return SafeArea(
+      bottom: false,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        children: [
+          SizedBox(height: kToolbarHeight + MediaQuery.of(context).padding.top),
+          _Header(searchController: _searchController),
+          const SizedBox(height: 24),
+          FadeTransition(
+            opacity: _fadeAnimation,
+            child: Column(
+              children: _filteredCategories.map((c) => _CategorySection(category: c)).toList(),
+            ),
+          ),
+          const SizedBox(height: 100), // Padding for FAB
+        ],
+      ),
     );
   }
 }
@@ -235,34 +234,21 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24.0, top: 8.0),
-      child: Column(
-        children: [
-          BilingualText(
-            textKey: 'welcome_citizen',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.primary),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BilingualText(textKey: 'welcome_citizen', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        BilingualText(textKey: 'what_service_looking_for', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white.withOpacity(0.9))),
+        const SizedBox(height: 24),
+        TextField(
+          controller: searchController,
+          decoration: InputDecoration(
+            hintText: context.tr('Search services'),
+            prefixIcon: const Icon(Icons.search, color: AppColors.primaryColor),
           ),
-          const SizedBox(height: 8),
-          BilingualText(
-            textKey: 'what_service_looking_for',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 24),
-          TextField(
-            controller: searchController,
-            decoration: InputDecoration(
-              hintText: context.tr('Search services'),
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surface,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -275,7 +261,7 @@ class _CategorySection extends StatelessWidget {
   Widget build(BuildContext context) {
     final services = category['services'] as List<Map<String, dynamic>>;
     return Container(
-      margin: const EdgeInsets.only(bottom: 16.0),
+      margin: const EdgeInsets.only(bottom: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -283,59 +269,47 @@ class _CategorySection extends StatelessWidget {
             padding: const EdgeInsets.only(left: 4.0, bottom: 16.0),
             child: BilingualText(
               textKey: category['categoryKey']!,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, // Changed from 4 to 3 for better spacing
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.85, // Adjusted aspect ratio
-            ),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 0.9),
             itemCount: services.length,
             itemBuilder: (context, serviceIndex) {
               final service = services[serviceIndex];
-              return Card(
-                elevation: 3.0,
-                shadowColor: Theme.of(context).shadowColor.withAlpha(26),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(15),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => JobRequestScreen(category: service['titleKey']),
-                      ),
-                    );
-                  },
+              return InkWell(
+                borderRadius: BorderRadius.circular(15),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => JobRequestScreen(category: service['titleKey']))),
+                child: Card(
+                  elevation: 4.0,
+                  color: Colors.white.withOpacity(0.95),
+                  shadowColor: Colors.black.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Theme.of(context).colorScheme.primary.withAlpha(25), Theme.of(context).colorScheme.primary.withAlpha(50)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                            colors: [AppColors.primaryColor.withOpacity(0.1), AppColors.accentColor.withOpacity(0.2)],
+                            begin: Alignment.topLeft, end: Alignment.bottomRight,
                           ),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(service['icon'] as IconData?, size: 30, color: Theme.of(context).colorScheme.primary),
+                        child: Icon(service['icon'] as IconData?, size: 30, color: AppColors.primaryColor),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
                         child: BilingualText(
                           textKey: service['titleKey']!,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodySmall,
-                          maxLines: 2, // Allow 2 lines for title
-                          overflow: TextOverflow.ellipsis, // Add ellipsis if title is too long
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -357,24 +331,27 @@ class _BookingsTabPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentUser = AuthService().getCurrentUser();
     if (currentUser == null) {
-      return Center(child: BilingualText(textKey: 'log_in_to_see_bookings'));
+      return Center(child: BilingualText(textKey: 'log_in_to_see_bookings', style: const TextStyle(color: Colors.white)));
     }
-    return StreamBuilder<List<JobModel>>(
-      stream: JobService().getJobsStream(currentUser.uid),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: BilingualText(textKey: 'no_bookings_yet'));
-        }
+    return SafeArea(
+        child: StreamBuilder<List<JobModel>>(
+        stream: JobService().getJobsStream(currentUser.uid),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator(color: Colors.white));
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: BilingualText(textKey: 'no_bookings_yet', style: const TextStyle(color: Colors.white)));
+          }
 
-        final jobs = snapshot.data!;
-        return ListView.builder(
-          itemCount: jobs.length,
-          itemBuilder: (context, index) => _JobCard(job: jobs[index]),
-        );
-      },
+          final jobs = snapshot.data!;
+          return ListView.builder(
+            padding: const EdgeInsets.only(top: kToolbarHeight + 20),
+            itemCount: jobs.length,
+            itemBuilder: (context, index) => _JobCard(job: jobs[index]),
+          );
+        },
+      ),
     );
   }
 }
@@ -387,6 +364,8 @@ class _JobCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
         title: Text(job.title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Column(
@@ -397,13 +376,8 @@ class _JobCard extends StatelessWidget {
             Text(job.description, maxLines: 2, overflow: TextOverflow.ellipsis),
           ],
         ),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          Navigator.push(
-            context, 
-            MaterialPageRoute(builder: (_) => JobDetailScreen(jobId: job.id))
-          );
-        },
+        trailing: const Icon(Icons.chevron_right, color: AppColors.primaryColor),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => JobDetailScreen(jobId: job.id))),
       ),
     );
   }

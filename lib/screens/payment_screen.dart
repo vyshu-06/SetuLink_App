@@ -3,8 +3,9 @@ import 'package:setulink_app/services/payment_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/price_calculator_service.dart';
+import 'package:setulink_app/theme/app_colors.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 
-// Final, corrected version of the PaymentScreen.
 class PaymentScreen extends StatefulWidget {
   final String? jobId;
   final double amount;
@@ -23,17 +24,20 @@ class PaymentScreen extends StatefulWidget {
   State<PaymentScreen> createState() => _PaymentScreenState();
 }
 
-class _PaymentScreenState extends State<PaymentScreen> {
+class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProviderStateMixin {
   late PaymentService _paymentService;
   final TextEditingController _amountController = TextEditingController();
   double _finalAmount = 0.0;
   bool _isLoading = false;
 
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
     _paymentService = PaymentService();
-    // The amount is passed directly to the screen. No calculation is needed here.
     _finalAmount = widget.amount;
     _amountController.text = _finalAmount > 0 ? _finalAmount.toStringAsFixed(2) : '';
 
@@ -42,6 +46,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
         _finalAmount = double.tryParse(_amountController.text) ?? 0.0;
       });
     });
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _animationController.forward();
   }
 
   void _startPayment() {
@@ -97,62 +116,98 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void dispose() {
     _amountController.dispose();
     _paymentService.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // The only call to PriceCalculatorService is for the commission, which is correct.
     final commission = PriceCalculatorService.getCommission(_finalAmount);
     final payoutAmount = _finalAmount - commission;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(title: Text(tr(widget.category == 'Wallet topup' ? 'Add money to the Wallet' : 'Pay for service title'))),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextFormField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              readOnly: widget.amount > 0,
-              decoration: InputDecoration(
-                labelText: tr('Enter a amount(INR)'),
-                border: const OutlineInputBorder(),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surface,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: BilingualText(
+          textKey: widget.category == 'wallet_topup' ? 'add_money_to_wallet' : 'pay_for_service',
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 50),
+                    Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _amountController,
+                              keyboardType: TextInputType.number,
+                              readOnly: widget.amount > 0,
+                              decoration: InputDecoration(
+                                labelText: tr('amount_inr'),
+                                border: const UnderlineInputBorder(),
+                              ),
+                              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                            if (widget.category != 'wallet_topup') ...[
+                              const SizedBox(height: 20),
+                              _buildPaymentDetailRow(tr('platform_commission'), '₹${commission.toStringAsFixed(2)}'),
+                              const Divider(height: 20),
+                              _buildPaymentDetailRow(tr('craftizen_payout'), '₹${payoutAmount.toStringAsFixed(2)}'),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    ElevatedButton(
+                      onPressed: _isLoading ? null : _startPayment,
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : BilingualText(textKey: 'proceed_to_pay', style: const TextStyle(fontSize: 18)),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-            if (widget.category != 'wallet_topup') ...[
-              _buildPaymentDetailRow(tr('Platform Commission'), '₹\${commission.toStringAsFixed(2)}'),
-              _buildPaymentDetailRow(tr('Amount to Craftizen'), '₹\${payoutAmount.toStringAsFixed(2)}'),
-            ],
-            const Spacer(),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _startPayment,
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : Text(tr('Proceed to pay')),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildPaymentDetailRow(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.bodyMedium),
-          Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
-        ],
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
+      ],
     );
   }
 }

@@ -9,6 +9,7 @@ import 'package:setulink_app/screens/greeting_page.dart';
 import 'package:setulink_app/screens/kyc_screen.dart';
 import 'package:setulink_app/services/auth_service.dart' as app_auth;
 import 'package:setulink_app/widgets/bilingual_text.dart';
+import 'package:setulink_app/theme/app_colors.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,16 +18,33 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
   final app_auth.AuthService _authService = app_auth.AuthService();
   User? _authUser;
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
 
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
     _loadUserData();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   Future<void> _loadUserData() async {
@@ -39,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
              _userData = doc.data() as Map<String, dynamic>?;
              _isLoading = false;
            });
+           _animationController.forward();
         }
       } catch (e) {
         if (mounted) setState(() => _isLoading = false);
@@ -46,6 +65,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickAndUploadImage() async {
@@ -57,21 +82,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final File imageFile = File(image.path);
 
       try {
-        // Create a reference to the location you want to upload to
         final ref = FirebaseStorage.instance.ref('profile_pictures/$userId');
-
-        // Upload the file
         await ref.putFile(imageFile);
-
-        // Get the download URL
         final String downloadUrl = await ref.getDownloadURL();
-
-        // Update Firestore
         await FirebaseFirestore.instance.collection('users').doc(userId).update({
           'profilePictureUrl': downloadUrl,
         });
 
-        // Refresh user data
         setState(() {
           if (_userData != null) {
             _userData!['profilePictureUrl'] = downloadUrl;
@@ -97,102 +114,126 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _handleSwitchAccount() {
-     // This is the same as logout, as there is no multi-account management yet
     _handleLogout();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const BilingualText(textKey: 'profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator(color: Colors.white))
+            : SafeArea(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: _buildProfileContent(),
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
 
+  Widget _buildProfileContent() {
     final String name = _userData?['name'] ?? 'N/A';
     final String email = _userData?['email'] ?? 'N/A';
     final String phone = _userData?['phone'] ?? 'N/A';
     final String role = _userData?['role'] ?? 'N/A';
     final String? profilePictureUrl = _userData?['profilePictureUrl'];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: BilingualText(textKey: 'profile'),
-        backgroundColor: role == 'citizen' ? Colors.teal : (role == 'admin' ? Colors.blueGrey : Colors.deepOrange),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          Center(
-            child: Stack(
-              children: [
-                _ProfilePicture(profilePictureUrl: profilePictureUrl),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: IconButton(
-                      icon: const Icon(Icons.edit, size: 20, color: Colors.teal),
-                      onPressed: _pickAndUploadImage,
-                    ),
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      children: [
+        const SizedBox(height: 80),
+        Center(
+          child: Stack(
+            children: [
+              _ProfilePicture(profilePictureUrl: profilePictureUrl),
+              Positioned(
+                bottom: 0,
+                right: 4,
+                child: GestureDetector(
+                  onTap: _pickAndUploadImage,
+                  child: const CircleAvatar(
+                    radius: 20,
+                    backgroundColor: AppColors.accentColor,
+                    child: Icon(Icons.edit, size: 22, color: Colors.black),
                   ),
-                )
-              ],
-            ),
+                ),
+              )
+            ],
           ),
-          const SizedBox(height: 24),
-          _buildInfoCard(icon: Icons.person, text: name),
-          _buildInfoCard(icon: Icons.email, text: email),
-          _buildInfoCard(icon: Icons.phone, text: phone),
-          _buildInfoCard(icon: Icons.work, text: role.toUpperCase()),
-          const SizedBox(height: 24),
-          if (role == 'craftizen') ...[
-            _buildOptionButton(context, text: tr('verify_kyc'), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KYCScreen()))),
-            _buildOptionButton(context, text: tr('subscription_plans'), onTap: () => Navigator.pushNamed(context, '/subscription_plans')),
-          ],
-          const Divider(),
-          _buildOptionTile(context, icon: Icons.logout, text: tr('logout'), onTap: _handleLogout),
-          _buildOptionTile(context, icon: Icons.switch_account, text: tr('switch_accounts'), onTap: _handleSwitchAccount),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: Text(name, style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
+        ),
+        Center(
+          child: Text(role.toUpperCase(), style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 16, fontStyle: FontStyle.italic)),
+        ),
+        const SizedBox(height: 32),
+        _buildInfoCard(icon: Icons.email, text: email),
+        _buildInfoCard(icon: Icons.phone, text: phone),
+        const SizedBox(height: 24),
+        if (role == 'craftizen') ...[
+          _buildOptionButton(context, textKey: 'verify_kyc', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KYCScreen()))),
+          _buildOptionButton(context, textKey: 'subscription_plans', onTap: () => Navigator.pushNamed(context, '/subscription_plans')),
         ],
-      ),
+        const Divider(color: Colors.white54, thickness: 1, indent: 20, endIndent: 20),
+        _buildOptionTile(context, icon: Icons.logout, textKey: 'logout', onTap: _handleLogout),
+        _buildOptionTile(context, icon: Icons.switch_account, textKey: 'switch_accounts', onTap: _handleSwitchAccount),
+      ],
     );
   }
 
   Widget _buildInfoCard({required IconData icon, required String text}) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6.0),
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      elevation: 2,
+      color: Colors.white.withOpacity(0.9),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
-        leading: Icon(icon, color: Colors.grey[600]),
-        title: Text(text, style: const TextStyle(fontSize: 16)),
+        leading: Icon(icon, color: AppColors.primaryColor),
+        title: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
       ),
     );
   }
 
-  Widget _buildOptionButton(BuildContext context, {required String text, required VoidCallback onTap}) {
+  Widget _buildOptionButton(BuildContext context, {required String textKey, required VoidCallback onTap}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: ElevatedButton(
         onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.teal,
-          side: const BorderSide(color: Colors.teal),
-        ),
-        child: Text(text),
+        child: BilingualText(textKey: textKey, style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }
 
-  Widget _buildOptionTile(BuildContext context, {required IconData icon, required String text, required VoidCallback onTap}) {
+  Widget _buildOptionTile(BuildContext context, {required IconData icon, required String textKey, required VoidCallback onTap}) {
     return ListTile(
-      leading: Icon(icon, color: Colors.grey[700]),
-      title: Text(text),
+      leading: Icon(icon, color: Colors.white),
+      title: BilingualText(textKey: textKey, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
       onTap: onTap,
     );
   }
 }
 
-// New widget to manage profile picture display
 class _ProfilePicture extends StatelessWidget {
   final String? profilePictureUrl;
   const _ProfilePicture({this.profilePictureUrl});
@@ -200,9 +241,13 @@ class _ProfilePicture extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      radius: 50,
-      backgroundImage: profilePictureUrl != null ? NetworkImage(profilePictureUrl!) : null,
-      child: profilePictureUrl == null ? const Icon(Icons.person, size: 50) : null,
+      radius: 60,
+      backgroundColor: Colors.white,
+      child: CircleAvatar(
+        radius: 57,
+        backgroundImage: profilePictureUrl != null ? NetworkImage(profilePictureUrl!) : null,
+        child: profilePictureUrl == null ? const Icon(Icons.person, size: 60, color: AppColors.primaryColor) : null,
+      ),
     );
   }
 }

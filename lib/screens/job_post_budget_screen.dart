@@ -6,6 +6,8 @@ import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/job_service.dart';
 import 'package:setulink_app/services/price_calculator_service.dart';
 import 'package:setulink_app/screens/citizen_home.dart';
+import 'package:setulink_app/theme/app_colors.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class JobPostBudgetScreen extends StatefulWidget {
   final String serviceId;
@@ -23,7 +25,7 @@ class JobPostBudgetScreen extends StatefulWidget {
   State<JobPostBudgetScreen> createState() => _JobPostBudgetScreenState();
 }
 
-class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> {
+class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTickerProviderStateMixin {
   QueryDocumentSnapshot? _selectedProblem;
   double _calculatedPrice = 0;
   bool _isPeakTime = false;
@@ -31,10 +33,35 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> {
   final JobService _jobService = JobService();
   List<QueryDocumentSnapshot> _problems = [];
 
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
     _fetchProblems();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   void _fetchProblems() async {
@@ -116,66 +143,102 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> {
         : <String, double>{};
     
     return Scaffold(
-      appBar: AppBar(title: Text(tr('price_summary'))),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Card(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const BilingualText(textKey: 'price_summary', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    Text('₹${_calculatedPrice.toStringAsFixed(0)}', 
-                         style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
-                    Text(tr('total_estimated_price')),
+                    const SizedBox(height: 50),
+                    Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            BilingualText(textKey: 'total_estimated_price', style: Theme.of(context).textTheme.titleLarge),
+                            const SizedBox(height: 10),
+                            Text('₹${_calculatedPrice.toStringAsFixed(0)}', 
+                                 style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    if (_problems.isNotEmpty)
+                      Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          child: DropdownButtonFormField<QueryDocumentSnapshot>(
+                            value: _selectedProblem,
+                            items: _problems.map((problem) {
+                              final problemData = problem.data() as Map<String, dynamic>;
+                              return DropdownMenuItem<QueryDocumentSnapshot>(
+                                value: problem,
+                                child: Text(problemData['title'] ?? 'N/A'),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedProblem = value;
+                                _calculatePrice();
+                              });
+                            },
+                            decoration: InputDecoration(
+                              labelText: tr('select_problem'),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                      ),
+                    
+                    if (_selectedProblem != null)
+                      Card(
+                        margin: const EdgeInsets.only(top: 20),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        child: ExpansionTile(
+                          title: const BilingualText(textKey: 'price_breakdown'),
+                          children: breakdown.entries.map((e) => ListTile(
+                            title: BilingualText(textKey: e.key.replaceAll('_', ' ').toLowerCase()),
+                            trailing: Text('₹${e.value.toStringAsFixed(0)}'),
+                          )).toList(),
+                        ),
+                      ),
+                    const Spacer(),
+                    ElevatedButton(
+                      onPressed: _isLoading ? null : _confirmBooking,
+                      child: _isLoading 
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : BilingualText(textKey: 'book_now_amount', arguments: [_calculatedPrice.toStringAsFixed(0)], style: const TextStyle(fontSize: 18)),
+                    ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            if (_problems.isNotEmpty)
-              DropdownButtonFormField<QueryDocumentSnapshot>(
-                value: _selectedProblem,
-                items: _problems.map((problem) {
-                  final problemData = problem.data() as Map<String, dynamic>;
-                  return DropdownMenuItem<QueryDocumentSnapshot>(
-                    value: problem,
-                    child: Text(problemData['title'] ?? 'N/A'),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedProblem = value;
-                    _calculatePrice();
-                  });
-                },
-                decoration: InputDecoration(
-                  labelText: tr('select_problem'),
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-            
-            if (_selectedProblem != null)
-              ExpansionTile(
-                title: Text(tr('price_breakdown')),
-                children: breakdown.entries.map((e) => ListTile(
-                  title: Text(tr(e.key.replaceAll('_', ' ').toLowerCase())),
-                  trailing: Text('₹${e.value.toStringAsFixed(0)}'),
-                )).toList(),
-              ),
-            const Spacer(),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                minimumSize: const Size(double.infinity, 56),
-              ),
-              onPressed: _isLoading ? null : _confirmBooking,
-              child: _isLoading 
-                ? const CircularProgressIndicator(color: Colors.white)
-                : Text('${tr('book_now')} ₹${_calculatedPrice.toStringAsFixed(0)}'),
-            ),
-          ],
+          ),
         ),
       ),
     );

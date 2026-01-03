@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:setulink_app/screens/skill_video_upload_wrapper.dart';
+import 'package:setulink_app/theme/app_colors.dart';
 
 class SkillQuizScreen extends StatefulWidget {
   final String userId;
@@ -17,11 +18,15 @@ class SkillQuizScreen extends StatefulWidget {
   State<SkillQuizScreen> createState() => _SkillQuizScreenState();
 }
 
-class _SkillQuizScreenState extends State<SkillQuizScreen> {
+class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProviderStateMixin {
   int _currentSkillIndex = 0;
   int _currentQuestionIndex = 0;
   int _score = 0;
   final List<String> _passedSkills = [];
+
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   // Questions Database
   final Map<String, List<Map<String, dynamic>>> _allQuestions = {
@@ -89,122 +94,52 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> {
       {'q': 'What is the first step you should take before painting a room?', 'options': ['Start painting the trim', 'Clean the walls and prep the surfaces', 'Open a window for ventilation', 'Cover the furniture'], 'a': 1},
       {'q': 'What is "primer" used for?', 'options': ['To add a glossy finish to the paint', 'To create a uniform surface for the paint to adhere to', 'To thin the paint', 'To clean brushes after painting'], 'a': 1},
       {'q': 'Which type of paint finish is the most durable and easiest to clean?', 'options': ['Matte', 'Eggshell', 'Satin', 'Semi-gloss or gloss'], 'a': 3},
-      {'q': 'What is the best tool for painting the edges and corners of a wall?', 'options': ['A wide roller', 'A paint sprayer', 'An angled brush', 'A paint pad'], 'a': 2},
-      {'q': 'What does the term "cutting in" refer to?', 'options': ['Using a razor to remove old paint', 'Painting a clean line where the wall meets the ceiling or trim', 'Mixing two paint colors together', 'Sanding between coats of paint'], 'a': 1},
-      {'q': 'How long should you typically wait between coats of latex paint?', 'options': ['30 minutes', '1 hour', '2-4 hours', '24 hours'], 'a': 2},
-      {'q': 'What is the purpose of "taping off" before painting?', 'options': ['To create a decorative pattern', 'To protect trim, windows, and other areas from paint', 'To reinforce the wall', 'To mark where to stop painting'], 'a': 1},
-      {'q': 'Which type of paint is better for a high-moisture area like a bathroom?', 'options': ['Oil-based paint', 'Latex paint with a mildew-resistant additive', 'Chalk paint', 'Any interior paint'], 'a': 1},
-      {'q': 'What is the best way to clean a paintbrush used with latex paint?', 'options': ['With mineral spirits', 'With soap and water', 'Throw it away', 'Let it dry and scrape the paint off'], 'a': 1},
-      {'q': 'If you see paint bubbling or peeling, what is the most likely cause?', 'options': ['The paint color is too dark', 'The paint was applied in a room that was too cold', 'Moisture or dirt under the paint', 'The paint was applied too thickly'], 'a': 2},
     ],
-    'gardener': [
-      {'q': 'What is the process of removing dead or unwanted branches from a tree or shrub called?', 'options': ['Pruning', 'Mulching', 'Weeding', 'Tilling'], 'a': 0},
-      {'q': 'Which of the following is a primary benefit of adding mulch to a garden bed?', 'options': ['It attracts pests', 'It retains soil moisture and suppresses weeds', 'It makes the soil more compact', 'It encourages fungal growth'], 'a': 1},
-      {'q': 'What does "full sun" typically mean for a plant\'s light requirements?', 'options': ['At least 2 hours of direct sunlight', 'At least 6 hours of direct sunlight', 'Bright, but indirect light all day', 'Full shade'], 'a': 1},
-      {'q': 'What is the ideal pH range for most garden vegetables?', 'options': ['4.5 - 5.5', '6.0 - 7.0', '7.5 - 8.5', '8.5 - 9.5'], 'a': 1},
-      {'q': 'Which of these is a cool-weather crop?', 'options': ['Tomato', 'Cucumber', 'Lettuce', 'Watermelon'], 'a': 2},
-      {'q': 'What is the main purpose of composting?', 'options': ['To create a sterile growing medium', 'To dispose of kitchen waste quickly', 'To create a nutrient-rich soil amendment', 'To increase soil pH'], 'a': 2},
-      {'q': 'Which tool is best suited for turning soil in a new garden bed?', 'options': ['A trowel', 'A garden fork or spade', 'A leaf rake', 'A hoe'], 'a': 1},
-      {'q': 'What does the term "deadheading" refer to?', 'options': ['Removing dead plants from the garden', 'Watering plants at the end of the day', 'Removing spent flowers to encourage more blooms', 'Harvesting root vegetables'], 'a': 2},
-      {'q': 'Which of the following is a common sign of overwatering a plant?', 'options': ['Crispy brown leaves', 'Yellowing leaves and wilting', 'Slow growth', 'Brightly colored flowers'], 'a': 1},
-      {'q': 'What is companion planting?', 'options': ['Planting two of the same plant next to each other', 'A planting method that uses a trellis', 'The practice of planting different crops in proximity for mutual benefit', 'Planting in a container with a companion'], 'a': 2},
-    ],
-    'mechanic': [
-      {'q': 'What is the primary function of engine oil?', 'options': ['To clean the fuel injectors', 'To cool the engine', 'To lubricate moving parts and reduce friction', 'To improve fuel economy'], 'a': 2},
-      {'q': 'A car\'s battery provides power to which component to start the engine?', 'options': ['The alternator', 'The starter motor', 'The fuel pump', 'The radiator fan'], 'a': 1},
-      {'q': 'What does the acronym "VIN" stand for?', 'options': ['Vehicle Identification Number', 'Vehicle Inspection Notice', 'Verified Insurance Number', 'Vehicle Information Nameplate'], 'a': 0},
-      {'q': 'If a car\'s brake pedal feels "spongy," what is the most likely cause?', 'options': ['Worn brake pads', 'Air in the brake lines', 'Low tire pressure', 'A failing alternator'], 'a': 1},
-      {'q': 'What is the function of an alternator?', 'options': ['It starts the car', 'It cools the engine', 'It recharges the battery and powers the electrical system while the engine is running', 'It controls the vehicle\'s emissions'], 'a': 2},
-      {'q': 'Which of these is a sign that your tires may need to be balanced?', 'options': ['The car pulls to one side', 'The ride is unusually bumpy', 'Vibration in the steering wheel at certain speeds', 'A squealing noise when braking'], 'a': 2},
-      {'q': 'What does a catalytic converter do?', 'options': ['It converts engine heat into power', 'It reduces harmful emissions from the exhaust', 'It improves the car\'s aerodynamics', 'It helps the car start in cold weather'], 'a': 1},
-      {'q': 'In a standard 4-stroke engine, what are the four strokes in order?', 'options': ['Intake, Power, Compression, Exhaust', 'Intake, Compression, Power, Exhaust', 'Compression, Intake, Power, Exhaust', 'Power, Exhaust, Intake, Compression'], 'a': 1},
-      {'q': 'What is the purpose of a car\'s radiator?', 'options': ['To heat the car\'s cabin', 'To cool the engine by dissipating heat from the coolant', 'To filter the engine oil', 'To charge the battery'], 'a': 1},
-      {'q': 'What does a lit "Check Engine" light signify?', 'options': ['It is time for a routine oil change', 'A tire has low pressure', 'The engine has detected a potential problem', 'The headlights are on'], 'a': 2},
-    ],
-    'chef': [
-      {'q': 'What are the five "mother sauces" of classical French cuisine?', 'options': ['Tomato, Pesto, Alfredo, Marinara, and Aioli', 'Béchamel, Espagnole, Hollandaise, Tomate, and Velouté', 'Soy, Teriyaki, Hoisin, Oyster, and Sriracha', 'Salsa, Mole, Guacamole, Ranch, and BBQ'], 'a': 1},
-      {'q': 'What does the culinary term "al dente" mean, typically used for pasta?', 'options': ['Cooked until very soft', 'Served with a cheese sauce', 'Cooked until firm to the bite', 'Served cold'], 'a': 2},
-      {'q': 'What is the process of searing meat?', 'options': ['Cooking it slowly in liquid', 'Boiling it rapidly', 'Cooking it at a high temperature to create a browned crust', 'Marinating it overnight'], 'a': 2},
-      {'q': 'Which knife is the most versatile and essential in a kitchen?', 'options': ['Paring knife', 'Bread knife', 'Chef\'s knife', 'Boning knife'], 'a': 2},
-      {'q': 'What is the purpose of blanching vegetables?', 'options': ['To cook them fully in one step', 'To lightly cook them in boiling water then shock them in ice water to preserve color and texture', 'To roast them in the oven', 'To pickle them in vinegar'], 'a': 1},
-      {'q': 'Which of the following is NOT a method of "dry-heat" cooking?', 'options': ['Roasting', 'Grilling', 'Sautéing', 'Braising'], 'a': 3},
-      {'q': 'What is an "emulsion" in cooking?', 'options': ['A mixture of flour and fat used to thicken sauces', 'A combination of two liquids that normally don\'t mix, like oil and vinegar', 'A type of clear soup', 'A technique for chopping herbs'], 'a': 1},
-      {'q': 'What temperature is generally considered the "danger zone" for food, where bacteria grow most rapidly?', 'options': ['Below 0°C (32°F)', '0°C to 20°C (32°F to 68°F)', '4°C to 60°C (40°F to 140°F)', 'Above 100°C (212°F)'], 'a': 2},
-      {'q': 'What does it mean to "deglaze" a pan?', 'options': ['To clean a pan with soap and water', 'To add liquid to a hot pan to lift the flavorful browned bits off the bottom', 'To remove the glossy finish from a pan', 'To coat a pan with a non-stick spray'], 'a': 1},
-      {'q': 'Which ingredient acts as a leavening agent in baking?', 'options': ['Sugar', 'Flour', 'Baking soda or yeast', 'Salt'], 'a': 2},
-    ],
-    'babysitter': [
-      {'q': 'What is the first thing you should do when you arrive at a babysitting job?', 'options': ['Start playing with the children', 'Ask for the Wi-Fi password', 'Confirm emergency contact information and house rules with the parents', 'Turn on the TV'], 'a': 2},
-      {'q': 'What is the correct sleep position for an infant to reduce the risk of SIDS?', 'options': ['On their stomach', 'On their side', 'On their back', 'With a soft pillow'], 'a': 2},
-      {'q': 'If a child starts choking and cannot cough or make a sound, what should you do?', 'options': ['Give them a glass of water', 'Encourage them to cough', 'Immediately perform age-appropriate first aid for choking (like back blows or the Heimlich maneuver) and call for help', 'Wait for the parents to return'], 'a': 2},
-      {'q': 'A toddler is having a tantrum. What is generally the best approach?', 'options': ['Yell at them to stop', 'Ignore them completely', 'Stay calm, ensure they are safe, and acknowledge their feelings without giving in to unreasonable demands', 'Offer them a sugary snack to calm them down'], 'a': 2},
-      {'q': 'If a stranger comes to the door, what should you do?', 'options': ['Open the door to see what they want', 'Let the child answer the door', 'Do not open the door and do not tell the person you are alone', 'Invite them in if they say they know the parents'], 'a': 2},
-      {'q': 'Which snack is a potential choking hazard for a toddler?', 'options': ['Yogurt', 'Apple slices', 'Whole grapes', 'Mashed bananas'], 'a': 2},
-      {'q': 'What is a key part of ensuring a safe play environment for children?', 'options': ['Letting them play with any toys they find', 'Supervising them closely and removing any potential hazards', 'Only allowing them to watch TV', 'Letting them play outside unsupervised'], 'a': 1},
-      {'q': 'If a child gets a minor cut, what is the first aid step?', 'options': ['Ignore it', 'Apply pressure with a clean cloth and then wash with soap and water', 'Cover it immediately without cleaning it', 'Put ice on it'], 'a': 1},
-      {'q': 'How should you communicate with the parents during the job?', 'options': ['Only call if there is a major emergency', 'Send updates every 5 minutes', 'Follow the communication plan you agreed on with them (e.g., text with a picture or only call if needed)', 'Do not contact them at all'], 'a': 2},
-      {'q': 'Before the parents leave, what crucial information should you know about each child?', 'options': ['Their favorite TV show', 'Any allergies or medical conditions', 'Their favorite toy', 'What time they go to bed'], 'a': 1},
-    ],
-    'pet_sitter': [
-      {'q': 'What is a common sign of stress or anxiety in a dog?', 'options': ['Wagging tail', 'Panting, yawning, or excessive licking', 'A healthy appetite', 'Sleeping soundly'], 'a': 1},
-      {'q': 'Which of the following common human foods is toxic to dogs?', 'options': ['Carrots', 'Chocolate', 'Rice', 'Apples'], 'a': 1},
-      {'q': 'Before a client leaves, what is the most critical information to have?', 'options': ['The Wi-Fi password', 'The pet\'s favorite toys', 'Veterinarian contact information and feeding/medication schedule', 'The TV remote instructions'], 'a': 2},
-      {'q': 'If you are walking a dog and another off-leash dog approaches, what should you do?', 'options': ['Let the dogs figure it out', 'Run away as fast as you can', 'Stay calm, try to create space, and place yourself between the dog you\'re walking and the other dog', 'Shout at the other dog'], 'a': 2},
-      {'q': 'When meeting a new cat for the first time, what is the best approach?', 'options': ['Immediately pick it up for a cuddle', 'Stare directly into its eyes', 'Let the cat approach you first and offer a hand to sniff', 'Make loud noises to get its attention'], 'a': 2},
-      {'q': 'What is a sign that a cat is feeling comfortable and content?', 'options': ['Hissing', 'A twitching tail', 'Purring and slow blinking', 'Flattened ears'], 'a': 2},
-      {'q': 'If a pet in your care seems sick or injured, what should be your first step?', 'options': ['Wait 24 hours to see if it improves', 'Search for remedies online', 'Contact the owner and/or the veterinarian immediately for guidance', 'Try to give it human medication'], 'a': 2},
-      {'q': 'Why is it important to keep a dog on a leash in public areas?', 'options': ['It isn\'t important if the dog is well-behaved', 'To show who is in control', 'For the safety of the dog, other people, and other animals', 'To make the walk shorter'], 'a': 2},
-      {'q': 'What does it mean if a dog\'s body language is "stiff" with a high, wagging tail?', 'options': ['It is always a sign of a friendly and happy dog', 'The dog is relaxed and ready to play', 'It can be a sign of arousal or potential aggression, and should be approached with caution', 'The dog is tired'], 'a': 2},
-      {'q': 'How often should a litter box for a cat typically be scooped?', 'options': ['Once a week', 'Once a month', 'At least once a day', 'Only when it looks full'], 'a': 2},
-    ],
-
   };
 
-  List<Map<String, dynamic>> _getQuestionsForSkill(String skill) {
-    final key = skill.toLowerCase().replaceAll(' ', '_');
-    return _allQuestions[key] ?? _allQuestions['default']!;
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _animationController.forward();
   }
 
-  void _answerQuestion(int selectedOption) {
-    final currentSkill = widget.selectedSkills[_currentSkillIndex];
-    final questions = _getQuestionsForSkill(currentSkill);
-    final correctOptionIndex = questions[_currentQuestionIndex]['a'] as int;
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
-    if (selectedOption == correctOptionIndex) {
+  void _nextQuestion(int selectedOption) {
+    final currentSkill = widget.selectedSkills[_currentSkillIndex];
+    final currentQuestions = _allQuestions[currentSkill]!;
+    if (selectedOption == currentQuestions[_currentQuestionIndex]['a']) {
       _score++;
     }
 
-    if (_currentQuestionIndex < 9) {
+    if (_currentQuestionIndex < currentQuestions.length - 1) {
       setState(() {
         _currentQuestionIndex++;
       });
     } else {
-      bool passed = _score >= 8;
-      if (passed) {
+      // End of quiz for the current skill
+      if (_score >= 6) {
+        // Passing score
         _passedSkills.add(currentSkill);
       }
-
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => AlertDialog(
-          title: Text(passed ? 'Congratulations!' : 'Oops!'),
-          content: Text(
-            passed
-              ? 'You passed the quiz for $currentSkill with a score of $_score/10.'
-              : 'You did not pass the quiz for $currentSkill. You scored $_score/10.'
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                _moveToNextSkill();
-              },
-              child: Text('Next'),
-            )
-          ],
-        ),
-      );
+      _moveToNextSkill();
     }
   }
 
@@ -214,18 +149,15 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> {
         _currentSkillIndex++;
         _currentQuestionIndex = 0;
         _score = 0;
+        _animationController.reset();
+        _animationController.forward();
       });
     } else {
-      if (_passedSkills.isEmpty) {
-         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('You did not pass the quiz for any of the selected skills.')),
-        );
-      }
-      
+      // All quizzes are finished
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => SkillVideoUploadWrapper(
+          builder: (context) => SkillVideoUploadWrapper(
             userId: widget.userId,
             passedSkills: _passedSkills,
             commonAnswers: widget.commonAnswers ?? {},
@@ -237,104 +169,75 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.selectedSkills.isEmpty) {
-        return Scaffold(
-            appBar: AppBar(title: Text('Quiz')),
-            body: Center(child: Text('No skills selected.'))
-        );
-    }
-    
     final currentSkill = widget.selectedSkills[_currentSkillIndex];
-    final questions = _getQuestionsForSkill(currentSkill);
-    final currentQuestion = questions[_currentQuestionIndex];
+    final currentQuestions = _allQuestions[currentSkill]!;
+    final question = currentQuestions[_currentQuestionIndex];
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        title: Text('Quiz: $currentSkill'),
+        title: Text('Skill Quiz: $currentSkill'),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 20),
-            
-            LinearProgressIndicator(
-              value: (_currentQuestionIndex + 1) / 10,
-              backgroundColor: Colors.grey.shade200,
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Question ${_currentQuestionIndex + 1} / 10',
-              style: Theme.of(context).textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            
-            const SizedBox(height: 20),
-            
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  children: [
-                    Text(
-                      currentQuestion['q'],
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
+      extendBodyBehindAppBar: true,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryColor.withOpacity(0.8),
+              AppColors.accentColor.withOpacity(0.6),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Card(
+                  elevation: 8.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Question ${_currentQuestionIndex + 1}/${currentQuestions.length}',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          question['q'],
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 24),
+                        ...List.generate(question['options'].length, (index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: ElevatedButton(
+                              onPressed: () => _nextQuestion(index),
+                              child: Text(question['options'][index]),
+                            ),
+                          );
+                        }),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-            
-            ...List.generate(4, (index) {
-              final optionText = (currentQuestion['options'] as List)[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: ElevatedButton(
-                  onPressed: () => _answerQuestion(index),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                    alignment: Alignment.centerLeft,
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black87,
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.grey.shade300)
-                    )
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 12,
-                        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                        child: Text(
-                          String.fromCharCode(65 + index), // A, B, C, D
-                          style: TextStyle(
-                            fontSize: 12, 
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          optionText,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ],
+          ),
         ),
       ),
     );

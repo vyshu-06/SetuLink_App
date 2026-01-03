@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:setulink_app/models/job_model.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/job_service.dart';
+import 'package:setulink_app/theme/app_colors.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'chat_list_screen.dart';
 import 'greeting_page.dart';
 import 'profile_screen.dart';
@@ -50,16 +52,19 @@ class _CraftizenHomeState extends State<CraftizenHome> {
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.background,
+        extendBody: true,
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: const Text('Craftizen Dashboard'),
-          elevation: 1,
+          title: const BilingualText(textKey: 'craftizen_dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           actions: [
             IconButton(
-              icon: const Icon(Icons.person_outline),
+              icon: const Icon(Icons.person_outline, color: Colors.white),
               onPressed: _navigateToProfile,
             ),
             PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, color: Colors.white),
               onSelected: (value) {
                 if (value == 'logout') {
                   _handleLogout();
@@ -68,33 +73,44 @@ class _CraftizenHomeState extends State<CraftizenHome> {
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
                   value: 'logout',
-                  child: Text('Logout'),
+                  child: BilingualText(textKey: 'logout'),
                 ),
               ],
             ),
           ],
         ),
-        body: _pages.elementAt(_selectedIndex),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.work_outline),
-              activeIcon: Icon(Icons.work),
-              label: 'Jobs',
+          ),
+          child: _pages.elementAt(_selectedIndex),
+        ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, spreadRadius: 5)],
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+            child: BottomNavigationBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
+                BottomNavigationBarItem(icon: Icon(Icons.work_outline), activeIcon: Icon(Icons.work), label: 'Jobs'),
+                BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), activeIcon: Icon(Icons.chat_bubble), label: 'Chats'),
+              ],
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+              selectedItemColor: AppColors.primaryColor,
+              unselectedItemColor: Colors.grey[600],
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              activeIcon: Icon(Icons.chat_bubble),
-              label: 'Chats',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
+          ),
         ),
       ),
     );
@@ -115,159 +131,151 @@ class _HomeTabPage extends StatelessWidget {
     final currentUser = AuthService().getCurrentUser();
     final String uid = currentUser?.uid ?? '';
 
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return SafeArea(
+      bottom: false,
+      child: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator(color: Colors.white));
+          }
 
-        final userData = snapshot.data!.data() as Map<String, dynamic>?;
-        final String name = userData?['name'] ?? '';
-        final List<String> skills = (userData?['skills'] as List<dynamic>?)?.cast<String>() ?? [];
-        final bool isKycVerified = userData?['kyc']?['verified'] ?? false;
-        final bool isAvailable = userData?['isAvailable'] ?? false;
+          final userData = snapshot.data!.data() as Map<String, dynamic>?;
+          final String name = userData?['name'] ?? '';
+          final List<String> skills = (userData?['skills'] as List<dynamic>?)?.cast<String>() ?? [];
+          final bool isKycVerified = userData?['kyc']?['verified'] ?? false;
+          final bool isAvailable = userData?['isAvailable'] ?? false;
 
-        return CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 16.0),
-                child: Column(
-                  children: [
-                    Text(
-                      'Welcome, Craftizen!',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.primary),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      name,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    // Availability Toggle
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: isAvailable ? Colors.green : Colors.grey),
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, kToolbarHeight, 16.0, 16.0),
+                  child: Column(
+                    children: [
+                      const BilingualText(
+                        textKey: 'welcome_craftizen',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(isAvailable ? 'Available for Work' : 'Not Available', style: TextStyle(color: isAvailable ? Colors.green : Colors.grey, fontWeight: FontWeight.bold)),
-                          const SizedBox(width: 8),
-                          Switch(
-                            value: isAvailable,
-                            activeColor: Colors.green,
-                            onChanged: (val) => _toggleAvailability(uid, isAvailable),
-                          ),
-                        ],
+                      const SizedBox(height: 8),
+                      Text(
+                        name,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white.withOpacity(0.9)),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Edit Professional Profile'),
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()));
-                      },
-                    ),
-                  ],
+                      const SizedBox(height: 24),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(color: isAvailable ? Colors.greenAccent : Colors.white54),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            BilingualText(textKey: isAvailable ? 'available_for_work' : 'not_available', style: TextStyle(color: isAvailable ? Colors.white : Colors.white70, fontWeight: FontWeight.bold)),
+                            const SizedBox(width: 8),
+                            Switch(
+                              value: isAvailable,
+                              activeColor: Colors.greenAccent,
+                              onChanged: (val) => _toggleAvailability(uid, isAvailable),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.edit, size: 20),
+                        label: const BilingualText(textKey: 'edit_professional_profile'),
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen())),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.9),
+                          foregroundColor: AppColors.primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: _buildSkillsSection(skills, context),
-            ),
-            SliverToBoxAdapter(
-              child: _buildJobsSection(context, isKycVerified, skills),
-            ),
-          ],
-        );
-      },
+              SliverToBoxAdapter(
+                child: _buildSkillsSection(skills, context),
+              ),
+              SliverToBoxAdapter(
+                child: _buildJobsSection(context, isKycVerified, skills),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            ],
+          );
+        },
+      ),
     );
   }
 
   Widget _buildSkillsSection(List<String> skills, BuildContext context) {
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).shadowColor.withAlpha(25),
-            spreadRadius: 1,
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'My Skills',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
-            children: skills
-                .map((skill) => Chip(
-                      label: Text(skill),
-                    ))
-                .toList(),
-          ),
-        ],
+      elevation: 4,
+      color: Colors.white.withOpacity(0.95),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const BilingualText(
+              textKey: 'my_skills',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryColor),
+            ),
+            const SizedBox(height: 12),
+            if (skills.isEmpty)
+              const Center(child: BilingualText(textKey: 'no_skills_added'))
+            else
+              Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: skills.map((skill) => Chip(label: Text(skill), backgroundColor: AppColors.primaryColor.withOpacity(0.1))).toList(),
+              ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildJobsSection(BuildContext context, bool isKycVerified, List<String> skills) {
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).shadowColor.withAlpha(25),
-            spreadRadius: 1,
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Job Requests',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          if (!isKycVerified)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 24.0),
-                child: Text(
-                  'Your KYC is not verified. Please complete KYC to see job requests.',
-                  style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+      elevation: 4,
+      color: Colors.white.withOpacity(0.95),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const BilingualText(
+              textKey: 'job_requests',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryColor),
+            ),
+            const SizedBox(height: 12),
+            if (!isKycVerified)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24.0),
+                  child: BilingualText(
+                    textKey: 'kyc_not_verified_jobs',
+                    style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
-            )
-          else if (skills.isEmpty)
-             const Center(child: Text('Add skills to see relevant jobs'))
-          else
-             // Sneak peek or shortcut
-             const Center(child: Text('Go to "Jobs" tab to find work!')),
-        ],
+              )
+            else if (skills.isEmpty)
+              const Center(child: BilingualText(textKey: 'add_skills_to_see_jobs'))
+            else
+              const Center(child: BilingualText(textKey: 'go_to_jobs_tab')),
+          ],
+        ),
       ),
     );
   }
@@ -278,25 +286,35 @@ class _JobsTabPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          const TabBar(
-            tabs: [
-              Tab(text: 'New Jobs'),
-              Tab(text: 'My Jobs'),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _NewJobsList(),
-                _MyJobsList(),
-              ],
+    return SafeArea(
+      bottom: false,
+      child: DefaultTabController(
+        length: 2,
+        child: Column(
+          children: [
+            SizedBox(height: kToolbarHeight + MediaQuery.of(context).padding.top),
+            Container(
+              color: Colors.white.withOpacity(0.1),
+              child: const TabBar(
+                tabs: [
+                  Tab(child: BilingualText(textKey: 'new_jobs')),
+                  Tab(child: BilingualText(textKey: 'my_jobs')),
+                ],
+                indicatorColor: AppColors.accentColor,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white70,
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _NewJobsList(),
+                  _MyJobsList(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -313,8 +331,8 @@ class _NewJobsList extends StatelessWidget {
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
       builder: (context, userSnapshot) {
-        if (!userSnapshot.hasData) return const Center(child: CircularProgressIndicator());
-        
+        if (!userSnapshot.hasData) return const Center(child: CircularProgressIndicator(color: Colors.white));
+
         final userData = userSnapshot.data!.data() as Map<String, dynamic>?;
         final List<String> skills = (userData?['skills'] as List<dynamic>?)?.cast<String>() ?? [];
         final bool isKycVerified = userData?['kyc']?['verified'] ?? false;
@@ -324,26 +342,27 @@ class _NewJobsList extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [
-                Icon(Icons.verified_user_outlined, size: 64, color: Colors.orange),
+                Icon(Icons.verified_user_outlined, size: 64, color: Colors.orangeAccent),
                 SizedBox(height: 16),
-                Text('Your KYC is not verified. Please complete KYC to see job requests.'),
+                BilingualText(textKey: 'kyc_not_verified_jobs', style: TextStyle(color: Colors.white), textAlign: TextAlign.center,),
               ],
             ),
           );
         }
 
         if (skills.isEmpty) {
-          return const Center(child: Text('Please add skills to your profile to see jobs.'));
+          return const Center(child: BilingualText(textKey: 'add_skills_to_see_jobs', style: TextStyle(color: Colors.white)));
         }
 
         return StreamBuilder<List<JobModel>>(
           stream: JobService().getOpenJobsForCraftizen(skills),
           builder: (context, jobSnapshot) {
-            if (jobSnapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-            if (!jobSnapshot.hasData || jobSnapshot.data!.isEmpty) return const Center(child: Text('No new jobs nearby.'));
+            if (jobSnapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: Colors.white));
+            if (!jobSnapshot.hasData || jobSnapshot.data!.isEmpty) return const Center(child: BilingualText(textKey: 'no_new_jobs_nearby', style: TextStyle(color: Colors.white)));
 
             final jobs = jobSnapshot.data!;
             return ListView.builder(
+              padding: const EdgeInsets.only(bottom: 100),
               itemCount: jobs.length,
               itemBuilder: (context, index) => _JobCard(job: jobs[index]),
             );
@@ -365,11 +384,12 @@ class _MyJobsList extends StatelessWidget {
     return StreamBuilder<List<JobModel>>(
       stream: JobService().getJobsStream(uid, isCraftizen: true),
       builder: (context, jobSnapshot) {
-        if (jobSnapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-        if (!jobSnapshot.hasData || jobSnapshot.data!.isEmpty) return const Center(child: Text('No accepted jobs yet.'));
+        if (jobSnapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: Colors.white));
+        if (!jobSnapshot.hasData || jobSnapshot.data!.isEmpty) return const Center(child: BilingualText(textKey: 'no_accepted_jobs_yet', style: TextStyle(color: Colors.white)));
 
         final jobs = jobSnapshot.data!;
         return ListView.builder(
+          padding: const EdgeInsets.only(bottom: 100),
           itemCount: jobs.length,
           itemBuilder: (context, index) => _JobCard(job: jobs[index]),
         );
@@ -386,6 +406,8 @@ class _JobCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
         title: Text(job.title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Column(
@@ -396,13 +418,8 @@ class _JobCard extends StatelessWidget {
             Text(job.description, maxLines: 2, overflow: TextOverflow.ellipsis),
           ],
         ),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          Navigator.push(
-            context, 
-            MaterialPageRoute(builder: (_) => JobDetailScreen(jobId: job.id))
-          );
-        },
+        trailing: const Icon(Icons.chevron_right, color: AppColors.primaryColor),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => JobDetailScreen(jobId: job.id))),
       ),
     );
   }
