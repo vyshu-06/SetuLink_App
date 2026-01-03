@@ -61,7 +61,7 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(title: Text(tr('tell_us_more'))),
+      appBar: AppBar(title: Text(tr('Tell us more'))),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Form(

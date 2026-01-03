@@ -43,13 +43,13 @@ class _KYCQuestionnaireScreenState extends State<KYCQuestionnaireScreen> {
       case 'number':
         inputWidget = TextFormField(
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(hintText: tr('enter_a_number')),
+          decoration: InputDecoration(hintText: tr('Enter a number')),
           validator: (val) {
             if (val == null || val.isEmpty) {
-              return tr('please_enter_value');
+              return tr('Please enter a value');
             }
             if (int.tryParse(val) == null) {
-              return tr('enter_valid_number');
+              return tr('Enter a valid number');
             }
             return null;
           },
@@ -60,12 +60,12 @@ class _KYCQuestionnaireScreenState extends State<KYCQuestionnaireScreen> {
         break;
       case 'boolean':
         inputWidget = DropdownButtonFormField<String>(
-          items: [tr('yes'), tr('no')]
+          items: [tr('Yes'), tr('No')]
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
-          validator: (val) => val == null ? tr('please_select_option') : null,
+          validator: (val) => val == null ? tr('Please select a option') : null,
           onSaved: (val) {
-            answers[question['field']] = val == tr('yes');
+            answers[question['field']] = val == tr('Yes');
           },
           onChanged: (_) {},
         );
@@ -75,14 +75,14 @@ class _KYCQuestionnaireScreenState extends State<KYCQuestionnaireScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text('${tr('skill_verification')} - ${currentQuestionIndex + 1}/${questions.length}')),
+      appBar: AppBar(title: Text('${tr('Skill Verification')} - ${currentQuestionIndex + 1}/${questions.length}')),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              Text(tr(question['question']), style: const TextStyle(fontSize: 18)),
+              Text(tr(question['Question']), style: const TextStyle(fontSize: 18)),
               const SizedBox(height: 24),
               inputWidget,
               const Spacer(),
@@ -92,7 +92,7 @@ class _KYCQuestionnaireScreenState extends State<KYCQuestionnaireScreen> {
                   if (currentQuestionIndex > 0)
                     TextButton(
                         onPressed: () => setState(() => currentQuestionIndex--),
-                        child: Text(tr('back'))),
+                        child: Text(tr('Back'))),
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
@@ -108,8 +108,8 @@ class _KYCQuestionnaireScreenState extends State<KYCQuestionnaireScreen> {
                       }
                     },
                     child: Text(currentQuestionIndex < questions.length - 1
-                        ? tr('next')
-                        : tr('complete')),
+                        ? tr('Next')
+                        : tr('Complete')),
                   ),
                 ],
               ),

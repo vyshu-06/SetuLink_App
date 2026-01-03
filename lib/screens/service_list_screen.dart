@@ -36,12 +36,12 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text(tr('error_loading_data')));
+            return Center(child: Text(tr('Error loading data')));
           }
 
           final docs = snapshot.data?.docs ?? [];
           if (docs.isEmpty) {
-            return Center(child: Text(tr('no_jobs_available')));
+            return Center(child: Text(tr('No jobs available')));
           }
 
           return ListView.separated(
@@ -51,7 +51,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             itemBuilder: (context, index) {
               final service = docs[index].data() as Map<String, dynamic>;
 
-              final name = service['name'] ?? tr('unknown_service');
+              final name = service['Name'] ?? tr('Unknown Service');
               final description = service['description'] ?? '';
 
               return ListTile(

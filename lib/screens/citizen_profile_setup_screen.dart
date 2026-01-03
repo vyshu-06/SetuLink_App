@@ -50,7 +50,7 @@ class _CitizenProfileSetupScreenState extends State<CitizenProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(tr('complete_your_profile'))),
+      appBar: AppBar(title: Text(tr('Complete your Profile'))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -58,22 +58,22 @@ class _CitizenProfileSetupScreenState extends State<CitizenProfileSetupScreen> {
           child: Column(
             children: [
               Text(
-                tr('tell_us_your_location'),
+                tr('Tell us your Location'),
                 style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _cityController,
-                decoration: InputDecoration(labelText: tr('city_town'), border: const OutlineInputBorder()),
-                validator: (v) => v!.isEmpty ? tr('required') : null,
+                decoration: InputDecoration(labelText: tr('City town'), border: const OutlineInputBorder()),
+                validator: (v) => v!.isEmpty ? tr('Required') : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _pincodeController,
-                decoration: InputDecoration(labelText: tr('pincode'), border: const OutlineInputBorder()),
+                decoration: InputDecoration(labelText: tr('Pincode'), border: const OutlineInputBorder()),
                 keyboardType: TextInputType.number,
-                validator: (v) => v!.length != 6 ? tr('enter_valid_pincode') : null,
+                validator: (v) => v!.length != 6 ? tr('enter a valid Pincode') : null,
               ),
               const SizedBox(height: 32),
               ElevatedButton(
@@ -84,7 +84,7 @@ class _CitizenProfileSetupScreenState extends State<CitizenProfileSetupScreen> {
                 ),
                 child: _isLoading 
                   ? const CircularProgressIndicator(color: Colors.white) 
-                  : Text(tr('save_and_continue'), style: const TextStyle(color: Colors.white)),
+                  : Text(tr('Save and Continue'), style: const TextStyle(color: Colors.white)),
               ),
             ],
           ),

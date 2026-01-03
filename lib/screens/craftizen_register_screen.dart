@@ -27,7 +27,7 @@ class _CraftizenRegisterScreenState extends State<CraftizenRegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('craftizen_registration')),
+        title: Text(tr('Craftizen Registration')),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -39,35 +39,35 @@ class _CraftizenRegisterScreenState extends State<CraftizenRegisterScreen> {
                 const SizedBox(height: 20),
                 TextFormField(
                   key: const ValueKey('register_name'),
-                  decoration: InputDecoration(labelText: tr('name')),
+                  decoration: InputDecoration(labelText: tr('Name')),
                   onChanged: (val) => name = val.trim(),
                   validator: (val) =>
-                      val == null || val.isEmpty ? tr('enter_your_name') : null,
+                      val == null || val.isEmpty ? tr('Enter your Name') : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   key: const ValueKey('register_email'),
-                  decoration: InputDecoration(labelText: tr('email')),
+                  decoration: InputDecoration(labelText: tr('Email')),
                   onChanged: (val) => email = val.trim(),
                   validator: (val) => (val != null && val.contains('@'))
                       ? null
-                      : tr('enter_valid_email'),
+                      : tr('Enter your valid Email'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   key: const ValueKey('register_phone'),
-                  decoration: InputDecoration(labelText: tr('phone_number')),
+                  decoration: InputDecoration(labelText: tr('Phone Number')),
                   keyboardType: TextInputType.phone,
                   onChanged: (val) => phone = val.trim(),
                   validator: (val) => (val != null && val.length >= 10)
                       ? null
-                      : tr('enter_valid_phone_number'),
+                      : tr('Enter your valid Phone Number'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   key: const ValueKey('register_password'),
                   decoration: InputDecoration(
-                    labelText: tr('password'),
+                    labelText: tr('Password'),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
                       onPressed: () {
@@ -81,13 +81,13 @@ class _CraftizenRegisterScreenState extends State<CraftizenRegisterScreen> {
                   onChanged: (val) => password = val,
                   validator: (val) => (val != null && val.length >= 6)
                       ? null
-                      : tr('password_min_6_chars'),
+                      : tr('Password should have minimum of 6 characters'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   key: const ValueKey('register_confirm'),
                   decoration: InputDecoration(
-                    labelText: tr('confirm_password'),
+                    labelText: tr('Confirm Password'),
                     suffixIcon: IconButton(
                       icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
                       onPressed: () {
@@ -100,16 +100,16 @@ class _CraftizenRegisterScreenState extends State<CraftizenRegisterScreen> {
                   obscureText: _obscureConfirmPassword,
                   onChanged: (val) => confirmPwd = val,
                   validator: (val) =>
-                      val != password ? tr('passwords_do_not_match') : null,
+                      val != password ? tr('Password do not match') : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: InputDecoration(labelText: tr('referral_code_optional')),
+                  decoration: InputDecoration(labelText: tr('Referral Code(Optional)')),
                   onChanged: (val) => referralCode = val.trim(),
                 ),
                 const SizedBox(height: 26),
                 ElevatedButton(
-                  child: Text(tr('register')),
+                  child: Text(tr('Register')),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       setState(() {

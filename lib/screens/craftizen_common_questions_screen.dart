@@ -48,7 +48,7 @@ class _CraftizenCommonQuestionsScreenState
       // Check if all questions are answered
       if (_answers.length != _questions.length) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr('please_answer_all_questions'))),
+          SnackBar(content: Text(tr('Please answer all the Questions'))),
         );
         return;
       }
@@ -77,7 +77,7 @@ class _CraftizenCommonQuestionsScreenState
         }
       } catch (e) {
         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${tr('error_saving_answers')}: $e')));
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${tr('Error occured while saving the answers')}: $e')));
         }
       } finally {
         if (mounted) {
@@ -93,7 +93,7 @@ class _CraftizenCommonQuestionsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('common_questions')),
+        title: Text(tr('Common Questions')),
       ),
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
@@ -105,7 +105,7 @@ class _CraftizenCommonQuestionsScreenState
             Padding(
               padding: const EdgeInsets.only(bottom: 24.0),
               child: Text(
-                tr('please_answer_these_common_questions'),
+                tr('Please answer these common Questions'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
@@ -141,7 +141,7 @@ class _CraftizenCommonQuestionsScreenState
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: Text(tr('next')),
+              child: Text(tr('Next')),
             ),
           ],
         ),

@@ -86,27 +86,27 @@ class _CitizenHomeState extends State<CitizenHome> {
             BottomNavigationBarItem(
               icon: const Icon(Icons.home_outlined),
               activeIcon: const Icon(Icons.home),
-              label: context.tr('home'),
+              label: context.tr('Home'),
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.history_outlined),
               activeIcon: const Icon(Icons.history),
-              label: context.tr('bookings'),
+              label: context.tr('Bookings'),
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.chat_bubble_outline),
               activeIcon: const Icon(Icons.chat_bubble),
-              label: context.tr('chats'),
+              label: context.tr('Chats'),
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.account_balance_wallet_outlined),
               activeIcon: const Icon(Icons.account_balance_wallet),
-              label: context.tr('wallet'),
+              label: context.tr('Wallet'),
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.person_outline),
               activeIcon: const Icon(Icons.person),
-              label: context.tr('profile'),
+              label: context.tr('Profile'),
             ),
           ],
           currentIndex: _selectedIndex,
@@ -116,7 +116,7 @@ class _CitizenHomeState extends State<CitizenHome> {
           onPressed: () {
             Navigator.push(context, MaterialPageRoute(builder: (_) => const JobRequestScreen()));
           },
-          label: Text(context.tr('post_a_job')),
+          label: Text(context.tr('Post a job')),
           icon: const Icon(Icons.add),
         ) : null,
       ),
@@ -254,7 +254,7 @@ class _Header extends StatelessWidget {
           TextField(
             controller: searchController,
             decoration: InputDecoration(
-              hintText: context.tr('search_services'),
+              hintText: context.tr('Search services'),
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
               filled: true,
@@ -392,8 +392,8 @@ class _JobCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${tr('budget')}: ₹${job.budget}'),
-            Text('${tr('status')}: ${job.jobStatus.toUpperCase()}', style: TextStyle(color: job.jobStatus == 'open' ? Colors.green : Colors.blue)),
+            Text('${tr('Budget')}: ₹${job.budget}'),
+            Text('${tr('Status')}: ${job.jobStatus.toUpperCase()}', style: TextStyle(color: job.jobStatus == 'open' ? Colors.green : Colors.blue)),
             Text(job.description, maxLines: 2, overflow: TextOverflow.ellipsis),
           ],
         ),

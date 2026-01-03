@@ -47,14 +47,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void _startPayment() {
     if (_finalAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('enter_valid_amount'))),
+        SnackBar(content: Text(tr('Enter a valid amount'))),
       );
       return;
     }
 
     final currentUser = AuthService().getCurrentUser();
     if (currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("you_must_be_logged_in_to_pay"))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("You must be logged in to pay"))));
       return;
     }
 
@@ -79,7 +79,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${tr('payment_successful_id')}: $paymentId')),
+          SnackBar(content: Text('${tr('Payment Successful Id')}: $paymentId')),
         );
         Navigator.pop(context);
       },
@@ -87,7 +87,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         if (!mounted) return;
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${tr('payment_failed')}: $error')),
+          SnackBar(content: Text('${tr('Payment Failed')}: $error')),
         );
       },
     );
@@ -108,7 +108,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(title: Text(tr(widget.category == 'wallet_topup' ? 'add_money_to_wallet' : 'pay_for_service_title'))),
+      appBar: AppBar(title: Text(tr(widget.category == 'Wallet topup' ? 'Add money to the Wallet' : 'Pay for service title'))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -119,7 +119,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               keyboardType: TextInputType.number,
               readOnly: widget.amount > 0,
               decoration: InputDecoration(
-                labelText: tr('enter_amount_inr'),
+                labelText: tr('Enter a amount(INR)'),
                 border: const OutlineInputBorder(),
                 filled: true,
                 fillColor: Theme.of(context).colorScheme.surface,
@@ -127,15 +127,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
             const SizedBox(height: 20),
             if (widget.category != 'wallet_topup') ...[
-              _buildPaymentDetailRow(tr('platform_commission'), '₹\${commission.toStringAsFixed(2)}'),
-              _buildPaymentDetailRow(tr('amount_to_craftizen'), '₹\${payoutAmount.toStringAsFixed(2)}'),
+              _buildPaymentDetailRow(tr('Platform Commission'), '₹\${commission.toStringAsFixed(2)}'),
+              _buildPaymentDetailRow(tr('Amount to Craftizen'), '₹\${payoutAmount.toStringAsFixed(2)}'),
             ],
             const Spacer(),
             ElevatedButton(
               onPressed: _isLoading ? null : _startPayment,
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : Text(tr('proceed_to_pay')),
+                  : Text(tr('Proceed to pay')),
             ),
           ],
         ),
