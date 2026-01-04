@@ -231,7 +231,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                       onPressed: _isLoading ? null : _confirmBooking,
                       child: _isLoading 
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : BilingualText(textKey: 'book_now_amount', arguments: [_calculatedPrice.toStringAsFixed(0)], style: const TextStyle(fontSize: 18)),
+                        : Text(tr('book_now_amount', args: [_calculatedPrice.toStringAsFixed(0)]), style: const TextStyle(fontSize: 18)),
                     ),
                     const SizedBox(height: 20),
                   ],
