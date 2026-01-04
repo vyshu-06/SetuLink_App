@@ -77,7 +77,7 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const BilingualText(textKey: 'nearby_craftizens_title')),
+      appBar: AppBar(title: const BilingualText(textKey: 'Nearby craftizens title')),
       body: _currentPosition == null
           ? const Center(child: CircularProgressIndicator())
           : GoogleMap(

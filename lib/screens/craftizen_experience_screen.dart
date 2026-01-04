@@ -91,7 +91,7 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> w
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const BilingualText(textKey: 'tell_us_more', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const BilingualText(textKey: 'Tell us more', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -140,7 +140,7 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> w
                           const SizedBox(height: 32),
                           ElevatedButton(
                             onPressed: _saveAndContinue,
-                            child: const BilingualText(textKey: 'next', style: TextStyle(fontSize: 18)),
+                            child: const BilingualText(textKey: 'Next', style: TextStyle(fontSize: 18)),
                           ),
                         ],
                       ),

@@ -1,8 +1,19 @@
-2025/12/20-15:22:16.572 2d3c Reusing MANIFEST C:\Users\HP\AppData\Local\Temp\flutter_tools.fb0cd493\flutter_tools_chrome_device.2d741be5\Default\Site Characteristics Database/MANIFEST-000001
-2025/12/20-15:22:16.676 2d3c Recovering log #10
-2025/12/20-15:22:16.893 2d3c Reusing old log C:\Users\HP\AppData\Local\Temp\flutter_tools.fb0cd493\flutter_tools_chrome_device.2d741be5\Default\Site Characteristics Database/000010.log 
-2025/12/20-15:22:16.895 2d3c Delete type=0 #3
-2025/12/20-15:22:16.895 2d3c Delete type=2 #4
-2025/12/20-15:22:16.895 2d3c Delete type=0 #6
-2025/12/20-15:22:16.896 2d3c Delete type=2 #7
-2025/12/20-15:22:16.896 2d3c Delete type=2 #8
+2026/01/04-17:43:13.504 4580 Reusing MANIFEST C:\Users\siric\AppData\Local\Temp\flutter_tools.6fbadd03\flutter_tools_chrome_device.e1a33657\Default\Site Characteristics Database/MANIFEST-000001
+2026/01/04-17:43:13.505 4580 Recovering log #3
+2026/01/04-17:43:13.505 4580 Level-0 table #20: started
+2026/01/04-17:43:13.510 4580 Level-0 table #20: 194 bytes OK
+2026/01/04-17:43:13.510 4580 Recovering log #6
+2026/01/04-17:43:13.511 4580 Level-0 table #21: started
+2026/01/04-17:43:13.515 4580 Level-0 table #21: 165 bytes OK
+2026/01/04-17:43:13.515 4580 Recovering log #10
+2026/01/04-17:43:13.516 4580 Level-0 table #22: started
+2026/01/04-17:43:13.521 4580 Level-0 table #22: 228 bytes OK
+2026/01/04-17:43:13.521 4580 Recovering log #17
+2026/01/04-17:43:13.522 4580 Reusing old log C:\Users\siric\AppData\Local\Temp\flutter_tools.6fbadd03\flutter_tools_chrome_device.e1a33657\Default\Site Characteristics Database/000017.log 
+2026/01/04-17:43:13.531 4580 Delete type=0 #3
+2026/01/04-17:43:13.531 4580 Delete type=2 #4
+2026/01/04-17:43:13.531 4580 Delete type=0 #6
+2026/01/04-17:43:13.531 4580 Delete type=2 #7
+2026/01/04-17:43:13.531 4580 Delete type=2 #8
+2026/01/04-17:43:13.531 4580 Delete type=0 #10
+2026/01/04-17:43:13.531 4580 Delete type=2 #12

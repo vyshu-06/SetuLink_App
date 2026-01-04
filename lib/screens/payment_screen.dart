@@ -129,7 +129,7 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: BilingualText(
-          textKey: widget.category == 'wallet_topup' ? 'add_money_to_wallet' : 'pay_for_service',
+          textKey: widget.category == 'Wallet topup' ? 'Add money to wallet' : 'Pay for service',
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
@@ -188,7 +188,7 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
                       onPressed: _isLoading ? null : _startPayment,
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : BilingualText(textKey: 'proceed_to_pay', style: const TextStyle(fontSize: 18)),
+                          : BilingualText(textKey: 'Proceed to pay', style: const TextStyle(fontSize: 18)),
                     ),
                     const SizedBox(height: 20),
                   ],

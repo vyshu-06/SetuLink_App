@@ -79,7 +79,7 @@ class _JobRequestScreenState extends State<JobRequestScreen> with SingleTickerPr
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const BilingualText(textKey: 'schedule_your_service', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const BilingualText(textKey: 'Schedule your service', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -111,12 +111,12 @@ class _JobRequestScreenState extends State<JobRequestScreen> with SingleTickerPr
                         child: Column(
                           children: [
                             ListTile(
-                              title: const BilingualText(textKey: 'service'),
+                              title: const BilingualText(textKey: 'Service'),
                               subtitle: Text(widget.category ?? 'N/A', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
                             ),
                             const Divider(),
                             ListTile(
-                              title: const BilingualText(textKey: 'scheduled_for'),
+                              title: const BilingualText(textKey: 'Scheduled for'),
                               subtitle: Text(DateFormat('dd MMM, yyyy').format(_selectedDate), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
                               trailing: const Icon(Icons.calendar_today, color: AppColors.primaryColor),
                               onTap: () async {
@@ -138,7 +138,7 @@ class _JobRequestScreenState extends State<JobRequestScreen> with SingleTickerPr
                       onPressed: _isLoading ? null : _proceedToPricing,
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const BilingualText(textKey: 'proceed_to_select_problem', style: TextStyle(fontSize: 18)),
+                          : const BilingualText(textKey: 'Proceed to select problem', style: TextStyle(fontSize: 18)),
                     ),
                     const SizedBox(height: 20),
                   ],

@@ -122,7 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const BilingualText(textKey: 'profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const BilingualText(textKey: 'Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -192,12 +192,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         _buildInfoCard(icon: Icons.phone, text: phone),
         const SizedBox(height: 24),
         if (role == 'craftizen') ...[
-          _buildOptionButton(context, textKey: 'verify_kyc', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KYCScreen()))),
-          _buildOptionButton(context, textKey: 'subscription_plans', onTap: () => Navigator.pushNamed(context, '/subscription_plans')),
+          _buildOptionButton(context, textKey: 'Verify kyc', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KYCScreen()))),
+          _buildOptionButton(context, textKey: 'Subscription plans', onTap: () => Navigator.pushNamed(context, '/subscription_plans')),
         ],
         const Divider(color: Colors.white54, thickness: 1, indent: 20, endIndent: 20),
-        _buildOptionTile(context, icon: Icons.logout, textKey: 'logout', onTap: _handleLogout),
-        _buildOptionTile(context, icon: Icons.switch_account, textKey: 'switch_accounts', onTap: _handleSwitchAccount),
+        _buildOptionTile(context, icon: Icons.logout, textKey: 'Logout', onTap: _handleLogout),
+        _buildOptionTile(context, icon: Icons.switch_account, textKey: 'Switch Accounts', onTap: _handleSwitchAccount),
       ],
     );
   }

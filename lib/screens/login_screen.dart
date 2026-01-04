@@ -181,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
-                            child: const BilingualText(textKey: 'login_with_phone'),
+                            child: const BilingualText(textKey: 'Login with phone'),
                           ),
                           if (error.isNotEmpty)
                             Padding(
