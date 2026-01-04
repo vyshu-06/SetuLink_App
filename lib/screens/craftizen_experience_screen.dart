@@ -118,21 +118,21 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> w
                         children: [
                           const SizedBox(height: 50),
                           _buildDropdown(
-                            label: tr('how_many_years_experience'),
+                            label: tr('How many years of experience you have?'),
                             value: _experience,
                             items: ['0-1', '1-3', '3-5', '5+'],
                             onChanged: (val) => setState(() => _experience = val),
                           ),
                           const SizedBox(height: 24),
                           _buildDropdown(
-                            label: tr('mention_travel_radius'),
+                            label: tr('Mention your travel radius'),
                             value: _radius,
                             items: ['5 km', '10 km', '25 km', '50 km+'],
                             onChanged: (val) => setState(() => _radius = val),
                           ),
                           const SizedBox(height: 24),
                           _buildDropdown(
-                            label: tr('are_you_certified'),
+                            label: tr('Are you certified?'),
                             value: _isCertified,
                             items: ['Yes', 'No'],
                             onChanged: (val) => setState(() => _isCertified = val),

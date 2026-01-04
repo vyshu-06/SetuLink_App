@@ -118,7 +118,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
       await _jobService.createJob(newJob);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('job_posted_successfully'))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Job posted successfully'))));
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const CitizenHome(initialIndex: 1)),
           (route) => false,
@@ -126,7 +126,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${tr('failed_to_post_job')}: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${tr('Failed to post job')}: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
