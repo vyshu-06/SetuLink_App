@@ -55,7 +55,7 @@ class _CraftizenHomeState extends State<CraftizenHome> {
         extendBody: true,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: const BilingualText(textKey: 'Craftizen Dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: const BilingualText(textKey: 'craftizen_dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           backgroundColor: Colors.transparent,
           elevation: 0,
           actions: [
@@ -73,7 +73,7 @@ class _CraftizenHomeState extends State<CraftizenHome> {
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
                   value: 'logout',
-                  child: BilingualText(textKey: 'Logout'),
+                  child: BilingualText(textKey: 'logout'),
                 ),
               ],
             ),
@@ -154,7 +154,7 @@ class _HomeTabPage extends StatelessWidget {
                   child: Column(
                     children: [
                       const BilingualText(
-                        textKey: 'Welcome Craftizen',
+                        textKey: 'welcome_craftizen',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
                       ),
@@ -175,7 +175,7 @@ class _HomeTabPage extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            BilingualText(textKey: isAvailable ? 'Available for work' : 'Not available', style: TextStyle(color: isAvailable ? Colors.white : Colors.white70, fontWeight: FontWeight.bold)),
+                            BilingualText(textKey: isAvailable ? 'available_for_work' : 'not_available', style: TextStyle(color: isAvailable ? Colors.white : Colors.white70, fontWeight: FontWeight.bold)),
                             const SizedBox(width: 8),
                             Switch(
                               value: isAvailable,
@@ -188,7 +188,7 @@ class _HomeTabPage extends StatelessWidget {
                       const SizedBox(height: 16),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.edit, size: 20),
-                        label: const BilingualText(textKey: 'Edit professional profile'),
+                        label: const BilingualText(textKey: 'edit_professional_profile'),
                         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen())),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white.withOpacity(0.9),
@@ -225,12 +225,12 @@ class _HomeTabPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const BilingualText(
-              textKey: 'My Skills',
+              textKey: 'my_skills',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryColor),
             ),
             const SizedBox(height: 12),
             if (skills.isEmpty)
-              const Center(child: BilingualText(textKey: 'No skills added'))
+              const Center(child: BilingualText(textKey: 'no_skills_added'))
             else
               Wrap(
                 spacing: 8.0,
@@ -255,7 +255,7 @@ class _HomeTabPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const BilingualText(
-              textKey: 'Job requests',
+              textKey: 'job_requests',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryColor),
             ),
             const SizedBox(height: 12),
@@ -264,14 +264,14 @@ class _HomeTabPage extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 24.0),
                   child: BilingualText(
-                    textKey: 'Kyc not verified jobs',
+                    textKey: 'kyc_not_verified_jobs',
                     style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ),
               )
             else if (skills.isEmpty)
-              const Center(child: BilingualText(textKey: 'Add skills to see jobs'))
+              const Center(child: BilingualText(textKey: 'add_skills_to_see_jobs'))
             else
               const Center(child: BilingualText(textKey: 'go_to_jobs_tab')),
           ],

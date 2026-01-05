@@ -125,5 +125,6 @@
   "subscription_payment_verified": "చందా చెల్లింపు విజయవంతంగా ధృవీకరించబడింది",
   "subscription_verification_failed": "చందా ధృవీకరణ విఫలమైంది",
   "subscribe_title": "చందా పొందండి",
-  "subscribe_now": "ఇప్పుడే చందా పొందండి"
+  "subscribe_now": "ఇప్పుడే చందా పొందండి",
+  "please_upload_skill_video": "దయచేసి {skill}లో మీ నైపుణ్యాన్ని ప్రదర్శించే ఒక చిన్న వీడియోను అప్‌లోడ్ చేయండి."
 }

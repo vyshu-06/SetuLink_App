@@ -139,5 +139,6 @@
   "subscription_payment_verified": "Subscription payment verified successfully",
   "subscription_verification_failed": "Subscription verification failed",
   "subscribe_title": "Subscribe",
-  "subscribe_now": "Subscribe Now"
+  "subscribe_now": "Subscribe Now",
+  "please_upload_skill_video": "Please upload a short video demonstrating your skill in {skill}."
 }

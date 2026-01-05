@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -26,6 +27,12 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> {
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickVideo() async {
+    if (kIsWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Video recording is not supported on the web.')),
+      );
+      return;
+    }
     final XFile? pickedFile = await _picker.pickVideo(
       source: ImageSource.camera,
       maxDuration: const Duration(minutes: 2),
