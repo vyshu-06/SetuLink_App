@@ -45,7 +45,7 @@ class _CraftizenJobListScreenState extends State<CraftizenJobListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: BilingualText(textKey: 'job_requests'),
+        title: BilingualText(textKey: 'Job requests'),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -58,7 +58,7 @@ class _CraftizenJobListScreenState extends State<CraftizenJobListScreen> {
   Widget _buildJobList() {
     // Replace with actual job list implementation
     return Center(
-      child: BilingualText(textKey: 'no_jobs_available'),
+      child: BilingualText(textKey: 'No jobs available'),
     );
   }
 
@@ -72,7 +72,7 @@ class _CraftizenJobListScreenState extends State<CraftizenJobListScreen> {
             const Icon(Icons.warning, size: 60, color: Colors.orange),
             const SizedBox(height: 16),
             BilingualText(
-              textKey: 'kyc_not_verified_message',
+              textKey: 'Kyc not verified message',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 18),
             ),

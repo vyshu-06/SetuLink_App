@@ -115,7 +115,7 @@ class _CraftizenSkillSelectionScreenState extends State<CraftizenSkillSelectionS
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: BilingualText(textKey: 'select_skills_title', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: BilingualText(textKey: 'Select skills title', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -173,7 +173,7 @@ class _CraftizenSkillSelectionScreenState extends State<CraftizenSkillSelectionS
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _continueToNextStep,
-                  child: const BilingualText(textKey: 'next', style: TextStyle(fontSize: 18)),
+                  child: const BilingualText(textKey: 'Next', style: TextStyle(fontSize: 18)),
                 ),
               ),
             ),

@@ -26,17 +26,17 @@ class _CraftizenCommonQuestionsScreenState
   final List<Map<String, dynamic>> _questions = [
     {
       'key': 'question_1',
-      'textKey': 'are_you_willing_to_undergo_background_verification',
+      'textKey': 'Are you willing to undergo background verification',
       'options': ['yes', 'no']
     },
     {
       'key': 'question_2',
-      'textKey': 'do_you_have_your_own_tools_and_equipment',
+      'textKey': 'Do you have your own tools and equipment',
       'options': ['yes', 'no']
     },
     {
       'key': 'question_3',
-      'textKey': 'are_you_available_to_work_on_weekends',
+      'textKey': 'Are you available to work on weekends',
       'options': ['yes', 'no']
     },
   ];

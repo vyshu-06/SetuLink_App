@@ -60,7 +60,7 @@ class _CitizenHomeState extends State<CitizenHome> {
         extendBody: true,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: BilingualText(textKey: 'citizen_dashboard', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: BilingualText(textKey: 'Citizen dashboard', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           backgroundColor: Colors.transparent,
           elevation: 0,
           actions: [
@@ -74,7 +74,7 @@ class _CitizenHomeState extends State<CitizenHome> {
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
                   value: 'logout',
-                  child: BilingualText(textKey: 'logout'),
+                  child: BilingualText(textKey: 'Logout'),
                 ),
               ],
             ),
@@ -237,9 +237,9 @@ class _Header extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BilingualText(textKey: 'welcome_citizen', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+        BilingualText(textKey: 'Welcome Citizen', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        BilingualText(textKey: 'what_service_looking_for', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white.withOpacity(0.9))),
+        BilingualText(textKey: 'What service looking for', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white.withOpacity(0.9))),
         const SizedBox(height: 24),
         TextField(
           controller: searchController,
@@ -268,7 +268,7 @@ class _CategorySection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 4.0, bottom: 16.0),
             child: BilingualText(
-              textKey: category['categoryKey']!,
+              textKey: category['CategoryKey']!,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
@@ -305,7 +305,7 @@ class _CategorySection extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
                         child: BilingualText(
-                          textKey: service['titleKey']!,
+                          textKey: service['TitleKey']!,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                           maxLines: 2,
@@ -331,7 +331,7 @@ class _BookingsTabPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentUser = AuthService().getCurrentUser();
     if (currentUser == null) {
-      return Center(child: BilingualText(textKey: 'log_in_to_see_bookings', style: const TextStyle(color: Colors.white)));
+      return Center(child: BilingualText(textKey: 'Log in to see bookings', style: const TextStyle(color: Colors.white)));
     }
     return SafeArea(
         child: StreamBuilder<List<JobModel>>(
@@ -341,7 +341,7 @@ class _BookingsTabPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator(color: Colors.white));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: BilingualText(textKey: 'no_bookings_yet', style: const TextStyle(color: Colors.white)));
+            return Center(child: BilingualText(textKey: 'No bookings yet', style: const TextStyle(color: Colors.white)));
           }
 
           final jobs = snapshot.data!;

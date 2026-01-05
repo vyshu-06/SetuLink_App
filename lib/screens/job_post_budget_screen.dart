@@ -145,7 +145,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const BilingualText(textKey: 'price_summary', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const BilingualText(textKey: 'Price summary', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -175,7 +175,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           children: [
-                            BilingualText(textKey: 'total_estimated_price', style: Theme.of(context).textTheme.titleLarge),
+                            BilingualText(textKey: 'Total estimated price', style: Theme.of(context).textTheme.titleLarge),
                             const SizedBox(height: 10),
                             Text('₹${_calculatedPrice.toStringAsFixed(0)}', 
                                  style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
@@ -219,7 +219,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                         elevation: 4,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         child: ExpansionTile(
-                          title: const BilingualText(textKey: 'price_breakdown'),
+                          title: const BilingualText(textKey: 'Price breakdown'),
                           children: breakdown.entries.map((e) => ListTile(
                             title: BilingualText(textKey: e.key.replaceAll('_', ' ').toLowerCase()),
                             trailing: Text('₹${e.value.toStringAsFixed(0)}'),
