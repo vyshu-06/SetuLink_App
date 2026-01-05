@@ -262,7 +262,7 @@ class _HomeTabPage extends StatelessWidget {
             if (!isKycVerified)
               const Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24.0),
+                  padding: const EdgeInsets.symmetric(vertical: 24.0),
                   child: BilingualText(
                     textKey: 'kyc_not_verified_jobs',
                     style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
@@ -273,7 +273,7 @@ class _HomeTabPage extends StatelessWidget {
             else if (skills.isEmpty)
               const Center(child: BilingualText(textKey: 'add_skills_to_see_jobs'))
             else
-              const Center(child: BilingualText(textKey: 'Go to jobs tab')),
+              const Center(child: BilingualText(textKey: 'go_to_jobs_tab')),
           ],
         ),
       ),
@@ -297,8 +297,8 @@ class _JobsTabPage extends StatelessWidget {
               color: Colors.white.withOpacity(0.1),
               child: const TabBar(
                 tabs: [
-                  Tab(child: BilingualText(textKey: 'New jobs')),
-                  Tab(child: BilingualText(textKey: 'My jobs')),
+                  Tab(child: BilingualText(textKey: 'new_jobs')),
+                  Tab(child: BilingualText(textKey: 'my_jobs')),
                 ],
                 indicatorColor: AppColors.accentColor,
                 labelColor: Colors.white,
@@ -344,14 +344,14 @@ class _NewJobsList extends StatelessWidget {
               children: const [
                 Icon(Icons.verified_user_outlined, size: 64, color: Colors.orangeAccent),
                 SizedBox(height: 16),
-                BilingualText(textKey: 'Kyc not verified jobs', style: TextStyle(color: Colors.white), textAlign: TextAlign.center,),
+                BilingualText(textKey: 'kyc_not_verified_jobs', style: TextStyle(color: Colors.white), textAlign: TextAlign.center,),
               ],
             ),
           );
         }
 
         if (skills.isEmpty) {
-          return const Center(child: BilingualText(textKey: 'add skills to see jobs', style: TextStyle(color: Colors.white)));
+          return const Center(child: BilingualText(textKey: 'add_skills_to_see_jobs', style: TextStyle(color: Colors.white)));
         }
 
         return StreamBuilder<List<JobModel>>(

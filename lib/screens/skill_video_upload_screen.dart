@@ -28,20 +28,25 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> {
 
   Future<void> _pickVideo() async {
     if (kIsWeb) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Video recording is not supported on the web.')),
+      final XFile? pickedFile = await _picker.pickVideo(
+        source: ImageSource.gallery,
       );
-      return;
-    }
-    final XFile? pickedFile = await _picker.pickVideo(
-      source: ImageSource.camera,
-      maxDuration: const Duration(minutes: 2),
-    );
+      if (pickedFile != null) {
+        setState(() {
+          _videoFile = File(pickedFile.path);
+        });
+      }
+    } else {
+      final XFile? pickedFile = await _picker.pickVideo(
+        source: ImageSource.camera,
+        maxDuration: const Duration(minutes: 2),
+      );
 
-    if (pickedFile != null) {
-      setState(() {
-        _videoFile = File(pickedFile.path);
-      });
+      if (pickedFile != null) {
+        setState(() {
+          _videoFile = File(pickedFile.path);
+        });
+      }
     }
   }
 
@@ -87,7 +92,7 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              tr('please_upload_skill_video', args: [widget.skill]),
+              tr('please_upload_skill_video', namedArgs: {'skill': widget.skill}),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium,
             ),
@@ -108,7 +113,7 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> {
             ElevatedButton.icon(
               onPressed: _uploading ? null : _pickVideo,
               icon: const Icon(Icons.camera_alt),
-              label: Text(tr('record_video')),
+              label: Text(tr(kIsWeb ? 'select_video' : 'record_video')),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
