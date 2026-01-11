@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:setulink_app/theme/app_colors.dart';
 
 class SkillVideoUploadScreen extends StatefulWidget {
   final String userId;
@@ -21,32 +22,53 @@ class SkillVideoUploadScreen extends StatefulWidget {
   State<SkillVideoUploadScreen> createState() => _SkillVideoUploadScreenState();
 }
 
-class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> {
-  File? _videoFile;
+class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> with SingleTickerProviderStateMixin {
+  XFile? _videoFile;
   bool _uploading = false;
+  double _uploadProgress = 0;
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> _pickVideo() async {
-    if (kIsWeb) {
-      final XFile? pickedFile = await _picker.pickVideo(
-        source: ImageSource.gallery,
-      );
-      if (pickedFile != null) {
-        setState(() {
-          _videoFile = File(pickedFile.path);
-        });
-      }
-    } else {
-      final XFile? pickedFile = await _picker.pickVideo(
-        source: ImageSource.camera,
-        maxDuration: const Duration(minutes: 2),
-      );
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
-      if (pickedFile != null) {
-        setState(() {
-          _videoFile = File(pickedFile.path);
-        });
-      }
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickVideo() async {
+    final source = kIsWeb ? ImageSource.gallery : ImageSource.camera;
+    final XFile? pickedFile = await _picker.pickVideo(
+      source: source,
+      maxDuration: const Duration(minutes: 2),
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _videoFile = pickedFile;
+        _uploadProgress = 0;
+      });
     }
   }
 
@@ -55,6 +77,7 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> {
 
     setState(() {
       _uploading = true;
+      _uploadProgress = 0;
     });
 
     try {
@@ -64,76 +87,144 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> {
           .child(widget.userId)
           .child('${widget.skill}_${DateTime.now().millisecondsSinceEpoch}.mp4');
 
-      final uploadTask = storageRef.putFile(_videoFile!);
-      final snapshot = await uploadTask.whenComplete(() {});
+      UploadTask uploadTask;
+      
+      if (kIsWeb) {
+        // Correct way for Web to avoid memory hang: use readAsBytes directly in putData
+        uploadTask = storageRef.putData(
+          await _videoFile!.readAsBytes(),
+          SettableMetadata(contentType: 'video/mp4'),
+        );
+      } else {
+        uploadTask = storageRef.putFile(
+          File(_videoFile!.path),
+          SettableMetadata(contentType: 'video/mp4'),
+        );
+      }
+
+      // Listen to progress events
+      uploadTask.snapshotEvents.listen(
+        (TaskSnapshot snapshot) {
+          if (mounted && snapshot.totalBytes > 0) {
+            setState(() {
+              _uploadProgress = snapshot.bytesTransferred / snapshot.totalBytes;
+            });
+          }
+        },
+        onError: (e) {
+          debugPrint('Upload error: $e');
+          if (mounted) {
+            setState(() => _uploading = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Upload error: $e')),
+            );
+          }
+        },
+      );
+
+      final snapshot = await uploadTask;
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
       widget.onVideoUploaded(downloadUrl);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed: $e')),
-      );
-      setState(() {
-        _uploading = false;
-      });
+      if (mounted) {
+        setState(() => _uploading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: ${e.toString()}')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('${tr('upload_video_for')} ${widget.skill}'),
+        title: Text(
+          tr('upload_video_for', namedArgs: {'skill': tr(widget.skill)}),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              tr('please_upload_skill_video', namedArgs: {'skill': widget.skill}),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 24),
-            if (_videoFile != null) ...[
-              const Icon(Icons.check_circle, color: Colors.green, size: 60),
-              const SizedBox(height: 8),
-              Text(
-                tr('video_selected'),
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.green),
-              ),
-              const SizedBox(height: 24),
-            ] else ...[
-              const Icon(Icons.videocam_outlined, size: 80, color: Colors.grey),
-              const SizedBox(height: 24),
-            ],
-            ElevatedButton.icon(
-              onPressed: _uploading ? null : _pickVideo,
-              icon: const Icon(Icons.camera_alt),
-              label: Text(tr(kIsWeb ? 'select_video' : 'record_video')),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: (_videoFile != null && !_uploading) ? _uploadVideo : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-              ),
-              child: _uploading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 50),
+                    Text(
+                      tr('please_upload_skill_video', namedArgs: {'skill': tr(widget.skill)}),
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 30),
+                    _videoFile != null
+                        ? const Icon(Icons.check_circle, color: Colors.white, size: 80)
+                        : const Icon(Icons.videocam_outlined, size: 80, color: Colors.white70),
+                    const SizedBox(height: 16),
+                    if (_videoFile != null)
+                      Text(
+                        tr('video_selected'),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
-                    )
-                  : Text(tr('upload_and_continue')),
+                    const SizedBox(height: 30),
+                    if (_uploading) ...[
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: _uploadProgress > 0 ? _uploadProgress : null,
+                          backgroundColor: Colors.white24,
+                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                          minHeight: 10,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _uploadProgress > 0 
+                          ? '${(_uploadProgress * 100).toStringAsFixed(0)}%'
+                          : tr('uploading'),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ] else ...[
+                      ElevatedButton.icon(
+                        onPressed: _pickVideo,
+                        icon: const Icon(Icons.video_call),
+                        label: Text(tr(kIsWeb ? 'select_video' : 'record_video')),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.accentColor,
+                          foregroundColor: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _videoFile != null ? _uploadVideo : null,
+                        child: Text(tr('upload_and_continue')),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -7,6 +7,8 @@ class BilingualText extends StatelessWidget {
   final TextAlign? textAlign;
   final int? maxLines;
   final TextOverflow? overflow;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
 
   const BilingualText({
     required this.textKey,
@@ -14,13 +16,15 @@ class BilingualText extends StatelessWidget {
     this.textAlign,
     this.maxLines,
     this.overflow,
+    this.args,
+    this.namedArgs,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      textKey.tr(),
+      textKey.tr(args: args, namedArgs: namedArgs),
       style: style,
       textAlign: textAlign,
       maxLines: maxLines,

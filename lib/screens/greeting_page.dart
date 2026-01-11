@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:setulink_app/screens/login_screen.dart';
 import 'package:setulink_app/screens/register_screen.dart';
-import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'package:setulink_app/theme/app_colors.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class GreetingPage extends StatefulWidget {
   const GreetingPage({super.key});
@@ -70,16 +70,16 @@ class _GreetingPageState extends State<GreetingPage> with SingleTickerProviderSt
                         errorBuilder: (context, error, stackTrace) => const Icon(Icons.link, size: 100, color: Colors.white),
                       ),
                       const SizedBox(height: 20),
-                      const BilingualText(
-                        textKey: 'setulink_title',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 32),
+                      Text(
+                        'setulink_title'.tr(),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 32),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
-                      BilingualText(
-                        textKey: 'tagline',
+                      Text(
+                        'tagline'.tr(),
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white.withOpacity(0.9), height: 1.5),
+                        style: const TextStyle(color: Colors.white70, fontSize: 16, height: 1.5),
                       ),
                       const SizedBox(height: 50),
                       SizedBox(
@@ -90,7 +90,7 @@ class _GreetingPageState extends State<GreetingPage> with SingleTickerProviderSt
                             backgroundColor: Colors.white,
                             foregroundColor: AppColors.primaryColor,
                           ),
-                          child: const BilingualText(textKey: 'user_button', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          child: Text('user_button'.tr(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -102,23 +102,23 @@ class _GreetingPageState extends State<GreetingPage> with SingleTickerProviderSt
                             backgroundColor: AppColors.accentColor,
                             foregroundColor: Colors.black,
                           ),
-                          child: const BilingualText(textKey: 'craftizen_button', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          child: Text('craftizen_button'.tr(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const SizedBox(height: 30),
                       InkWell(
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen(initialRole: 'admin'))),
-                        child: const BilingualText(textKey: 'admin_panel_button', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+                        child: Text('admin_panel_button'.tr(), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
                       ),
                       const SizedBox(height: 60),
                       Wrap(
                         alignment: WrapAlignment.center,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          const BilingualText(textKey: 'new_to_app_text', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                          Text('new_to_app_text'.tr(), style: const TextStyle(color: Colors.white70, fontSize: 13)),
                           InkWell(
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen())),
-                            child: const BilingualText(textKey: 'register_now_button', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                            child: Text('register_now_button'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                           ),
                         ],
                       ),
