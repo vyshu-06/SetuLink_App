@@ -26,6 +26,7 @@
         "geoflutterfire2",
         "google_maps_flutter",
         "google_mlkit_text_recognition",
+        "http",
         "image_picker",
         "location",
         "path_provider",
@@ -104,6 +105,16 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "http",
+      "version": "1.6.0",
+      "dependencies": [
+        "async",
+        "http_parser",
+        "meta",
+        "web"
       ]
     },
     {
@@ -286,7 +297,7 @@
     },
     {
       "name": "image_picker",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "dependencies": [
         "flutter",
         "image_picker_android",
@@ -612,6 +623,24 @@
       ]
     },
     {
+      "name": "http_parser",
+      "version": "4.1.2",
+      "dependencies": [
+        "collection",
+        "source_span",
+        "string_scanner",
+        "typed_data"
+      ]
+    },
+    {
+      "name": "async",
+      "version": "2.13.0",
+      "dependencies": [
+        "collection",
+        "meta"
+      ]
+    },
+    {
       "name": "nm",
       "version": "0.5.0",
       "dependencies": [
@@ -815,16 +844,6 @@
       "name": "synchronized",
       "version": "3.4.0",
       "dependencies": []
-    },
-    {
-      "name": "http",
-      "version": "1.5.0",
-      "dependencies": [
-        "async",
-        "http_parser",
-        "meta",
-        "web"
-      ]
     },
     {
       "name": "audioplayers_windows",
@@ -1440,14 +1459,6 @@
       ]
     },
     {
-      "name": "async",
-      "version": "2.13.0",
-      "dependencies": [
-        "collection",
-        "meta"
-      ]
-    },
-    {
       "name": "leak_tracker_testing",
       "version": "3.0.2",
       "dependencies": [
@@ -1507,16 +1518,6 @@
       "name": "fixnum",
       "version": "1.1.1",
       "dependencies": []
-    },
-    {
-      "name": "http_parser",
-      "version": "4.1.2",
-      "dependencies": [
-        "collection",
-        "source_span",
-        "string_scanner",
-        "typed_data"
-      ]
     },
     {
       "name": "file_selector_windows",

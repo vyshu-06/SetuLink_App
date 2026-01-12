@@ -188,8 +188,6 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
       {'q': 'When to use high beams?', 'options': ['Fog', 'City', 'Open road/No oncoming', 'Rain'], 'a': 2},
       {'q': 'Tire pressure check freq?', 'options': ['Annually', 'Monthly', 'Every 5 years', 'When flat'], 'a': 1},
     ],
-
-    // CATEGORY 2: TECHNICAL
     'mobile_repair': [
       {'q': 'First step before opening phone?', 'options': ['Remove screen', 'Power off', 'Charge it', 'Call owner'], 'a': 1},
       {'q': 'Solution for water damage?', 'options': ['Hairdryer', 'Rice', 'Open and clean with Isopropyl', 'Turn it on'], 'a': 2},
@@ -210,7 +208,7 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
       {'q': 'Microwave sparking?', 'options': ['Door loose', 'Metal inside', 'Old food', 'Low power'], 'a': 1},
       {'q': 'Dishwasher not draining?', 'options': ['No soap', 'Clogged filter/Drain pump', 'Cold water', 'Door open'], 'a': 1},
       {'q': 'Oven not heating?', 'options': ['Light off', 'Heating element/Igniter failure', 'Timer set', 'Door glass'], 'a': 1},
-      {'q': 'A "Multimeter" is used for...', 'options': ['Measuring time', 'Checking electrical continuity', 'Weighing', 'Cleaning'], 'a': 1},
+      {'q': 'A Multimeter is used for...', 'options': ['Measuring time', 'Checking electrical continuity', 'Weighing', 'Cleaning'], 'a': 1},
       {'q': 'Vacuum suction loss?', 'options': ['Full bag/Clogged hose', 'New filter', 'Long cord', 'Power on'], 'a': 0},
       {'q': 'AC leaking water inside?', 'options': ['Normal', 'Blocked condensate drain', 'Too cold', 'Filter missing'], 'a': 1},
     ],
@@ -244,7 +242,7 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
       {'q': 'Router placement?', 'options': ['Floor', 'Central open area', 'Inside metal box', 'Bathroom'], 'a': 1},
       {'q': 'Fastest Wi-Fi standard?', 'options': ['Wi-Fi 4', 'Wi-Fi 6', 'Wi-Fi 1', 'Dial-up'], 'a': 1},
       {'q': 'Resetting router password?', 'options': ['Buy new', 'Factory Reset button', 'Change Wi-Fi', 'Call ISP'], 'a': 1},
-      {'q': 'What is a "Repeater"?', 'options': ['New internet', 'Device to extend signal range', 'Phone charger', 'Monitor'], 'a': 1},
+      {'q': 'What is a Repeater?', 'options': ['New internet', 'Device to extend signal range', 'Phone charger', 'Monitor'], 'a': 1},
       {'q': 'Secure Wi-Fi encryption?', 'options': ['WEP', 'WPA3', 'Open', 'No password'], 'a': 1},
       {'q': 'Ethernet cable (LAN)?', 'options': ['Wireless', 'Wired connection', 'Battery', 'Screen'], 'a': 1},
       {'q': 'Ping measures?', 'options': ['Speed', 'Latency/Delay', 'Weight', 'Distance'], 'a': 1},
@@ -256,7 +254,7 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
       {'q': 'Smart bulb advantage?', 'options': ['Brighter', 'Dimming/Remote control', 'Cheaper', 'Bigger'], 'a': 1},
       {'q': 'What is Geofencing?', 'options': ['Physical fence', 'Location-based automation', 'Internet wall', 'Gardening'], 'a': 1},
       {'q': 'Smart locks need?', 'options': ['Keys', 'Battery/Wi-Fi connection', 'Wires', 'Oil'], 'a': 1},
-      {'q': '"Scenes" in automation?', 'options': ['Movies', 'Pre-set group of actions', 'Pictures', 'Rooms'], 'a': 1},
+      {'q': 'Scenes in automation?', 'options': ['Movies', 'Pre-set group of actions', 'Pictures', 'Rooms'], 'a': 1},
       {'q': 'Smart Thermostat benefit?', 'options': ['Cooks food', 'Energy savings/Remote temp control', 'Bigger TV', 'Music'], 'a': 1},
       {'q': 'Voice assistant example?', 'options': ['Chrome', 'Alexa/Google Assistant', 'Windows', 'Facebook'], 'a': 1},
       {'q': 'Sensor to detect leaks?', 'options': ['Motion', 'Water/Flood sensor', 'Smoke', 'Contact'], 'a': 1},
@@ -269,13 +267,11 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
       {'q': 'Panel maintenance?', 'options': ['Waxing', 'Regular cleaning/Dust removal', 'Painting', 'Changing glass'], 'a': 1},
       {'q': 'Solar battery function?', 'options': ['Make sun brighter', 'Store energy for night', 'Cool panels', 'Increase voltage'], 'a': 1},
       {'q': 'Grid-tied system?', 'options': ['Connected to utility grid', 'Uses no wires', 'Only for camping', 'No panels'], 'a': 0},
-      {'q': 'Solar "Charge Controller"?', 'options': ['Increases sun', 'Prevents battery overcharging', 'Turns off TV', 'Remote'], 'a': 1},
+      {'q': 'Solar Charge Controller?', 'options': ['Increases sun', 'Prevents battery overcharging', 'Turns off TV', 'Remote'], 'a': 1},
       {'q': 'Net Metering?', 'options': ['Selling excess power back to grid', 'Measuring sun', 'Cleaning tool', 'Battery life'], 'a': 0},
       {'q': 'Shadow effect?', 'options': ['Better cooling', 'Significant power reduction', 'Makes panels blue', 'None'], 'a': 1},
       {'q': 'Kilowatt hour (kWh)?', 'options': ['Weight', 'Unit of energy consumption', 'Speed', 'Heat'], 'a': 1},
     ],
-
-    // CATEGORY 3: COMMUNITY/SKILL-BASED
     'tutor': [
       {'q': 'Best way to check student understanding?', 'options': ['Assume they know', 'Ask questions/Apply concepts', 'Talk faster', 'Give answers'], 'a': 1},
       {'q': 'Learning style focusing on pictures?', 'options': ['Auditory', 'Visual', 'Kinesthetic', 'Reading'], 'a': 1},
@@ -306,9 +302,9 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
       {'q': 'Instrument with keys?', 'options': ['Violin', 'Piano', 'Flute', 'Drum'], 'a': 1},
       {'q': 'What is a Sharp (#)?', 'options': ['Lower pitch', 'Higher pitch', 'Loud sound', 'Ending'], 'a': 1},
       {'q': 'Teaching beginner rhythm?', 'options': ['Metronome/Clapping', 'Playing fast', 'Skipping notes', 'Silent reading'], 'a': 0},
-      {'q': 'A "Chord" is...', 'options': ['One note', 'Multiple notes played together', 'A string', 'Instrument case'], 'a': 1},
+      {'q': 'A Chord is...', 'options': ['One note', 'Multiple notes played together', 'A string', 'Instrument case'], 'a': 1},
       {'q': 'Major vs Minor scale?', 'options': ['Happy vs Sad/Serious sound', 'Loud vs Quiet', 'Fast vs Slow', 'Big vs Small'], 'a': 0},
-      {'q': 'What is "Dynamics"?', 'options': ['Speed', 'Volume variation (Loud/Soft)', 'Note height', 'Instrument type'], 'a': 1},
+      {'q': 'What is Dynamics?', 'options': ['Speed', 'Volume variation (Loud/Soft)', 'Note height', 'Instrument type'], 'a': 1},
       {'q': 'Ear training?', 'options': ['Cleaning ears', 'Recognizing pitches/intervals by sound', 'Loud music', 'Listening to radio'], 'a': 1},
       {'q': 'Practicing importance?', 'options': ['Once a month', 'Daily/Consistent routine', 'Only during lessons', 'Not needed'], 'a': 1},
     ],
@@ -338,23 +334,19 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
     ],
   };
 
-
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 500),
     );
-
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
-
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    _slideAnimation = Tween<Offset>(begin: const Offset(0.05, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-
     _animationController.forward();
   }
 
@@ -364,28 +356,31 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
     super.dispose();
   }
 
-  void _nextQuestion(int selectedOption) {
+  void _answerQuestion(int selectedIndex) {
     final currentSkill = widget.selectedSkills[_currentSkillIndex];
-    final currentQuestions = _allQuestions[currentSkill]!;
-    if (selectedOption == currentQuestions[_currentQuestionIndex]['a']) {
+    final questions = _allQuestions[currentSkill] ?? [];
+
+    if (selectedIndex == questions[_currentQuestionIndex]['a']) {
       _score++;
     }
 
-    if (_currentQuestionIndex < currentQuestions.length - 1) {
+    if (_currentQuestionIndex < questions.length - 1) {
       setState(() {
         _currentQuestionIndex++;
+        _animationController.reset();
+        _animationController.forward();
       });
     } else {
-      // End of quiz for the current skill
-      if (_score >= 6) {
-        // Passing score
+      // Finished questions for current skill
+      if (_score >= (questions.length * 0.7).ceil()) {
         _passedSkills.add(currentSkill);
       }
-      _moveToNextSkill();
+
+      _nextSkill();
     }
   }
 
-  void _moveToNextSkill() {
+  void _nextSkill() {
     if (_currentSkillIndex < widget.selectedSkills.length - 1) {
       setState(() {
         _currentSkillIndex++;
@@ -395,11 +390,11 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
         _animationController.forward();
       });
     } else {
-      // All quizzes are finished
+      // Finished all quizzes
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => SkillVideoUploadWrapper(
+          builder: (_) => SkillVideoUploadWrapper(
             userId: widget.userId,
             passedSkills: _passedSkills,
             commonAnswers: widget.commonAnswers ?? {},
@@ -412,74 +407,104 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final currentSkill = widget.selectedSkills[_currentSkillIndex];
-    final currentQuestions = _allQuestions[currentSkill]!;
-    final question = currentQuestions[_currentQuestionIndex];
+    final questions = _allQuestions[currentSkill] ?? [];
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text('${'skill_quiz'.tr()}: ${currentSkill.tr()}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primaryColor,
-              AppColors.accentColor.withOpacity(0.8),
+    if (questions.isEmpty) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("No questions for $currentSkill"),
+              ElevatedButton(
+                onPressed: _nextSkill,
+                child: const Text("Skip"),
+              ),
             ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
           ),
         ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: Card(
-                  elevation: 8.0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          '${'question'.tr()} ${_currentQuestionIndex + 1}/${currentQuestions.length}',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.primaryColor),
+      );
+    }
+
+    final question = questions[_currentQuestionIndex];
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(currentSkill.replaceAll('_', ' ').toUpperCase()),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.primaryColor,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Progress Bar
+            LinearProgressIndicator(
+              value: (_currentQuestionIndex + 1) / questions.length,
+              backgroundColor: Colors.grey[200],
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+            ),
+            const SizedBox(height: 32),
+
+            // Question Count
+            Text(
+              "Question ${_currentQuestionIndex + 1} of ${questions.length}",
+              style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+
+            // Animated Question
+            Expanded(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Column(
+                    children: [
+                      Text(
+                        question['q'] as String,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textColor,
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          (question['q'] as String),
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 24),
-                        ...List.generate(question['options'].length, (index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: ElevatedButton(
-                              onPressed: () => _nextQuestion(index),
-                              child: Text((question['options'][index] as String)),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 40),
+
+                      // Options
+                      ...List.generate(
+                        (question['options'] as List).length,
+                            (index) => Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: ElevatedButton(
+                            onPressed: () => _answerQuestion(index),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: AppColors.textColor,
+                              side: BorderSide(color: Colors.grey[300]!),
+                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 0,
                             ),
-                          );
-                        }),
-                      ],
-                    ),
+                            child: Text(
+                              question['options'][index] as String,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

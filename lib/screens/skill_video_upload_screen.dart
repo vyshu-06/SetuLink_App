@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,7 +23,8 @@ class SkillVideoUploadScreen extends StatefulWidget {
   State<SkillVideoUploadScreen> createState() => _SkillVideoUploadScreenState();
 }
 
-class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> with SingleTickerProviderStateMixin {
+class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> 
+    with SingleTickerProviderStateMixin {
   XFile? _videoFile;
   bool _uploading = false;
   double _uploadProgress = 0;
@@ -39,15 +41,12 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> with Si
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-
     _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-
     _animationController.forward();
   }
 
@@ -58,17 +57,36 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> with Si
   }
 
   Future<void> _pickVideo() async {
-    final source = kIsWeb ? ImageSource.gallery : ImageSource.camera;
-    final XFile? pickedFile = await _picker.pickVideo(
-      source: source,
-      maxDuration: const Duration(minutes: 2),
-    );
+    try {
+      final source = kIsWeb ? ImageSource.gallery : ImageSource.camera;
+      final XFile? pickedFile = await _picker.pickVideo(
+        source: source,
+        maxDuration: const Duration(seconds: 30), 
+        preferredCameraDevice: CameraDevice.rear,
+      );
 
-    if (pickedFile != null) {
-      setState(() {
-        _videoFile = pickedFile;
-        _uploadProgress = 0;
-      });
+      if (pickedFile != null) {
+        final fileSize = await pickedFile.length();
+        if (fileSize > 50 * 1024 * 1024) { 
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Video too large. Max 50MB. Please choose shorter video.')),
+            );
+          }
+          return;
+        }
+        
+        setState(() {
+          _videoFile = pickedFile;
+          _uploadProgress = 0;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking video: $e')),
+        );
+      }
     }
   }
 
@@ -83,54 +101,79 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> with Si
     try {
       final storageRef = FirebaseStorage.instance
           .ref()
-          .child('skill_videos')
-          .child(widget.userId)
-          .child('${widget.skill}_${DateTime.now().millisecondsSinceEpoch}.mp4');
+          .child('skill_videos/${widget.userId}/${widget.skill}_${DateTime.now().millisecondsSinceEpoch}.mp4');
 
       UploadTask uploadTask;
       
       if (kIsWeb) {
-        // Correct way for Web to avoid memory hang: use readAsBytes directly in putData
-        uploadTask = storageRef.putData(
-          await _videoFile!.readAsBytes(),
-          SettableMetadata(contentType: 'video/mp4'),
+        final bytes = await _videoFile!.readAsBytes();
+        final metadata = SettableMetadata(
+          contentType: 'video/mp4',
+          customMetadata: {'userId': widget.userId, 'skill': widget.skill},
         );
+        
+        uploadTask = storageRef.putData(bytes, metadata);
       } else {
         uploadTask = storageRef.putFile(
           File(_videoFile!.path),
-          SettableMetadata(contentType: 'video/mp4'),
+          SettableMetadata(
+            contentType: 'video/mp4',
+            customMetadata: {'userId': widget.userId, 'skill': widget.skill},
+          ),
         );
       }
 
-      // Listen to progress events
-      uploadTask.snapshotEvents.listen(
-        (TaskSnapshot snapshot) {
-          if (mounted && snapshot.totalBytes > 0) {
-            setState(() {
+      final completer = Completer<String>();
+      
+      final subscription = uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        if (mounted) {
+          setState(() {
+            if (snapshot.totalBytes > 0) {
               _uploadProgress = snapshot.bytesTransferred / snapshot.totalBytes;
-            });
-          }
-        },
-        onError: (e) {
-          debugPrint('Upload error: $e');
-          if (mounted) {
-            setState(() => _uploading = false);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Upload error: $e')),
-            );
-          }
-        },
-      );
+            }
+          });
+        }
+        
+        if (snapshot.state == TaskState.success) {
+          snapshot.ref.getDownloadURL().then((url) {
+            if (!completer.isCompleted) completer.complete(url);
+          });
+        }
+      }, onError: (e) {
+        if (!completer.isCompleted) completer.completeError(e);
+      });
 
-      final snapshot = await uploadTask;
-      final downloadUrl = await snapshot.ref.getDownloadURL();
+      // TIMEOUT after 2 minutes
+      Timer(const Duration(minutes: 2), () {
+        if (!completer.isCompleted && mounted) {
+          uploadTask.cancel();
+          completer.completeError(TimeoutException('Upload timeout', const Duration(minutes: 2)));
+        }
+      });
+
+      final downloadUrl = await completer.future;
+      subscription.cancel();
 
       widget.onVideoUploaded(downloadUrl);
+      
     } catch (e) {
+      debugPrint('Upload error: $e');
       if (mounted) {
         setState(() => _uploading = false);
+        String errorMsg = e is TimeoutException 
+            ? 'Upload timeout. Try shorter video or better connection.' 
+            : 'Upload failed: ${e.toString()}';
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: ${e.toString()}')),
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: _uploadVideo,
+            ),
+          ),
         );
       }
     }
@@ -142,7 +185,7 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> with Si
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
-          tr('upload_video_for', namedArgs: {'skill': tr(widget.skill)}),
+          '${tr('upload_video_for')} ${widget.skill}',
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
@@ -170,7 +213,7 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> with Si
                   children: [
                     const SizedBox(height: 50),
                     Text(
-                      tr('please_upload_skill_video', namedArgs: {'skill': tr(widget.skill)}),
+                      tr('please_upload_skill_video', namedArgs: {'skill': widget.skill}),
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                       textAlign: TextAlign.center,
                     ),
@@ -200,7 +243,7 @@ class _SkillVideoUploadScreenState extends State<SkillVideoUploadScreen> with Si
                       Text(
                         _uploadProgress > 0 
                           ? '${(_uploadProgress * 100).toStringAsFixed(0)}%'
-                          : tr('uploading'),
+                          : 'Uploading...',
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),

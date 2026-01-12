@@ -94,7 +94,7 @@ class _CraftizenRegisterScreenState extends State<CraftizenRegisterScreen> with 
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            tr('Create Craftizen Account'), // New Key
+                            tr('Create Craftizen Account'),
                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 20),
