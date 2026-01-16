@@ -108,7 +108,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> with SingleTickerProv
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const BilingualText(textKey: 'Phone sign in', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const BilingualText(textKey: 'phone_login', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -153,14 +153,17 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> with SingleTickerProv
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const BilingualText(textKey: 'Enter phone number', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        const BilingualText(textKey: 'phone_login', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        const BilingualText(textKey: 'We will send otp', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey)),
+        const BilingualText(textKey: 'phone_number', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey)),
         const SizedBox(height: 24),
         TextField(
           controller: _phoneController,
           keyboardType: TextInputType.phone,
-          decoration: InputDecoration(labelText: tr('phone_number'), prefixText: '+91 '),
+          decoration: InputDecoration(
+            label: const BilingualText(textKey: 'phone_number'),
+            prefixText: '+91 ',
+          ),
         ),
         const SizedBox(height: 24),
         ElevatedButton(
@@ -175,14 +178,17 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> with SingleTickerProv
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const BilingualText(textKey: 'Enter otp', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        const BilingualText(textKey: 'enter_otp', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
+        // Note: For complex strings like "OTP sent to X", we might need to handle it in BilingualText or just use tr()
         Text(tr('otp_sent_to', args: [_phoneController.text]), textAlign: TextAlign.center, style: const TextStyle(fontSize: 14, color: Colors.grey)),
         const SizedBox(height: 24),
         TextField(
           controller: _otpController,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(labelText: tr('otp')),
+          decoration: InputDecoration(
+            label: const BilingualText(textKey: 'enter_otp'),
+          ),
         ),
         const SizedBox(height: 24),
         ElevatedButton(
@@ -191,7 +197,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> with SingleTickerProv
         ),
         TextButton(
           onPressed: () => setState(() => _codeSent = false),
-          child: const BilingualText(textKey: 'Change Number'),
+          child: const BilingualText(textKey: 'back'),
         ),
       ],
     );

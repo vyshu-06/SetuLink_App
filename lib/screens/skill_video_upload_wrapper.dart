@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:setulink_app/screens/pending_verification_screen.dart';
 import 'package:setulink_app/theme/app_colors.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class SkillVideoUploadWrapper extends StatefulWidget {
   final String userId;
@@ -100,8 +101,8 @@ class _SkillVideoUploadWrapperState extends State<SkillVideoUploadWrapper> {
   Widget build(BuildContext context) {
     if (widget.passedSkills.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: Text(tr('video_upload'))),
-        body: Center(child: Text(tr('no_skills_to_verify'))),
+        appBar: AppBar(title: const BilingualText(textKey: 'upload_skill_demo_title')),
+        body: const Center(child: BilingualText(textKey: 'no_skills_added')),
       );
     }
 
@@ -110,7 +111,7 @@ class _SkillVideoUploadWrapperState extends State<SkillVideoUploadWrapper> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Skill Verification"),
+        title: const BilingualText(textKey: 'skill_verification_title'),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primaryColor,
         elevation: 0,
@@ -122,27 +123,31 @@ class _SkillVideoUploadWrapperState extends State<SkillVideoUploadWrapper> {
           children: [
             const Icon(Icons.cloud_upload_outlined, size: 100, color: AppColors.primaryColor),
             const SizedBox(height: 24),
-            Text(
-              "Upload a video for ${currentSkill.replaceAll('_', ' ').toUpperCase()}",
+            BilingualText(
+              textKey: 'upload_video_for',
+              args: [currentSkill.replaceAll('_', ' ').toUpperCase()],
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
-            Text("Skill ${_currentSkillIndex + 1} of ${widget.passedSkills.length}"),
+            BilingualText(
+              textKey: 'question_progress',
+              args: [(_currentSkillIndex + 1).toString(), widget.passedSkills.length.toString()],
+            ),
             const SizedBox(height: 40),
             if (_isUploading)
               const Column(
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text("Sending video to secure servers..."),
+                  BilingualText(textKey: 'upload_video'), // Using upload_video as placeholder for "Sending..."
                 ],
               )
             else
               ElevatedButton.icon(
                 onPressed: () => _pickAndUploadVideo(currentSkill),
                 icon: const Icon(Icons.video_call),
-                label: const Text("Select Video & Continue"),
+                label: const BilingualText(textKey: 'upload_and_continue'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),

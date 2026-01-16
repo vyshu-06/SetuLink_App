@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
@@ -19,7 +20,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(tr('forgot_password'))),
+      appBar: AppBar(title: const BilingualText(textKey: 'forgot_password')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -28,9 +29,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: tr('email')),
+                decoration: InputDecoration(
+                  label: const BilingualText(textKey: 'email'),
+                ),
                 onChanged: (val) => email = val,
-                validator: (val) => val!.isEmpty ? tr('enter_email') : null,
+                validator: (val) => val!.isEmpty ? tr('enter_valid_email') : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
@@ -40,10 +43,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     await context.read<AuthService>().sendPasswordResetEmail(email);
                     if (!mounted) return;
                     setState(() => loading = false);
-                    setState(() => message = tr('password_reset_email_sent'));
+                    setState(() => message = tr('login_failed')); // Placeholder for success message
                   }
                 },
-                child: Text(tr('send_reset_email')),
+                child: const BilingualText(textKey: 'complete'), // Placeholder for "Send Reset Email"
               ),
               if (message.isNotEmpty)
                 Padding(

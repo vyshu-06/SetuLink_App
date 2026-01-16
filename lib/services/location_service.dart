@@ -1,19 +1,48 @@
+import 'package:location/location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 
 class LocationService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final Location _location = Location();
+  final _geo = GeoFlutterFire();
+  final _db = FirebaseFirestore.instance;
 
-  // Note: The geo-querying functionality has been temporarily removed
-  // because the geoflutterfire_plus package was causing a dependency conflict.
-  // This service can be updated with a new geo-query package in the future.
+  Future<LocationData?> getCurrentLocation() async {
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
 
-  Stream<List<DocumentSnapshot>> getNearbyCraftizens(double lat, double lng, double radius) {
-    // Placeholder implementation - does not perform a geo-query.
-    // This will need to be replaced with a proper geo-query implementation.
-    return _db
-        .collection('users')
-        .where('role', isEqualTo: 'craftizen')
-        .snapshots()
-        .map((snapshot) => snapshot.docs);
+    serviceEnabled = await _location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _location.requestService();
+      if (!serviceEnabled) return null;
+    }
+
+    permissionGranted = await _location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await _location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) return null;
+    }
+
+    return await _location.getLocation();
+  }
+
+  Future<void> updateUserLocation(String userId) async {
+    final pos = await getCurrentLocation();
+    if (pos == null) return;
+
+    GeoFirePoint myLocation = _geo.point(latitude: pos.latitude!, longitude: pos.longitude!);
+    await _db.collection('users').doc(userId).update({
+      'position': myLocation.data,
+    });
+  }
+
+  Stream<List<DocumentSnapshot>> getNearbyCraftizens(double lat, double lng, {double radius = 10, String? skill}) {
+    GeoFirePoint center = _geo.point(latitude: lat, longitude: lng);
+    var collectionReference = _db.collection('users').where('role', isEqualTo: 'craftizen');
+    
+    // Skill filtering would usually be done on the client side after the geo-query
+    // because Firestore doesn't support multiple inequality filters easily with geo-queries.
+    return _geo.collection(collectionRef: collectionReference)
+        .within(center: center, radius: radius, field: 'position');
   }
 }

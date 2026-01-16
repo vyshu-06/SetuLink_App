@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:setulink_app/services/location_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
+import 'package:location/location.dart';
 
 class MapNearbyCraftizens extends StatefulWidget {
   final String skillCategory;
@@ -25,18 +26,16 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
   }
 
   Future<void> _initializeMap() async {
-    // Note: Temporary fixed location since getCurrentGeoPoint was removed.
-    // In a real implementation, you would use a location package to get the current location.
-    final userLocation = const GeoPoint(20.5937, 78.9629); // Example center of India
-    if (mounted) {
+    final locationData = await _locationService.getCurrentLocation();
+    if (locationData != null && mounted) {
       setState(() {
-        _currentPosition = LatLng(userLocation.latitude, userLocation.longitude);
+        _currentPosition = LatLng(locationData.latitude!, locationData.longitude!);
       });
       _locationService
           .getNearbyCraftizens(
-        userLocation.latitude,
-        userLocation.longitude,
-        _radiusInKm,
+        locationData.latitude!,
+        locationData.longitude!,
+        radius: _radiusInKm,
       )
           .listen((craftizens) {
         _updateMarkers(craftizens);
@@ -47,11 +46,13 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
   void _updateMarkers(List<DocumentSnapshot> craftizenDocs) {
     Set<Marker> markers = {};
     for (var doc in craftizenDocs) {
-      final data = doc.data() as Map<String, dynamic>; // Explicitly cast to Map
-      final GeoPoint? geoPoint = data['location'];
+      final data = doc.data() as Map<String, dynamic>; 
+      final Map<String, dynamic>? positionData = data['position'];
+      if (positionData == null) continue;
+      
+      final GeoPoint? geoPoint = positionData['geopoint'];
       if (geoPoint == null) continue;
 
-      // Filter by skill category locally since the service is simplified
       final List<dynamic>? skills = data['skills'];
       if (skills != null && skills.contains(widget.skillCategory)) {
           markers.add(
@@ -60,7 +61,7 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
               position: LatLng(geoPoint.latitude, geoPoint.longitude),
               infoWindow: InfoWindow(
                 title: data['name'] ?? 'Unknown',
-                snippet: (data['skills'] as List<dynamic>?)?.join(', '), // Safe navigation and join
+                snippet: (data['skills'] as List<dynamic>?)?.join(', '), 
               ),
             ),
           );
@@ -77,7 +78,7 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const BilingualText(textKey: 'Nearby craftizens title')),
+      appBar: AppBar(title: const BilingualText(textKey: 'nearby_craftizens_title')),
       body: _currentPosition == null
           ? const Center(child: CircularProgressIndicator())
           : GoogleMap(

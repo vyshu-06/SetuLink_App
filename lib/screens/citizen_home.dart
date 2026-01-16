@@ -60,7 +60,7 @@ class _CitizenHomeState extends State<CitizenHome> {
         extendBody: true,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: BilingualText(textKey: 'Citizen dashboard', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: const BilingualText(textKey: 'citizen_dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           backgroundColor: Colors.transparent,
           elevation: 0,
           actions: [
@@ -74,7 +74,7 @@ class _CitizenHomeState extends State<CitizenHome> {
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
                   value: 'logout',
-                  child: BilingualText(textKey: 'Logout'),
+                  child: BilingualText(textKey: 'logout'),
                 ),
               ],
             ),
@@ -118,11 +118,11 @@ class _CitizenHomeState extends State<CitizenHome> {
               elevation: 0,
               type: BottomNavigationBarType.fixed,
               items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: context.tr('Home')),
-                BottomNavigationBarItem(icon: const Icon(Icons.history_outlined), activeIcon: const Icon(Icons.history), label: context.tr('Bookings')),
-                BottomNavigationBarItem(icon: const Icon(Icons.chat_bubble_outline), activeIcon: const Icon(Icons.chat_bubble), label: context.tr('Chats')),
-                BottomNavigationBarItem(icon: const Icon(Icons.account_balance_wallet_outlined), activeIcon: const Icon(Icons.account_balance_wallet), label: context.tr('Wallet')),
-                BottomNavigationBarItem(icon: const Icon(Icons.person_outline), activeIcon: const Icon(Icons.person), label: context.tr('Profile')),
+                BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: tr('home')),
+                BottomNavigationBarItem(icon: const Icon(Icons.history_outlined), activeIcon: const Icon(Icons.history), label: tr('bookings')),
+                BottomNavigationBarItem(icon: const Icon(Icons.chat_bubble_outline), activeIcon: const Icon(Icons.chat_bubble), label: tr('chats')),
+                BottomNavigationBarItem(icon: const Icon(Icons.account_balance_wallet_outlined), activeIcon: const Icon(Icons.account_balance_wallet), label: tr('wallet')),
+                BottomNavigationBarItem(icon: const Icon(Icons.person_outline), activeIcon: const Icon(Icons.person), label: tr('profile')),
               ],
               currentIndex: _selectedIndex,
               onTap: _onItemTapped,
@@ -134,7 +134,7 @@ class _CitizenHomeState extends State<CitizenHome> {
         floatingActionButton: _selectedIndex == 0
             ? FloatingActionButton.extended(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const JobRequestScreen())),
-                label: Text(context.tr('Post a job')),
+                label: BilingualText(textKey: 'post_a_job'),
                 icon: const Icon(Icons.add),
               )
             : null,
@@ -237,14 +237,14 @@ class _Header extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BilingualText(textKey: 'Welcome Citizen', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+        const BilingualText(textKey: 'welcome_citizen', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
         const SizedBox(height: 8),
-        BilingualText(textKey: 'What service looking for', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white.withOpacity(0.9))),
+        const BilingualText(textKey: 'what_service_looking_for', style: TextStyle(color: Colors.white70, fontSize: 16)),
         const SizedBox(height: 24),
         TextField(
           controller: searchController,
           decoration: InputDecoration(
-            hintText: context.tr('Search services'),
+            hintText: tr('search_services'),
             prefixIcon: const Icon(Icons.search, color: AppColors.primaryColor),
           ),
         ),
@@ -268,8 +268,8 @@ class _CategorySection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 4.0, bottom: 16.0),
             child: BilingualText(
-              textKey: category['CategoryKey']!,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+              textKey: category['categoryKey']!,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
             ),
           ),
           GridView.builder(
@@ -305,9 +305,9 @@ class _CategorySection extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
                         child: BilingualText(
-                          textKey: service['TitleKey']!,
+                          textKey: service['titleKey']!,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -331,7 +331,7 @@ class _BookingsTabPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentUser = AuthService().getCurrentUser();
     if (currentUser == null) {
-      return Center(child: BilingualText(textKey: 'Log in to see bookings', style: const TextStyle(color: Colors.white)));
+      return const Center(child: BilingualText(textKey: 'log_in_to_see_bookings', style: TextStyle(color: Colors.white)));
     }
     return SafeArea(
         child: StreamBuilder<List<JobModel>>(
@@ -341,7 +341,7 @@ class _BookingsTabPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator(color: Colors.white));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: BilingualText(textKey: 'No bookings yet', style: const TextStyle(color: Colors.white)));
+            return const Center(child: BilingualText(textKey: 'no_jobs_available', style: TextStyle(color: Colors.white)));
           }
 
           final jobs = snapshot.data!;
@@ -371,7 +371,7 @@ class _JobCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${tr('Budget')}: ₹${job.budget}'),
+            Text('${tr('amount')}: ₹${job.budget}'),
             Text('${tr('Status')}: ${job.jobStatus.toUpperCase()}', style: TextStyle(color: job.jobStatus == 'open' ? Colors.green : Colors.blue)),
             Text(job.description, maxLines: 2, overflow: TextOverflow.ellipsis),
           ],

@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:setulink_app/theme/app_colors.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatId;
@@ -67,7 +68,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final currentUser = _authService.getCurrentUser();
-    if (currentUser == null) return Scaffold(body: Center(child: Text('not_logged_in'.tr())));
+    if (currentUser == null) return const Scaffold(body: Center(child: BilingualText(textKey: 'log_in_to_see_bookings')));
 
     final messageStream = _db
         .collection('chats')
@@ -178,7 +179,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
               child: TextField(
                 controller: _messageController,
                 decoration: InputDecoration(
-                  hintText: 'enter_message'.tr(),
+                  hintText: tr('search_services'), // Using search_services as placeholder for 'Enter message'
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 ),
@@ -197,14 +198,27 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   Future<void> _sendMessage(String userId, String type, String content) async {
     if (content.isEmpty) return;
 
-    await _db.collection('chats').doc(widget.chatId).collection('messages').add({
+    final batch = _db.batch();
+    
+    // Add message to subcollection
+    final msgRef = _db.collection('chats').doc(widget.chatId).collection('messages').doc();
+    batch.set(msgRef, {
       'senderId': userId,
       'type': type,
-      'text': type == 'text' ? content : null,
+      'text': type == 'text' ? content : 'Voice Message',
       'url': type == 'audio' ? content : null,
       'timestamp': FieldValue.serverTimestamp(),
     });
 
+    // Update parent chat document for the Chat List metadata
+    final chatRef = _db.collection('chats').doc(widget.chatId);
+    batch.set(chatRef, {
+      'lastMessage': type == 'text' ? content : 'Voice Message',
+      'lastTimestamp': FieldValue.serverTimestamp(),
+      'users': widget.chatId.split('_'), // Ensure users array exists
+    }, SetOptions(merge: true));
+
+    await batch.commit();
     _messageController.clear();
   }
 

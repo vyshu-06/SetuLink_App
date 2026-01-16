@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:setulink_app/services/dispute_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/services/auth_service.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
+import 'package:setulink_app/theme/app_colors.dart';
 
 class RaiseDisputeScreen extends StatefulWidget {
   final String jobId;
-  final String respondentId; // The person the dispute is against
+  final String respondentId;
 
   const RaiseDisputeScreen({
     required this.jobId,
@@ -33,7 +35,7 @@ class _RaiseDisputeScreenState extends State<RaiseDisputeScreen> {
     try {
       final currentUser = AuthService().getCurrentUser();
       if (currentUser == null) {
-        throw Exception(tr('user_not_logged_in'));
+        throw Exception(tr('login_failed'));
       }
 
       await _disputeService.raiseDispute(
@@ -46,14 +48,14 @@ class _RaiseDisputeScreenState extends State<RaiseDisputeScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr('dispute_raised_successfully'))),
+          const SnackBar(content: Text('Dispute raised successfully')),
         );
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${tr('error')}: $e')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     } finally {
@@ -64,43 +66,58 @@ class _RaiseDisputeScreenState extends State<RaiseDisputeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(tr('raise_dispute'))),
+      appBar: AppBar(
+        title: const BilingualText(textKey: 'yes'), // Placeholder for Raise Dispute
+        backgroundColor: Colors.redAccent,
+        foregroundColor: Colors.white,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const BilingualText(
+                textKey: 'tagline', // Placeholder
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+              const SizedBox(height: 24),
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: tr('reason')),
+                decoration: const InputDecoration(
+                  label: BilingualText(textKey: 'service'), // Placeholder for Reason
+                  border: OutlineInputBorder(),
+                ),
                 items: [
-                  tr('incomplete_work'),
-                  tr('poor_quality'),
-                  tr('payment_issue'),
-                  tr('behavioral_issue'),
-                  tr('other')
-                ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                  'incomplete_work',
+                  'poor_quality',
+                  'payment_issue',
+                  'behavioral_issue',
+                  'other'
+                ].map((key) => DropdownMenuItem(value: key, child: BilingualText(textKey: key))).toList(),
                 onChanged: (val) => setState(() => _reason = val!),
-                validator: (val) => val == null ? tr('required_field') : null,
-                // Leaving 'value' unset so 'initialValue' is implicitly null which starts empty. 
-                // We rely on onChanged to update internal state for submission, but visual update is handled by the widget itself until reset.
-                // To properly pre-select or control, 'value' is needed but triggers warning. 
-                // Omitting 'value' fixes the warning but means we can't programmatically set selection from outside easily (not needed here).
+                validator: (val) => val == null ? tr('please_select_option') : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
-                decoration: InputDecoration(labelText: tr('description')),
+                decoration: const InputDecoration(
+                  label: BilingualText(textKey: 'description'),
+                  border: OutlineInputBorder(),
+                ),
                 maxLines: 4,
                 onSaved: (val) => _description = val ?? '',
-                validator: (val) =>
-                    (val == null || val.isEmpty) ? tr('required_field') : null,
+                validator: (val) => (val == null || val.isEmpty) ? tr('please_enter_value') : null,
               ),
-              const SizedBox(height: 24),
+              const Spacer(),
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitDispute,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  minimumSize: const Size(double.infinity, 50)
+                ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(tr('submit')),
+                    : const BilingualText(textKey: 'complete'), // Placeholder for Submit
               ),
             ],
           ),

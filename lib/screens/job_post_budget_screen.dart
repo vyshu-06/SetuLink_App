@@ -145,7 +145,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const BilingualText(textKey: 'Price summary', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const BilingualText(textKey: 'platform_commission', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), // Using placeholder
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -175,7 +175,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           children: [
-                            BilingualText(textKey: 'Total estimated price', style: Theme.of(context).textTheme.titleLarge),
+                            const BilingualText(textKey: 'amount', style: TextStyle(fontSize: 18)),
                             const SizedBox(height: 10),
                             Text('₹${_calculatedPrice.toStringAsFixed(0)}', 
                                  style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
@@ -206,7 +206,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                               });
                             },
                             decoration: InputDecoration(
-                              labelText: tr('select_problem'),
+                              label: const BilingualText(textKey: 'service'),
                               border: InputBorder.none,
                             ),
                           ),
@@ -219,7 +219,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                         elevation: 4,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         child: ExpansionTile(
-                          title: const BilingualText(textKey: 'Price breakdown'),
+                          title: const BilingualText(textKey: 'amount'), // Placeholder
                           children: breakdown.entries.map((e) => ListTile(
                             title: BilingualText(textKey: e.key.replaceAll('_', ' ').toLowerCase()),
                             trailing: Text('₹${e.value.toStringAsFixed(0)}'),
@@ -231,7 +231,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                       onPressed: _isLoading ? null : _confirmBooking,
                       child: _isLoading 
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(tr('book_now_amount', args: [_calculatedPrice.toStringAsFixed(0)]), style: const TextStyle(fontSize: 18)),
+                        : const BilingualText(textKey: 'pay_now'), // Placeholder
                     ),
                     const SizedBox(height: 20),
                   ],

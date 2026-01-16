@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:setulink_app/screens/greeting_page.dart';
+import 'package:setulink_app/screens/language_selection_screen.dart';
 import 'dart:async';
 import 'package:setulink_app/theme/app_colors.dart';
 
@@ -40,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         if (mounted) {
           Navigator.of(context).pushReplacement(
             PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => const GreetingPage(),
+              pageBuilder: (context, animation, secondaryAnimation) => const LanguageSelectionScreen(),
               transitionsBuilder: (context, animation, secondaryAnimation, child) {
                 return FadeTransition(
                   opacity: animation,

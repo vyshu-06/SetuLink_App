@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/analytics_service.dart';
+import 'package:setulink_app/services/fcm_service.dart'; // Added
 import 'package:setulink_app/screens/citizen_home.dart';
 import 'package:setulink_app/screens/craftizen_home.dart';
 import 'package:setulink_app/screens/login_screen.dart';
@@ -28,11 +29,13 @@ import 'package:setulink_app/screens/admin_dashboard_screen.dart';
 import 'package:setulink_app/screens/citizen_profile_setup_screen.dart';
 import 'package:setulink_app/widgets/offline_banner.dart';
 import 'package:setulink_app/screens/craftizen_experience_screen.dart';
-import 'package:setulink_app/screens/pending_verification_screen.dart'; // Import the new screen
+import 'package:setulink_app/screens/pending_verification_screen.dart'; 
 import 'package:setulink_app/theme/app_theme.dart';
+import 'package:setulink_app/screens/language_selection_screen.dart';
 import 'firebase_options.dart';
 
 final AnalyticsService analyticsService = AnalyticsService();
+final FCMService fcmService = FCMService(); // Added
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +51,7 @@ Future<void> main() async {
       await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
     } else {
       FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+      await fcmService.init(); // Initialize FCM
     }
 
     debugPrint('FIREBASE INIT SUCCESS');
@@ -57,7 +61,7 @@ Future<void> main() async {
 
   runApp(
     EasyLocalization(
-      supportedLocales: const [Locale('en'), Locale('te')],
+      supportedLocales: const [Locale('en'), Locale('hi'), Locale('te')],
       path: 'assets/translations',
       fallbackLocale: const Locale('en'),
       child: MultiProvider(
@@ -96,6 +100,7 @@ class SetuLinkApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
+        '/language_selection': (context) => const LanguageSelectionScreen(),
         '/greeting': (context) => const GreetingPage(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
@@ -130,7 +135,6 @@ class SetuLinkApp extends StatelessWidget {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return CraftizenExperienceScreen(userId: args['userId']!, selectedSkills: args['selectedSkills']! as List<String>);
         },
-        // ADDED: Route for the Pending Verification Screen
         '/pending_verification': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
           return PendingVerificationScreen(

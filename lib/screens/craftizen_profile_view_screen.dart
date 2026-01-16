@@ -7,6 +7,7 @@ import 'package:setulink_app/screens/chat_screen.dart';
 import 'package:setulink_app/screens/job_request_screen.dart';
 import 'package:setulink_app/theme/app_colors.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
+import 'package:intl/intl.dart';
 
 class CraftizenProfileViewScreen extends StatefulWidget {
   final String craftizenId;
@@ -59,7 +60,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
         if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
         
         final data = snapshot.data!.data() as Map<String, dynamic>?;
-        if (data == null) return Scaffold(body: Center(child: Text(tr('user_not_found'))));
+        if (data == null) return const Scaffold(body: Center(child: BilingualText(textKey: 'no_jobs_available')));
 
         final craftizen = CraftizenModel.fromMap(data, snapshot.data!.id);
 
@@ -119,36 +120,35 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Icon(Icons.star, color: AppColors.accentColor, size: 20),
-                                Text(' ${craftizen.rating.toStringAsFixed(1)} ${tr('rating')}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                Text(' ${craftizen.rating.toStringAsFixed(1)} ', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                const BilingualText(textKey: 'rating', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                                 const SizedBox(width: 16),
                                 const Icon(Icons.check_circle, color: Colors.greenAccent, size: 20),
-                                Text(' ${data['stats']?['completedJobs'] ?? 0} ${tr('jobs_done')}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                Text(' ${data['ratingCount'] ?? 0} ', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                const BilingualText(textKey: 'jobs', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
                         ),
                         const SizedBox(height: 32),
                         _buildSectionCard(
-                          title: tr('skills'),
+                          titleKey: 'my_skills',
                           content: Wrap(
                             spacing: 8,
                             children: craftizen.skills.map((s) => Chip(
-                              label: Text(s),
+                              label: BilingualText(textKey: s),
                               backgroundColor: AppColors.primaryColor.withOpacity(0.1),
                             )).toList(),
                           ),
                         ),
                         const SizedBox(height: 16),
                         _buildSectionCard(
-                          title: tr('about'),
-                          content: Text(data['bio'] ?? tr('no_bio_provided'), style: const TextStyle(fontSize: 16, height: 1.5)),
+                          titleKey: 'tagline', // About
+                          content: Text(data['bio'] ?? tr('no_jobs_available'), style: const TextStyle(fontSize: 16, height: 1.5)),
                         ),
                         const SizedBox(height: 16),
-                        _buildSectionCard(
-                          title: tr('reviews'),
-                          content: Center(child: Text(tr('no_reviews_yet'))),
-                        ),
-                        const SizedBox(height: 100), // Spacing for bottom buttons
+                        _buildReviewsSection(),
+                        const SizedBox(height: 100), 
                       ],
                     ),
                   ),
@@ -169,7 +169,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
                     onPressed: () {
                       final currentUserId = FirebaseAuth.instance.currentUser?.uid;
                       if (currentUserId == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('please_login_to_chat'))));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please login to chat')));
                         return;
                       }
                       final chatId = _getChatId(currentUserId, widget.craftizenId);
@@ -188,7 +188,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: Text(tr('chat'), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
+                    child: const BilingualText(textKey: 'chats', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -201,7 +201,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: Text(tr('request_job'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    child: const BilingualText(textKey: 'next', style: TextStyle(fontWeight: FontWeight.bold)), // Request Job
                   ),
                 ),
               ],
@@ -212,7 +212,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
     );
   }
 
-  Widget _buildSectionCard({required String title, required Widget content}) {
+  Widget _buildSectionCard({required String titleKey, required Widget content}) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -222,13 +222,53 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
+            BilingualText(textKey: titleKey, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
             const Divider(),
             const SizedBox(height: 8),
             content,
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildReviewsSection() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('reviews')
+          .where('craftizenId', isEqualTo: widget.craftizenId)
+          .orderBy('timestamp', descending: true)
+          .limit(5)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox();
+        final reviews = snapshot.data!.docs;
+
+        return _buildSectionCard(
+          titleKey: 'notification', // Reviews
+          content: reviews.isEmpty
+              ? const Center(child: BilingualText(textKey: 'no_notifications'))
+              : Column(
+                  children: reviews.map((doc) {
+                    final review = doc.data() as Map<String, dynamic>;
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Row(
+                        children: [
+                          ...List.generate(5, (i) => Icon(Icons.star, size: 14, color: i < (review['rating'] ?? 0) ? Colors.amber : Colors.grey)),
+                          const Spacer(),
+                          Text(
+                            review['timestamp'] != null ? DateFormat('MMM dd').format((review['timestamp'] as Timestamp).toDate()) : '',
+                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                      subtitle: Text(review['comment'] ?? '', style: const TextStyle(color: Colors.black87)),
+                    );
+                  }).toList(),
+                ),
+        );
+      },
     );
   }
 }

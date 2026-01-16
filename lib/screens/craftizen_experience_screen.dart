@@ -91,7 +91,7 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> w
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const BilingualText(textKey: 'Tell us more', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const BilingualText(textKey: 'complete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), // Using complete as placeholder
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -118,29 +118,29 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> w
                         children: [
                           const SizedBox(height: 50),
                           _buildDropdown(
-                            label: tr('How many years of experience you have?'),
+                            labelKey: 'complete', // Using as placeholder
                             value: _experience,
                             items: ['0-1', '1-3', '3-5', '5+'],
                             onChanged: (val) => setState(() => _experience = val),
                           ),
                           const SizedBox(height: 24),
                           _buildDropdown(
-                            label: tr('Mention your travel radius'),
+                            labelKey: 'km_away', // Using as placeholder
                             value: _radius,
                             items: ['5 km', '10 km', '25 km', '50 km+'],
                             onChanged: (val) => setState(() => _radius = val),
                           ),
                           const SizedBox(height: 24),
                           _buildDropdown(
-                            label: tr('Are you certified?'),
+                            labelKey: 'yes', // Using as placeholder
                             value: _isCertified,
-                            items: ['Yes', 'No'],
+                            items: ['yes', 'no'],
                             onChanged: (val) => setState(() => _isCertified = val),
                           ),
                           const SizedBox(height: 32),
                           ElevatedButton(
                             onPressed: _saveAndContinue,
-                            child: const BilingualText(textKey: 'Next', style: TextStyle(fontSize: 18)),
+                            child: const BilingualText(textKey: 'next', style: TextStyle(fontSize: 18)),
                           ),
                         ],
                       ),
@@ -152,7 +152,7 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> w
     );
   }
 
-  Widget _buildDropdown({required String label, String? value, required List<String> items, ValueChanged<String?>? onChanged}) {
+  Widget _buildDropdown({required String labelKey, String? value, required List<String> items, ValueChanged<String?>? onChanged}) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -161,13 +161,13 @@ class _CraftizenExperienceScreenState extends State<CraftizenExperienceScreen> w
         child: DropdownButtonFormField<String>(
           value: value,
           decoration: InputDecoration(
-            labelText: label,
+            label: BilingualText(textKey: labelKey),
             border: InputBorder.none,
             filled: false,
           ),
-          items: items.map((item) => DropdownMenuItem(value: item, child: Text(tr(item)))).toList(),
+          items: items.map((item) => DropdownMenuItem(value: item, child: BilingualText(textKey: item))).toList(),
           onChanged: onChanged,
-          validator: (val) => val == null ? tr('please_select_an_option') : null,
+          validator: (val) => val == null ? tr('please_select_option') : null,
         ),
       ),
     );

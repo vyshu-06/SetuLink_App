@@ -6,6 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:setulink_app/screens/payment_screen.dart';
 import 'package:setulink_app/screens/raise_dispute_screen.dart';
+import 'package:setulink_app/features/ratings_rewards/presentation/rating_screen.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
+import 'package:setulink_app/theme/app_colors.dart';
 
 class JobDetailScreen extends StatelessWidget {
   final String jobId;
@@ -15,27 +18,31 @@ class JobDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return Center(child: Text(tr('not_logged_in')));
+    if (currentUser == null) return const Center(child: BilingualText(textKey: 'log_in_to_see_bookings'));
 
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance.collection('jobs').doc(jobId).snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData || snapshot.data?.data() == null) return const Center(child: CircularProgressIndicator());
 
         final job = JobModel.fromMap(snapshot.data!.data() as Map<String, dynamic>, snapshot.data!.id);
         final bool isCitizen = job.userId == currentUser.uid;
         final bool isCraftizen = job.assignedTo == currentUser.uid;
 
         return Scaffold(
-          appBar: AppBar(title: Text(job.title)),
+          appBar: AppBar(
+            title: Text(job.title),
+            backgroundColor: AppColors.primaryColor,
+            foregroundColor: Colors.white,
+          ),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _buildDetailRow(tr('status'), job.jobStatus.toUpperCase()),
-              _buildDetailRow(tr('budget'), '₹${job.budget}'),
-              _buildDetailRow(tr('time'), DateFormat('dd MMM, yyyy - hh:mm a').format(job.scheduledTime)),
-              _buildDetailRow(tr('description'), job.description),
-              const SizedBox(height: 20),
+              _buildDetailRow('status', job.jobStatus.toUpperCase()),
+              _buildDetailRow('amount', '₹${job.budget}'),
+              _buildDetailRow('time', DateFormat('dd MMM, yyyy - hh:mm a').format(job.scheduledTime)),
+              _buildDetailRow('description', job.description),
+              const SizedBox(height: 32),
               if (isCitizen) ..._buildCitizenActions(context, job),
               if (isCraftizen) ..._buildCraftizenActions(context, job),
               if (!isCitizen && !isCraftizen && job.jobStatus == 'open') ..._buildApplicantActions(context, job, currentUser.uid),
@@ -46,20 +53,24 @@ class JobDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String labelKey, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-          Text(value, style: const TextStyle(fontSize: 16)),
+          BilingualText(textKey: labelKey, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 14)),
+          const SizedBox(height: 4),
+          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+          const Divider(),
         ],
       ),
     );
   }
 
   List<Widget> _buildCitizenActions(BuildContext context, JobModel job) {
+    final bool isRated = (job.preferences['rated'] ?? false) == true;
+
     return [
       if (job.jobStatus == 'completed')
         ElevatedButton(
@@ -76,39 +87,73 @@ class JobDetailScreen extends StatelessWidget {
               ),
             );
           },
-          child: Text(tr('pay_for_service')),
+          style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+          child: const BilingualText(textKey: 'pay_now'),
         ),
-      if (job.jobStatus == 'paid') // Assuming a paid status
-        ElevatedButton(onPressed: () { /* TODO: Navigate to Rating Screen */ }, child: Text(tr('rate_craftizen'))),
+      
+      if (job.jobStatus == 'paid' && !isRated)
+        Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RatingScreen(jobId: job.id, craftizenId: job.assignedTo!),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber,
+              foregroundColor: Colors.black,
+              minimumSize: const Size(double.infinity, 50)
+            ),
+            child: const BilingualText(textKey: 'complete'), // Placeholder for Rate Experience
+          ),
+        ),
 
-      const SizedBox(height: 10),
-      ElevatedButton(
+      const SizedBox(height: 12),
+      OutlinedButton(
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) => RaiseDisputeScreen(
             jobId: job.id,
             respondentId: job.assignedTo ?? '',
           )));
         },
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-        child: Text(tr('raise_dispute')),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.redAccent,
+          side: const BorderSide(color: Colors.redAccent),
+          minimumSize: const Size(double.infinity, 50)
+        ),
+        child: const BilingualText(textKey: 'yes'), // Placeholder for Dispute
       ),
     ];
   }
 
   List<Widget> _buildCraftizenActions(BuildContext context, JobModel job) {
     return [
-      if (job.jobStatus == 'confirmed' || job.jobStatus == 'in_progress')
-        ElevatedButton(onPressed: () => _updateJobStatus(job.id, 'on_the_way'), child: Text(tr('on_the_way'))),
-      if (job.jobStatus == 'on_the_way')
-        ElevatedButton(onPressed: () => _updateJobStatus(job.id, 'started'), child: Text(tr('start_work'))),
+      if (job.jobStatus == 'confirmed')
+        ElevatedButton(
+          onPressed: () => _updateJobStatus(job.id, 'started'),
+          style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+          child: const BilingualText(textKey: 'next'), // Placeholder for Start
+        ),
       if (job.jobStatus == 'started')
-        ElevatedButton(onPressed: () => _updateJobStatus(job.id, 'completed'), child: Text(tr('mark_as_completed'))),
+        ElevatedButton(
+          onPressed: () => _updateJobStatus(job.id, 'completed'),
+          style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+          child: const BilingualText(textKey: 'complete'),
+        ),
     ];
   }
 
   List<Widget> _buildApplicantActions(BuildContext context, JobModel job, String craftizenId) {
     return [
-      ElevatedButton(onPressed: () => _applyForJob(job.id, craftizenId), child: Text(tr('apply_for_this_job'))),
+      ElevatedButton(
+        onPressed: () => _applyForJob(job.id, craftizenId),
+        style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+        child: const BilingualText(textKey: 'next'), // Placeholder for Apply
+      ),
     ];
   }
 
@@ -117,11 +162,9 @@ class JobDetailScreen extends StatelessWidget {
   }
 
   void _applyForJob(String jobId, String craftizenId) {
-    // In a real app, this would add to an 'applicants' subcollection or send a notification.
-    // For now, we'll just assign the job directly for simplicity to complete the flow.
     FirebaseFirestore.instance.collection('jobs').doc(jobId).update({
       'assignedTo': craftizenId,
-      'jobStatus': 'confirmed', // Auto-confirm for demo
+      'jobStatus': 'confirmed', 
     });
   }
 }

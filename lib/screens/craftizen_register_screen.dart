@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/screens/craftizen_skill_selection_screen.dart';
 import 'package:setulink_app/theme/app_colors.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class CraftizenRegisterScreen extends StatefulWidget {
   const CraftizenRegisterScreen({Key? key}) : super(key: key);
@@ -58,7 +59,7 @@ class _CraftizenRegisterScreenState extends State<CraftizenRegisterScreen> with 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        title: Text(tr('Craftizen Registration')),
+        title: const BilingualText(textKey: 'craftizen_registration'),
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
@@ -93,42 +94,42 @@ class _CraftizenRegisterScreenState extends State<CraftizenRegisterScreen> with 
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            tr('Create Craftizen Account'),
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                          const BilingualText(
+                            textKey: 'create_craftizen_account',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
                             key: const ValueKey('register_name'),
-                            decoration: InputDecoration(labelText: tr('Name')),
+                            decoration: InputDecoration(label: const BilingualText(textKey: 'name')),
                             onChanged: (val) => name = val.trim(),
                             validator: (val) =>
-                                val == null || val.isEmpty ? tr('Enter your Name') : null,
+                                val == null || val.isEmpty ? tr('enter_name') : null,
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
                             key: const ValueKey('register_email'),
-                            decoration: InputDecoration(labelText: tr('Email')),
+                            decoration: InputDecoration(label: const BilingualText(textKey: 'email')),
                             onChanged: (val) => email = val.trim(),
                             validator: (val) => (val != null && val.contains('@'))
                                 ? null
-                                : tr('Enter your valid Email'),
+                                : tr('enter_valid_email'),
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
                             key: const ValueKey('register_phone'),
-                            decoration: InputDecoration(labelText: tr('Phone Number')),
+                            decoration: InputDecoration(label: const BilingualText(textKey: 'phone')),
                             keyboardType: TextInputType.phone,
                             onChanged: (val) => phone = val.trim(),
                             validator: (val) => (val != null && val.length >= 10)
                                 ? null
-                                : tr('Enter your valid Phone Number'),
+                                : tr('enter_valid_phone'),
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
                             key: const ValueKey('register_password'),
                             decoration: InputDecoration(
-                              labelText: tr('Password'),
+                              label: const BilingualText(textKey: 'password'),
                               suffixIcon: IconButton(
                                 icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
                                 onPressed: () {
@@ -142,13 +143,13 @@ class _CraftizenRegisterScreenState extends State<CraftizenRegisterScreen> with 
                             onChanged: (val) => password = val,
                             validator: (val) => (val != null && val.length >= 6)
                                 ? null
-                                : tr('Password should have minimum of 6 characters'),
+                                : tr('password_min_6'),
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
                             key: const ValueKey('register_confirm'),
                             decoration: InputDecoration(
-                              labelText: tr('Confirm Password'),
+                              label: const BilingualText(textKey: 'confirm_password'),
                               suffixIcon: IconButton(
                                 icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
                                 onPressed: () {
@@ -161,16 +162,16 @@ class _CraftizenRegisterScreenState extends State<CraftizenRegisterScreen> with 
                             obscureText: _obscureConfirmPassword,
                             onChanged: (val) => confirmPwd = val,
                             validator: (val) =>
-                                val != password ? tr('Password do not match') : null,
+                                val != password ? tr('passwords_not_matching') : null,
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
-                            decoration: InputDecoration(labelText: tr('Referral Code(Optional)')),
+                            decoration: InputDecoration(label: const BilingualText(textKey: 'referral_code_optional')),
                             onChanged: (val) => referralCode = val.trim(),
                           ),
                           const SizedBox(height: 26),
                           ElevatedButton(
-                            child: loading ? const CircularProgressIndicator(color: Colors.white) : Text(tr('Register')),
+                            child: loading ? const CircularProgressIndicator(color: Colors.white) : const BilingualText(textKey: 'register'),
                             onPressed: loading ? null : () async {
                               if (_formKey.currentState!.validate()) {
                                 setState(() {
@@ -188,7 +189,7 @@ class _CraftizenRegisterScreenState extends State<CraftizenRegisterScreen> with 
                                 if (!mounted) return;
                                 setState(() => loading = false);
                                 if (userObj == null) {
-                                  setState(() => errorKey = 'registration_failed_try_again');
+                                  setState(() => errorKey = 'registration_failed');
                                 } else {
                                   Navigator.pushReplacement(
                                     context,
@@ -202,7 +203,7 @@ class _CraftizenRegisterScreenState extends State<CraftizenRegisterScreen> with 
                           ),
                           if (errorKey.isNotEmpty) ...[
                             const SizedBox(height: 16),
-                            Text(tr(errorKey), style: const TextStyle(color: Colors.redAccent))
+                            BilingualText(textKey: errorKey, style: const TextStyle(color: Colors.redAccent))
                           ]
                         ],
                       ),

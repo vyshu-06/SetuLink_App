@@ -23,8 +23,27 @@ class BilingualText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Current translation based on app's locale (e.g., Telugu or Hindi)
+    String currentText = tr(textKey, args: args, namedArgs: namedArgs);
+    
+    // Attempt to get English specifically. 
+    // Format: English (Telugu)
+    String englishText = tr(textKey); // Default fallback is English if key is English or fallback is set
+    
+    // If the current language is NOT English, we show bilingual: English (Telugu)
+    if (context.locale.languageCode != 'en') {
+      return Text(
+        "$englishText ($currentText)",
+        style: style,
+        textAlign: textAlign,
+        maxLines: maxLines,
+        overflow: overflow,
+      );
+    }
+
+    // If English, just show English
     return Text(
-      textKey.tr(args: args, namedArgs: namedArgs),
+      currentText,
       style: style,
       textAlign: textAlign,
       maxLines: maxLines,

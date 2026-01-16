@@ -66,14 +66,14 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
   void _startPayment() {
     if (_finalAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('Enter a valid amount'))),
+        SnackBar(content: Text(tr('enter_valid_amount'))),
       );
       return;
     }
 
     final currentUser = AuthService().getCurrentUser();
     if (currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr("You must be logged in to pay"))));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("You must be logged in to pay")));
       return;
     }
 
@@ -98,7 +98,7 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${tr('Payment Successful Id')}: $paymentId')),
+          SnackBar(content: Text('${tr('payment_successful')}: $paymentId')),
         );
         Navigator.pop(context);
       },
@@ -106,7 +106,7 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
         if (!mounted) return;
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${tr('Payment Failed')}: $error')),
+          SnackBar(content: Text('${tr('payment_failed')}: $error')),
         );
       },
     );
@@ -129,7 +129,7 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: BilingualText(
-          textKey: widget.category == 'Wallet topup' ? 'Add money to wallet' : 'Pay for service',
+          textKey: widget.category == 'wallet_topup' ? 'wallet' : 'pay_now',
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
@@ -167,7 +167,7 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
                               keyboardType: TextInputType.number,
                               readOnly: widget.amount > 0,
                               decoration: InputDecoration(
-                                labelText: tr('amount_inr'),
+                                label: const BilingualText(textKey: 'amount'),
                                 border: const UnderlineInputBorder(),
                               ),
                               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -175,9 +175,9 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
                             ),
                             if (widget.category != 'wallet_topup') ...[
                               const SizedBox(height: 20),
-                              _buildPaymentDetailRow(tr('platform_commission'), '₹${commission.toStringAsFixed(2)}'),
+                              _buildPaymentDetailRow('platform_commission', '₹${commission.toStringAsFixed(2)}'),
                               const Divider(height: 20),
-                              _buildPaymentDetailRow(tr('craftizen_payout'), '₹${payoutAmount.toStringAsFixed(2)}'),
+                              _buildPaymentDetailRow('your_payout', '₹${payoutAmount.toStringAsFixed(2)}'),
                             ],
                           ],
                         ),
@@ -188,7 +188,7 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
                       onPressed: _isLoading ? null : _startPayment,
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : BilingualText(textKey: 'Proceed to pay', style: const TextStyle(fontSize: 18)),
+                          : const BilingualText(textKey: 'proceed_to_pay', style: TextStyle(fontSize: 18)),
                     ),
                     const SizedBox(height: 20),
                   ],
@@ -201,11 +201,11 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildPaymentDetailRow(String title, String value) {
+  Widget _buildPaymentDetailRow(String titleKey, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        BilingualText(textKey: titleKey, style: Theme.of(context).textTheme.titleMedium),
         Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
       ],
     );

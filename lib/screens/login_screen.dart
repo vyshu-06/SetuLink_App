@@ -5,6 +5,8 @@ import 'package:setulink_app/screens/phone_auth_screen.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/theme/app_colors.dart';
+import 'package:setulink_app/services/fcm_service.dart';
+import 'package:setulink_app/services/location_service.dart';
 
 class LoginScreen extends StatefulWidget {
   final String initialRole;
@@ -66,6 +68,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     }
   }
 
+  Future<void> _updateUserData(String userId) async {
+    await FCMService().updateToken(userId);
+    await LocationService().updateUserLocation(userId);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,19 +114,21 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            tr('welcome_back'), // Assuming you have a key like this
+                          const BilingualText(
+                            textKey: 'welcome_back',
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
                             initialValue: email,
                             enableSuggestions: false,
                             autocorrect: false,
-                            decoration: InputDecoration(labelText: 'email'.tr()),
+                            decoration: const InputDecoration(
+                              label: BilingualText(textKey: 'email'),
+                            ),
                             onChanged: (val) => email = val,
-                            validator: (val) => val!.isEmpty ? 'enter_valid_email'.tr() : null,
+                            validator: (val) => val!.isEmpty ? tr('enter_valid_email') : null,
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
@@ -127,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             enableSuggestions: false,
                             autocorrect: false,
                             decoration: InputDecoration(
-                              labelText: 'password'.tr(),
+                              label: const BilingualText(textKey: 'password'),
                               suffixIcon: IconButton(
                                 icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
                                 onPressed: () {
@@ -137,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                             obscureText: _obscureText,
                             onChanged: (val) => password = val,
-                            validator: (val) => val!.length < 6 ? 'password_min_6'.tr() : null,
+                            validator: (val) => val!.length < 6 ? tr('password_min_6') : null,
                           ),
                           const SizedBox(height: 40),
                           ElevatedButton(
@@ -155,11 +164,17 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                                 final result = await context.read<AuthService>().signInWithEmail(email, password);
                                 if (!mounted) return;
-                                setState(() => loading = false);
-
+                                
                                 if (result == null) {
-                                  setState(() => error = 'Login failed.\n(cloud_firestore/unavailable) Failed to get document because the client is offline.');
+                                  setState(() {
+                                    loading = false;
+                                    error = 'Login failed. Please check your credentials.';
+                                  });
                                 } else {
+                                  await _updateUserData(result.uid);
+                                  if (!mounted) return;
+                                  setState(() => loading = false);
+                                  
                                   if (_selectedRole == 'citizen') {
                                     Navigator.of(context).pushReplacementNamed('/citizen_home');
                                   } else if (_selectedRole == 'craftizen') {
@@ -181,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
-                            child: const BilingualText(textKey: 'Login with phone'),
+                            child: const BilingualText(textKey: 'login_with_phone'),
                           ),
                           if (error.isNotEmpty)
                             Padding(

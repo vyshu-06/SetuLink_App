@@ -5,16 +5,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/chat_service.dart';
 import 'package:setulink_app/screens/chat_screen.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
+import 'package:setulink_app/theme/app_colors.dart';
 
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({Key? key}) : super(key: key);
-
-  Map<String, String> _getPeerInfo(DocumentSnapshot chatDoc, String currentUserId) {
-    final List<dynamic> participants = chatDoc['users'];
-    final String peerId = participants.firstWhere((id) => id != currentUserId, orElse: () => '');
-    final String peerName = 'User ${peerId.substring(0, 6)}';
-    return {'id': peerId, 'name': peerName};
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +18,12 @@ class ChatListScreen extends StatelessWidget {
     final currentUser = authService.currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: Text(tr('chats'))),
+      appBar: AppBar(
+        title: const BilingualText(textKey: 'chats', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: AppColors.primaryColor,
+      ),
       body: currentUser == null
-          ? Center(child: Text(tr('log_in_to_see_chats')))
+          ? const Center(child: BilingualText(textKey: 'log_in_to_see_bookings'))
           : StreamBuilder<QuerySnapshot>(
               stream: chatService.getChatList(currentUser.uid),
               builder: (context, snapshot) {
@@ -33,34 +31,51 @@ class ChatListScreen extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text(tr('no_chats_found')));
+                  return const Center(child: BilingualText(textKey: 'no_jobs_available')); // Placeholder for No Chats
                 }
 
                 final chatDocs = snapshot.data!.docs;
 
-                return ListView.builder(
+                return ListView.separated(
                   itemCount: chatDocs.length,
+                  separatorBuilder: (context, index) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final chat = chatDocs[index];
-                    final peerInfo = _getPeerInfo(chat, currentUser.uid);
                     final data = chat.data() as Map<String, dynamic>;
+                    final List<dynamic> users = data['users'] ?? [];
+                    final String peerId = users.firstWhere((id) => id != currentUser.uid, orElse: () => '');
 
-                    return ListTile(
-                      leading: const CircleAvatar(child: Icon(Icons.person)),
-                      title: Text(peerInfo['name']!),
-                      subtitle: Text(data.containsKey('lastMessage') ? data['lastMessage'] ?? '' : ''),
-                      onTap: () {
-                        if (peerInfo['id']!.isNotEmpty) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChatScreen(
-                                chatId: chat.id,
-                                otherUserName: peerInfo['name']!,
-                              ),
-                            ),
-                          );
-                        }
+                    return FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance.collection('users').doc(peerId).get(),
+                      builder: (context, userSnapshot) {
+                        final String peerName = userSnapshot.hasData ? (userSnapshot.data!['name'] ?? 'User') : '...';
+                        
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                            child: Text(peerName[0].toUpperCase(), style: const TextStyle(color: AppColors.primaryColor, fontWeight: FontWeight.bold)),
+                          ),
+                          title: Text(peerName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text(
+                            data['lastMessage'] ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: const Icon(Icons.chevron_right, size: 16),
+                          onTap: () {
+                            if (peerId.isNotEmpty) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreen(
+                                    chatId: chat.id,
+                                    otherUserName: peerName,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        );
                       },
                     );
                   },

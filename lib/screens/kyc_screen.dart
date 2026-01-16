@@ -58,7 +58,7 @@ class _KYCScreenState extends State<KYCScreen> with SingleTickerProviderStateMix
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const BilingualText(textKey: 'Kyc Verification', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const BilingualText(textKey: 'kyc_verification', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -81,16 +81,16 @@ class _KYCScreenState extends State<KYCScreen> with SingleTickerProviderStateMix
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const BilingualText(textKey: 'Verify your identity', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                    const BilingualText(textKey: 'kyc_verification', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     const SizedBox(height: 16),
-                    const BilingualText(textKey: 'Kyc instructions', style: TextStyle(color: Colors.white70, fontSize: 16), textAlign: TextAlign.center),
+                    const BilingualText(textKey: 'kyc_instructions', style: TextStyle(color: Colors.white70, fontSize: 16), textAlign: TextAlign.center),
                     const SizedBox(height: 50),
                     if (loading)
                       const CircularProgressIndicator(color: Colors.white)
                     else
                       ElevatedButton.icon(
                         icon: const Icon(Icons.camera_alt, size: 24),
-                        label: const BilingualText(textKey: 'Scan id document', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        label: const BilingualText(textKey: 'scan_id_document', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         onPressed: _scanDocument,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.accentColor,
@@ -108,7 +108,7 @@ class _KYCScreenState extends State<KYCScreen> with SingleTickerProviderStateMix
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             children: [
-                              const BilingualText(textKey: 'Extracted text', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
+                              const BilingualText(textKey: 'extracted_text', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
                               const SizedBox(height: 12),
                               Text(extractedText!, style: const TextStyle(fontSize: 14)),
                             ],

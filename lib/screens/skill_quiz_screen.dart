@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:setulink_app/screens/skill_video_upload_wrapper.dart';
 import 'package:setulink_app/theme/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class SkillQuizScreen extends StatefulWidget {
   final String userId;
@@ -31,7 +32,6 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
 
   // Questions Database
   final Map<String, List<Map<String, dynamic>>> _allQuestions = {
-    // CATEGORY 1: EVERYDAY NEEDS
     'plumber': [
       {'q': 'What is the standard height for a kitchen sink drain?', 'options': ['12 inches', '18 inches', '24 inches', '30 inches'], 'a': 1},
       {'q': 'Which tool is primarily used to clear a clogged toilet?', 'options': ['Plunger', 'Toilet Auger', 'Pipe Wrench', 'Basin Wrench'], 'a': 1},
@@ -371,7 +371,6 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
         _animationController.forward();
       });
     } else {
-      // Finished questions for current skill
       if (_score >= (questions.length * 0.7).ceil()) {
         _passedSkills.add(currentSkill);
       }
@@ -390,7 +389,6 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
         _animationController.forward();
       });
     } else {
-      // Finished all quizzes
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -415,10 +413,10 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("No questions for $currentSkill"),
+              BilingualText(textKey: 'no_questions_for', args: [currentSkill.replaceAll('_', ' ')]),
               ElevatedButton(
                 onPressed: _nextSkill,
-                child: const Text("Skip"),
+                child: const BilingualText(textKey: 'back'),
               ),
             ],
           ),
@@ -431,7 +429,7 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(currentSkill.replaceAll('_', ' ').toUpperCase()),
+        title: BilingualText(textKey: currentSkill, style: const TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primaryColor,
@@ -441,7 +439,6 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Progress Bar
             LinearProgressIndicator(
               value: (_currentQuestionIndex + 1) / questions.length,
               backgroundColor: Colors.grey[200],
@@ -449,14 +446,18 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
             ),
             const SizedBox(height: 32),
 
-            // Question Count
-            Text(
-              "Question ${_currentQuestionIndex + 1} of ${questions.length}",
-              style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                BilingualText(
+                  textKey: 'question_progress',
+                  args: [(_currentQuestionIndex + 1).toString(), questions.length.toString()],
+                  style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
 
-            // Animated Question
             Expanded(
               child: FadeTransition(
                 opacity: _fadeAnimation,
@@ -467,7 +468,7 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
                       Text(
                         question['q'] as String,
                         style: const TextStyle(
-                          fontSize: 22,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textColor,
                         ),
@@ -475,7 +476,6 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
                       ),
                       const SizedBox(height: 40),
 
-                      // Options
                       ...List.generate(
                         (question['options'] as List).length,
                             (index) => Padding(

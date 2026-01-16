@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/screens/craftizen_common_questions_screen.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class SkillSelectionScreen extends StatefulWidget {
   final String userId;
@@ -56,12 +57,12 @@ class _SkillSelectionScreenState extends State<SkillSelectionScreen> {
     },
   ];
 
-  void _onSkillSelected(bool? selected, String skill) {
+  void _onSkillSelected(bool? selected, String skillKey) {
     setState(() {
       if (selected == true) {
-        _selectedSkills.add(skill);
+        _selectedSkills.add(skillKey);
       } else {
-        _selectedSkills.remove(skill);
+        _selectedSkills.remove(skillKey);
       }
     });
   }
@@ -70,7 +71,7 @@ class _SkillSelectionScreenState extends State<SkillSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('select_your_skills')),
+        title: const BilingualText(textKey: 'my_skills'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -81,18 +82,18 @@ class _SkillSelectionScreenState extends State<SkillSelectionScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 4.0, bottom: 16.0),
-                  child: Text(
-                    tr(category['categoryKey']!),
+                  child: BilingualText(
+                    textKey: category['categoryKey']!,
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
                 ...(
                   category['services'] as List<Map<String, dynamic>>).map((service) {
-                    final skill = tr(service['titleKey']!);
+                    final skillKey = service['titleKey']!;
                     return CheckboxListTile(
-                      title: Text(skill),
-                      value: _selectedSkills.contains(skill),
-                      onChanged: (selected) => _onSkillSelected(selected, skill),
+                      title: BilingualText(textKey: skillKey),
+                      value: _selectedSkills.contains(skillKey),
+                      onChanged: (selected) => _onSkillSelected(selected, skillKey),
                     );
                   }).toList(),
               ],
@@ -111,7 +112,7 @@ class _SkillSelectionScreenState extends State<SkillSelectionScreen> {
                 ),
               );
             },
-            child: Text(tr('next')),
+            child: const BilingualText(textKey: 'next'),
           ),
         ],
       ),

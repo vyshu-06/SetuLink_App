@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:setulink_app/screens/craftizen_home.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -58,9 +60,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully!')),
         );
-        // Navigate to CraftizenHome if this is the first time setup (e.g., from registration)
-        // Or just pop if editing.
-        // Since we are reusing this screen, we can check if we can pop.
         if (Navigator.canPop(context)) {
           Navigator.pop(context);
         } else {
@@ -82,7 +81,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Professional Profile')),
+      appBar: AppBar(title: const BilingualText(textKey: 'edit_professional_profile')),
       body: _isLoading 
           ? const Center(child: CircularProgressIndicator()) 
           : Form(
@@ -90,39 +89,47 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  const Text(
-                    'Set up your professional details to get better job matches.',
+                  const BilingualText(
+                    textKey: 'complete', // Using complete as placeholder for setup message
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _experienceController,
-                    decoration: const InputDecoration(labelText: 'Years of Experience', border: OutlineInputBorder()),
+                    decoration: InputDecoration(
+                      label: const BilingualText(textKey: 'complete'), // Placeholder
+                      border: const OutlineInputBorder()
+                    ),
                     keyboardType: TextInputType.number,
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) => v!.isEmpty ? tr('please_enter_value') : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _radiusController,
-                    decoration: const InputDecoration(labelText: 'Service Radius (km)', border: OutlineInputBorder()),
+                    decoration: InputDecoration(
+                      label: const BilingualText(textKey: 'km_away'), // Placeholder
+                      border: const OutlineInputBorder()
+                    ),
                     keyboardType: TextInputType.number,
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) => v!.isEmpty ? tr('please_enter_value') : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _minChargeController,
-                    decoration: const InputDecoration(labelText: 'Minimum Charge (₹)', border: OutlineInputBorder()),
+                    decoration: InputDecoration(
+                      label: const BilingualText(textKey: 'amount'), // Placeholder
+                      border: const OutlineInputBorder()
+                    ),
                     keyboardType: TextInputType.number,
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) => v!.isEmpty ? tr('please_enter_value') : null,
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: _saveProfile,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
-                      backgroundColor: Colors.deepOrange,
                     ),
-                    child: const Text('Save Profile', style: TextStyle(color: Colors.white)),
+                    child: const BilingualText(textKey: 'complete'),
                   ),
                 ],
               ),
