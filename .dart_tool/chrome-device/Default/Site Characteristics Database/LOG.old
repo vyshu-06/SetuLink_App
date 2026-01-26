@@ -1,8 +1,22 @@
-2025/12/17-21:51:02.532 3338 Reusing MANIFEST C:\Users\HP\AppData\Local\Temp\flutter_tools.74558dec\flutter_tools_chrome_device.27269924\Default\Site Characteristics Database/MANIFEST-000001
-2025/12/17-21:51:02.603 3338 Recovering log #10
-2025/12/17-21:51:02.764 3338 Reusing old log C:\Users\HP\AppData\Local\Temp\flutter_tools.74558dec\flutter_tools_chrome_device.27269924\Default\Site Characteristics Database/000010.log 
-2025/12/17-21:51:02.769 3338 Delete type=0 #3
-2025/12/17-21:51:02.770 3338 Delete type=2 #4
-2025/12/17-21:51:02.770 3338 Delete type=0 #6
-2025/12/17-21:51:02.770 3338 Delete type=2 #7
-2025/12/17-21:51:02.770 3338 Delete type=2 #8
+2026/01/17-08:29:53.555 efc Log #3: 2 ops saved to Table #23 OK
+2026/01/17-08:29:53.623 efc Archiving C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database/000003.log: OK
+2026/01/17-08:29:53.654 efc Log #6: 1 ops saved to Table #24 OK
+2026/01/17-08:29:53.663 efc Archiving C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database/000006.log: OK
+2026/01/17-08:29:53.668 efc Log #10: 3 ops saved to Table #25 OK
+2026/01/17-08:29:53.697 efc Archiving C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database/000010.log: OK
+2026/01/17-08:29:53.717 efc Log #17: 2 ops saved to Table #26 OK
+2026/01/17-08:29:53.720 efc Archiving C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database/000017.log: OK
+2026/01/17-08:29:53.723 efc Table #4: 2 entries OK
+2026/01/17-08:29:53.725 efc Table #7: 2 entries OK
+2026/01/17-08:29:53.726 efc Table #8: 1 entries OK
+2026/01/17-08:29:53.727 efc Table #12: 2 entries OK
+2026/01/17-08:29:53.728 efc Table #18: 2 entries OK
+2026/01/17-08:29:53.729 efc Table #20: 2 entries OK
+2026/01/17-08:29:53.730 efc Table #21: 1 entries OK
+2026/01/17-08:29:53.731 efc Table #22: 3 entries OK
+2026/01/17-08:29:53.731 efc Table #23: 2 entries OK
+2026/01/17-08:29:53.732 efc Table #24: 1 entries OK
+2026/01/17-08:29:53.732 efc Table #25: 3 entries OK
+2026/01/17-08:29:53.733 efc Table #26: 2 entries OK
+2026/01/17-08:29:53.783 efc Archiving C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database/MANIFEST-000001: OK
+2026/01/17-08:29:53.797 efc **** Repaired leveldb C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database; recovered 12 files; 2311 bytes. Some data may have been lost. ****

@@ -118,11 +118,11 @@ class _CitizenHomeState extends State<CitizenHome> {
               elevation: 0,
               type: BottomNavigationBarType.fixed,
               items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: tr('home')),
-                BottomNavigationBarItem(icon: const Icon(Icons.history_outlined), activeIcon: const Icon(Icons.history), label: tr('bookings')),
-                BottomNavigationBarItem(icon: const Icon(Icons.chat_bubble_outline), activeIcon: const Icon(Icons.chat_bubble), label: tr('chats')),
-                BottomNavigationBarItem(icon: const Icon(Icons.account_balance_wallet_outlined), activeIcon: const Icon(Icons.account_balance_wallet), label: tr('wallet')),
-                BottomNavigationBarItem(icon: const Icon(Icons.person_outline), activeIcon: const Icon(Icons.person), label: tr('profile')),
+                BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: BilingualText.toBilingual(context, 'home')),
+                BottomNavigationBarItem(icon: const Icon(Icons.history_outlined), activeIcon: const Icon(Icons.history), label: BilingualText.toBilingual(context, 'bookings')),
+                BottomNavigationBarItem(icon: const Icon(Icons.chat_bubble_outline), activeIcon: const Icon(Icons.chat_bubble), label: BilingualText.toBilingual(context, 'chats')),
+                BottomNavigationBarItem(icon: const Icon(Icons.account_balance_wallet_outlined), activeIcon: const Icon(Icons.account_balance_wallet), label: BilingualText.toBilingual(context, 'wallet')),
+                BottomNavigationBarItem(icon: const Icon(Icons.person_outline), activeIcon: const Icon(Icons.person), label: BilingualText.toBilingual(context, 'profile')),
               ],
               currentIndex: _selectedIndex,
               onTap: _onItemTapped,
@@ -134,7 +134,7 @@ class _CitizenHomeState extends State<CitizenHome> {
         floatingActionButton: _selectedIndex == 0
             ? FloatingActionButton.extended(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const JobRequestScreen())),
-                label: BilingualText(textKey: 'post_a_job'),
+                label: const BilingualText(textKey: 'post_a_job'),
                 icon: const Icon(Icons.add),
               )
             : null,
@@ -191,7 +191,7 @@ class _HomeTabPageState extends State<_HomeTabPage> with SingleTickerProviderSta
       } else {
         _filteredCategories = _allServiceCategories.map((category) {
           final filteredServices = (category['services'] as List<Map<String, dynamic>>).where((service) {
-            final title = context.tr(service['titleKey']).toLowerCase();
+            final title = tr(service['titleKey']).toLowerCase();
             return title.contains(_searchQuery);
           }).toList();
 
@@ -244,7 +244,7 @@ class _Header extends StatelessWidget {
         TextField(
           controller: searchController,
           decoration: InputDecoration(
-            hintText: tr('search_services'),
+            hintText: BilingualText.toBilingual(context, 'search_services'),
             prefixIcon: const Icon(Icons.search, color: AppColors.primaryColor),
           ),
         ),
@@ -371,8 +371,8 @@ class _JobCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${tr('amount')}: ₹${job.budget}'),
-            Text('${tr('Status')}: ${job.jobStatus.toUpperCase()}', style: TextStyle(color: job.jobStatus == 'open' ? Colors.green : Colors.blue)),
+            Text('${BilingualText.toBilingual(context, 'amount')}: ₹${job.budget}'),
+            Text('${BilingualText.toBilingual(context, 'status')}: ${job.jobStatus.toUpperCase()}', style: TextStyle(color: job.jobStatus == 'open' ? Colors.green : Colors.blue)),
             Text(job.description, maxLines: 2, overflow: TextOverflow.ellipsis),
           ],
         ),

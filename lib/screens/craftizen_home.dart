@@ -103,9 +103,9 @@ class _CraftizenHomeState extends State<CraftizenHome> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: tr('home')),
-                BottomNavigationBarItem(icon: const Icon(Icons.work_outline), activeIcon: const Icon(Icons.work), label: tr('jobs')),
-                BottomNavigationBarItem(icon: const Icon(Icons.chat_bubble_outline), activeIcon: const Icon(Icons.chat_bubble), label: tr('chats')),
+                BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: BilingualText.toBilingual(context, 'home')),
+                BottomNavigationBarItem(icon: const Icon(Icons.work_outline), activeIcon: const Icon(Icons.work), label: BilingualText.toBilingual(context, 'jobs')),
+                BottomNavigationBarItem(icon: const Icon(Icons.chat_bubble_outline), activeIcon: const Icon(Icons.chat_bubble), label: BilingualText.toBilingual(context, 'chats')),
               ],
               currentIndex: _selectedIndex,
               onTap: _onItemTapped,
@@ -299,8 +299,8 @@ class _JobsTabPage extends StatelessWidget {
               color: Colors.white.withOpacity(0.1),
               child: TabBar(
                 tabs: [
-                  Tab(child: Text(tr('new_jobs'))),
-                  Tab(child: Text(tr('my_jobs'))),
+                  Tab(text: BilingualText.toBilingual(context, 'new_jobs')),
+                  Tab(text: BilingualText.toBilingual(context, 'my_jobs')),
                 ],
                 indicatorColor: AppColors.accentColor,
                 labelColor: Colors.white,
@@ -415,8 +415,8 @@ class _JobCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${tr('amount')}: ₹${job.budget}'),
-            Text('${tr('Status')}: ${job.jobStatus.toUpperCase()}', style: TextStyle(color: job.jobStatus == 'open' ? Colors.green : Colors.blue)),
+            Text('${BilingualText.toBilingual(context, 'amount')}: ₹${job.budget}'),
+            Text('${BilingualText.toBilingual(context, 'status')}: ${job.jobStatus.toUpperCase()}', style: TextStyle(color: job.jobStatus == 'open' ? Colors.green : Colors.blue)),
             Text(job.description, maxLines: 2, overflow: TextOverflow.ellipsis),
           ],
         ),
