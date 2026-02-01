@@ -94,7 +94,7 @@ class _CraftizenSkillSelectionScreenState extends State<CraftizenSkillSelectionS
   void _continueToNextStep() {
     if (_selectedSkills.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('please_select_at_least_one_skill'))),
+        SnackBar(content: Text(tr('Please select at least one Skill'))),
       );
       return;
     }

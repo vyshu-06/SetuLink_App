@@ -20,11 +20,11 @@ class _EarningsScreenState extends State<EarningsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (userId.isEmpty) return const Center(child: BilingualText(textKey: 'log_in_to_see_bookings'));
+    if (userId.isEmpty) return const Center(child: BilingualText(textKey: 'Log in to see your bookings'));
 
     return Scaffold(
       appBar: AppBar(
-        title: const BilingualText(textKey: 'jobs_page_title'),
+        title: const BilingualText(textKey: 'Jobs page title'),
         backgroundColor: AppColors.primaryColor,
       ),
       body: Column(
@@ -34,7 +34,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
             padding: EdgeInsets.all(16.0),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: BilingualText(textKey: 'jobs', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: BilingualText(textKey: 'Jobs', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
           ),
           Expanded(child: _buildTransactionList()),
@@ -56,14 +56,14 @@ class _EarningsScreenState extends State<EarningsScreen> {
           ),
           child: Column(
             children: [
-              const BilingualText(textKey: 'amount', style: TextStyle(color: Colors.white70, fontSize: 16)),
+              const BilingualText(textKey: 'Amount', style: TextStyle(color: Colors.white70, fontSize: 16)),
               const SizedBox(height: 8),
               Text('₹${balance.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: balance > 0 ? () => _showWithdrawDialog(balance) : null,
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppColors.primaryColor),
-                child: const BilingualText(textKey: 'complete'), // Placeholder for Withdraw
+                child: const BilingualText(textKey: 'Complete'), // Placeholder for Withdraw
               ),
             ],
           ),
@@ -78,7 +78,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
         final docs = snapshot.data!.docs;
-        if (docs.isEmpty) return const Center(child: BilingualText(textKey: 'no_accepted_jobs_yet'));
+        if (docs.isEmpty) return const Center(child: BilingualText(textKey: 'No accepted jobs yet'));
 
         return ListView.builder(
           itemCount: docs.length,
@@ -101,14 +101,14 @@ class _EarningsScreenState extends State<EarningsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const BilingualText(textKey: 'complete'), // Withdraw
+        title: const BilingualText(textKey: 'Complete'), // Withdraw
         content: TextField(
           controller: amountController,
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(labelText: 'Amount'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const BilingualText(textKey: 'back')),
+          TextButton(onPressed: () => Navigator.pop(context), child: const BilingualText(textKey: 'Back')),
           ElevatedButton(
             onPressed: () async {
               final amount = double.tryParse(amountController.text) ?? 0;
@@ -120,7 +120,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
                 }
               }
             },
-            child: const BilingualText(textKey: 'complete'),
+            child: const BilingualText(textKey: 'Complete'),
           ),
         ],
       ),

@@ -60,7 +60,7 @@ class _CitizenHomeState extends State<CitizenHome> {
         extendBody: true,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: const BilingualText(textKey: 'citizen_dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: const BilingualText(textKey: 'Citizen Dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           backgroundColor: Colors.transparent,
           elevation: 0,
           actions: [
@@ -74,7 +74,7 @@ class _CitizenHomeState extends State<CitizenHome> {
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
                   value: 'logout',
-                  child: BilingualText(textKey: 'logout'),
+                  child: BilingualText(textKey: 'Logout'),
                 ),
               ],
             ),
@@ -134,7 +134,7 @@ class _CitizenHomeState extends State<CitizenHome> {
         floatingActionButton: _selectedIndex == 0
             ? FloatingActionButton.extended(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const JobRequestScreen())),
-                label: const BilingualText(textKey: 'post_a_job'),
+                label: const BilingualText(textKey: 'Post a job'),
                 icon: const Icon(Icons.add),
               )
             : null,
@@ -237,9 +237,9 @@ class _Header extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const BilingualText(textKey: 'welcome_citizen', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
+        const BilingualText(textKey: 'Welcome Citizen', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
         const SizedBox(height: 8),
-        const BilingualText(textKey: 'what_service_looking_for', style: TextStyle(color: Colors.white70, fontSize: 16)),
+        const BilingualText(textKey: 'What service are you looking for?', style: TextStyle(color: Colors.white70, fontSize: 16)),
         const SizedBox(height: 24),
         TextField(
           controller: searchController,
@@ -331,7 +331,7 @@ class _BookingsTabPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentUser = AuthService().getCurrentUser();
     if (currentUser == null) {
-      return const Center(child: BilingualText(textKey: 'log_in_to_see_bookings', style: TextStyle(color: Colors.white)));
+      return const Center(child: BilingualText(textKey: 'Log in to see your bookings', style: TextStyle(color: Colors.white)));
     }
     return SafeArea(
         child: StreamBuilder<List<JobModel>>(
@@ -341,7 +341,7 @@ class _BookingsTabPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator(color: Colors.white));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: BilingualText(textKey: 'no_jobs_available', style: TextStyle(color: Colors.white)));
+            return const Center(child: BilingualText(textKey: 'No jobs available', style: TextStyle(color: Colors.white)));
           }
 
           final jobs = snapshot.data!;

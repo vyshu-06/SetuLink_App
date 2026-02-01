@@ -50,7 +50,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   void _openCheckout() {
     if (_subscriptionId == null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(context.tr('subscription_not_ready'))));
+          .showSnackBar(SnackBar(content: Text(context.tr('Subscription not ready'))));
       return;
     }
 
@@ -58,7 +58,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       'key': 'YOUR_RAZORPAY_API_KEY', // Replace with your actual key
       'subscription_id': _subscriptionId,
       'name': 'SetuLink',
-      'description': context.tr('subscription_payment_description'),
+      'description': context.tr('Subscription payment description'),
       'prefill': {'email': 'user@example.com', 'contact': '9999999999'}, // Replace with actual user data
       'retry': {'enabled': true, 'max_count': 3},
     };
@@ -87,7 +87,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         // TODO: Update Firestore user subscription status here
       } else {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(context.tr('subscription_verification_failed'))));
+            .showSnackBar(SnackBar(content: Text(context.tr('Subscription verification failed'))));
       }
     } catch (e) {
       if (!mounted) return;
@@ -99,7 +99,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   void _handlePaymentError(PaymentFailureResponse response) {
     if (!mounted) return;
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('${context.tr('payment_failed')}: ${response.message}')));
+        .showSnackBar(SnackBar(content: Text('${context.tr('Payment failed')}: ${response.message}')));
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {}
@@ -113,13 +113,13 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text(context.tr('subscribe_title'))),
+        appBar: AppBar(title: Text(context.tr('Subscribe'))),
         body: Center(
           child: _subscriptionId == null
               ? const CircularProgressIndicator()
               : ElevatedButton(
                   onPressed: _openCheckout,
-                  child: Text(context.tr('subscribe_now')),
+                  child: Text(context.tr('Subscribe Now')),
                 ),
         ));
   }

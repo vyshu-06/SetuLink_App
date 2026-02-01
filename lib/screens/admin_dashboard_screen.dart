@@ -12,14 +12,14 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(tr('admin_dashboard'))),
+      appBar: AppBar(title: Text(tr('Admin Dashboard'))),
       body: GridView.count(
         crossAxisCount: 2,
         padding: const EdgeInsets.all(16),
         children: [
           _buildDashboardCard(
             context,
-            title: tr('user_management'),
+            title: tr('User Management'),
             icon: Icons.people,
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const UserManagementScreen()));
@@ -27,7 +27,7 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
           _buildDashboardCard(
             context,
-            title: tr('job_monitor'),
+            title: tr('Job onitor'),
             icon: Icons.work,
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminJobsListScreen()));
@@ -35,7 +35,7 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
           _buildDashboardCard(
             context,
-            title: tr('dispute_resolution'),
+            title: tr('Dispute Resolution'),
             icon: Icons.gavel,
              onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const DisputeManagementScreen()));
@@ -43,7 +43,7 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
           _buildDashboardCard(
             context,
-            title: tr('finance_and_payouts'), 
+            title: tr('Finance and Payouts'),
             icon: Icons.monetization_on, 
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminPaymentsScreen()));
@@ -51,7 +51,7 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
           _buildDashboardCard(
             context,
-            title: tr('analytics'), 
+            title: tr('Analytics'),
             icon: Icons.analytics, 
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminAnalyticsScreen()));

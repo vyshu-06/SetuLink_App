@@ -89,13 +89,13 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
 
     final currentUser = AuthService().getCurrentUser();
     if (currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('you_must_be_logged_in'))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('You must be logged in'))));
       setState(() => _isLoading = false);
       return;
     }
 
     if (_selectedProblem == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('please_select_a_problem'))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Please select a problem'))));
       setState(() => _isLoading = false);
       return;
     }
@@ -145,7 +145,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const BilingualText(textKey: 'platform_commission', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), // Using placeholder
+        title: const BilingualText(textKey: 'Platform Commission', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), // Using placeholder
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -175,7 +175,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           children: [
-                            const BilingualText(textKey: 'amount', style: TextStyle(fontSize: 18)),
+                            const BilingualText(textKey: 'Amount', style: TextStyle(fontSize: 18)),
                             const SizedBox(height: 10),
                             Text('₹${_calculatedPrice.toStringAsFixed(0)}', 
                                  style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
@@ -206,7 +206,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                               });
                             },
                             decoration: InputDecoration(
-                              label: const BilingualText(textKey: 'service'),
+                              label: const BilingualText(textKey: 'Service'),
                               border: InputBorder.none,
                             ),
                           ),
@@ -219,7 +219,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                         elevation: 4,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         child: ExpansionTile(
-                          title: const BilingualText(textKey: 'amount'), // Placeholder
+                          title: const BilingualText(textKey: 'Amount'), // Placeholder
                           children: breakdown.entries.map((e) => ListTile(
                             title: BilingualText(textKey: e.key.replaceAll('_', ' ').toLowerCase()),
                             trailing: Text('₹${e.value.toStringAsFixed(0)}'),
@@ -231,7 +231,7 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                       onPressed: _isLoading ? null : _confirmBooking,
                       child: _isLoading 
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const BilingualText(textKey: 'pay_now'), // Placeholder
+                        : const BilingualText(textKey: 'Pay Now'), // Placeholder
                     ),
                     const SizedBox(height: 20),
                   ],

@@ -26,12 +26,12 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> with 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('dispute_resolution')),
+        title: Text(tr('Dispute Resolution')),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: tr('active_disputes')),
-            Tab(text: tr('resolved')),
+            Tab(text: tr('Active Disputes')),
+            Tab(text: tr('Resolved')),
           ],
         ),
       ),
@@ -61,7 +61,7 @@ class _DisputeList extends StatelessWidget {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
         final disputes = snapshot.data!;
-        if (disputes.isEmpty) return Center(child: Text(tr('no_disputes_found')));
+        if (disputes.isEmpty) return Center(child: Text(tr('No Disputes found')));
 
         return ListView.builder(
           itemCount: disputes.length,
@@ -78,13 +78,13 @@ class _DisputeList extends StatelessWidget {
                     Text('${tr('raised_by')}: ${dispute.raisedBy}'),
                     Text('${tr('date')}: ${DateFormat('dd MMM yyyy').format(dispute.createdAt.toDate())}'),
                     if (dispute.escalationRequested)
-                      Text(tr('escalated').toUpperCase(), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                      Text(tr('Escalated').toUpperCase(), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                   ],
                 ),
                 trailing: status == 'open'
                     ? ElevatedButton(
                         onPressed: () => _showResolveDialog(context, dispute),
-                        child: Text(tr('resolve')),
+                        child: Text(tr('Resolve')),
                       )
                     : const Icon(Icons.check_circle, color: Colors.green),
                 onTap: () {
@@ -115,21 +115,21 @@ class _DisputeList extends StatelessWidget {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: Text(tr('resolve_dispute')),
+            title: Text(tr('Resolve Dispute')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 InputDecorator(
-                  decoration: InputDecoration(labelText: tr('outcome'), border: const OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: tr('Outcome'), border: const OutlineInputBorder()),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: outcome,
                       isDense: true,
                       items: [
-                        DropdownMenuItem(value: 'refund_full', child: Text(tr('full_refund'))),
-                        DropdownMenuItem(value: 'refund_partial', child: Text(tr('partial_refund'))),
-                        DropdownMenuItem(value: 'no_refund', child: Text(tr('no_refund_rejected'))),
-                        DropdownMenuItem(value: 'warning_issued', child: Text(tr('issue_warning'))),
+                        DropdownMenuItem(value: 'refund_full', child: Text(tr('Full refund'))),
+                        DropdownMenuItem(value: 'refund_partial', child: Text(tr('Partial refund'))),
+                        DropdownMenuItem(value: 'no_refund', child: Text(tr('No refund rejected'))),
+                        DropdownMenuItem(value: 'warning_issued', child: Text(tr('Issue Warning'))),
                       ],
                       onChanged: (val) {
                         setState(() {
@@ -142,22 +142,22 @@ class _DisputeList extends StatelessWidget {
                 const SizedBox(height: 16),
                 TextField(
                   controller: noteController,
-                  decoration: InputDecoration(labelText: tr('resolution_note')),
+                  decoration: InputDecoration(labelText: tr('Resolution Note')),
                   maxLines: 3,
                 ),
               ],
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('cancel'))),
+              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Cancel'))),
               ElevatedButton(
                 onPressed: () {
                   service.resolveDispute(dispute.id, outcome, noteController.text);
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(tr('dispute_resolved'))),
+                    SnackBar(content: Text(tr('Dispute Resolved'))),
                   );
                 },
-                child: Text(tr('submit_resolution')),
+                child: Text(tr('Submit Resolution')),
               ),
             ],
           );

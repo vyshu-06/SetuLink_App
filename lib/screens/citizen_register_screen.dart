@@ -59,7 +59,7 @@ class _CitizenRegisterScreenState extends State<CitizenRegisterScreen> with Sing
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        title: const BilingualText(textKey: 'citizen_registration'),
+        title: const BilingualText(textKey: 'Citizen Registration'),
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
@@ -95,41 +95,41 @@ class _CitizenRegisterScreenState extends State<CitizenRegisterScreen> with Sing
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const BilingualText(
-                            textKey: 'create_account',
+                            textKey: 'Create your account',
                             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
                             key: const ValueKey('register_name'),
-                            decoration: InputDecoration(label: const BilingualText(textKey: 'name')),
+                            decoration: InputDecoration(label: const BilingualText(textKey: 'Name')),
                             onChanged: (val) => name = val.trim(),
                             validator: (val) =>
-                                val == null || val.isEmpty ? tr('enter_name') : null,
+                                val == null || val.isEmpty ? tr('Enter Name') : null,
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
                             key: const ValueKey('register_email'),
-                            decoration: InputDecoration(label: const BilingualText(textKey: 'email')),
+                            decoration: InputDecoration(label: const BilingualText(textKey: 'Email')),
                             onChanged: (val) => email = val.trim(),
                             validator: (val) => (val != null && val.contains('@'))
                                 ? null
-                                : tr('enter_valid_email'),
+                                : tr('Enter a valid Email'),
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
                             key: const ValueKey('register_phone'),
-                            decoration: InputDecoration(label: const BilingualText(textKey: 'phone')),
+                            decoration: InputDecoration(label: const BilingualText(textKey: 'Phone Number')),
                             keyboardType: TextInputType.phone,
                             onChanged: (val) => phone = val.trim(),
                             validator: (val) => (val != null && val.length >= 10)
                                 ? null
-                                : tr('enter_valid_phone'),
+                                : tr('Enter a valid Phone Number'),
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
                             key: const ValueKey('register_password'),
                             decoration: InputDecoration(
-                              label: const BilingualText(textKey: 'password'),
+                              label: const BilingualText(textKey: 'Password'),
                               suffixIcon: IconButton(
                                 icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
                                 onPressed: () {
@@ -143,13 +143,13 @@ class _CitizenRegisterScreenState extends State<CitizenRegisterScreen> with Sing
                             onChanged: (val) => password = val,
                             validator: (val) => (val != null && val.length >= 6)
                                 ? null
-                                : tr('password_min_6'),
+                                : tr('Password must have minimum of 6 characters'),
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
                             key: const ValueKey('register_confirm'),
                             decoration: InputDecoration(
-                              label: const BilingualText(textKey: 'confirm_password'),
+                              label: const BilingualText(textKey: 'Confirm Password'),
                               suffixIcon: IconButton(
                                 icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
                                 onPressed: () {
@@ -162,16 +162,16 @@ class _CitizenRegisterScreenState extends State<CitizenRegisterScreen> with Sing
                             obscureText: _obscureConfirmPassword,
                             onChanged: (val) => confirmPwd = val,
                             validator: (val) =>
-                                val != password ? tr('passwords_not_matching') : null,
+                                val != password ? tr('Passwords not matching') : null,
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
-                            decoration: InputDecoration(label: const BilingualText(textKey: 'referral_code_optional')),
+                            decoration: InputDecoration(label: const BilingualText(textKey: 'Referral Code(Optional)')),
                             onChanged: (val) => referralCode = val.trim(),
                           ),
                           const SizedBox(height: 26),
                           ElevatedButton(
-                            child: loading ? const CircularProgressIndicator(color: Colors.white) : const BilingualText(textKey: 'register'),
+                            child: loading ? const CircularProgressIndicator(color: Colors.white) : const BilingualText(textKey: 'Register'),
                             onPressed: loading ? null : () async {
                               if (_formKey.currentState!.validate()) {
                                 setState(() {

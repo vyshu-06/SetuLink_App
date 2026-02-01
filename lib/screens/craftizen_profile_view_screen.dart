@@ -60,7 +60,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
         if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
         
         final data = snapshot.data!.data() as Map<String, dynamic>?;
-        if (data == null) return const Scaffold(body: Center(child: BilingualText(textKey: 'no_jobs_available')));
+        if (data == null) return const Scaffold(body: Center(child: BilingualText(textKey: 'No Jobs available')));
 
         final craftizen = CraftizenModel.fromMap(data, snapshot.data!.id);
 
@@ -121,11 +121,11 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
                               children: [
                                 const Icon(Icons.star, color: AppColors.accentColor, size: 20),
                                 Text(' ${craftizen.rating.toStringAsFixed(1)} ', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                const BilingualText(textKey: 'rating', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                const BilingualText(textKey: 'Rating', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                                 const SizedBox(width: 16),
                                 const Icon(Icons.check_circle, color: Colors.greenAccent, size: 20),
                                 Text(' ${data['ratingCount'] ?? 0} ', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                const BilingualText(textKey: 'jobs', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                const BilingualText(textKey: 'Jobs', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -144,7 +144,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
                         const SizedBox(height: 16),
                         _buildSectionCard(
                           titleKey: 'tagline', // About
-                          content: Text(data['bio'] ?? tr('no_jobs_available'), style: const TextStyle(fontSize: 16, height: 1.5)),
+                          content: Text(data['bio'] ?? tr('No jobs available'), style: const TextStyle(fontSize: 16, height: 1.5)),
                         ),
                         const SizedBox(height: 16),
                         _buildReviewsSection(),
@@ -188,7 +188,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const BilingualText(textKey: 'chats', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
+                    child: const BilingualText(textKey: 'Chats', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -201,7 +201,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const BilingualText(textKey: 'next', style: TextStyle(fontWeight: FontWeight.bold)), // Request Job
+                    child: const BilingualText(textKey: 'Next', style: TextStyle(fontWeight: FontWeight.bold)), // Request Job
                   ),
                 ),
               ],
@@ -247,7 +247,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
         return _buildSectionCard(
           titleKey: 'notification', // Reviews
           content: reviews.isEmpty
-              ? const Center(child: BilingualText(textKey: 'no_notifications'))
+              ? const Center(child: BilingualText(textKey: 'No notifications'))
               : Column(
                   children: reviews.map((doc) {
                     final review = doc.data() as Map<String, dynamic>;

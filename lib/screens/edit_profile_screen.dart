@@ -81,7 +81,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const BilingualText(textKey: 'edit_professional_profile')),
+      appBar: AppBar(title: const BilingualText(textKey: 'Edit Professional Profile')),
       body: _isLoading 
           ? const Center(child: CircularProgressIndicator()) 
           : Form(
@@ -90,38 +90,38 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   const BilingualText(
-                    textKey: 'complete', // Using complete as placeholder for setup message
+                    textKey: 'Complete', // Using complete as placeholder for setup message
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _experienceController,
                     decoration: InputDecoration(
-                      label: const BilingualText(textKey: 'complete'), // Placeholder
+                      label: const BilingualText(textKey: 'Complete'), // Placeholder
                       border: const OutlineInputBorder()
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (v) => v!.isEmpty ? tr('please_enter_value') : null,
+                    validator: (v) => v!.isEmpty ? tr('Please enter a value') : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _radiusController,
                     decoration: InputDecoration(
-                      label: const BilingualText(textKey: 'km_away'), // Placeholder
+                      label: const BilingualText(textKey: 'km away'), // Placeholder
                       border: const OutlineInputBorder()
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (v) => v!.isEmpty ? tr('please_enter_value') : null,
+                    validator: (v) => v!.isEmpty ? tr('Please enter a value') : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _minChargeController,
                     decoration: InputDecoration(
-                      label: const BilingualText(textKey: 'amount'), // Placeholder
+                      label: const BilingualText(textKey: 'Amount'), // Placeholder
                       border: const OutlineInputBorder()
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (v) => v!.isEmpty ? tr('please_enter_value') : null,
+                    validator: (v) => v!.isEmpty ? tr('Please enter a value') : null,
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
@@ -129,7 +129,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
                     ),
-                    child: const BilingualText(textKey: 'complete'),
+                    child: const BilingualText(textKey: 'Complete'),
                   ),
                 ],
               ),

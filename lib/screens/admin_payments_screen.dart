@@ -9,7 +9,7 @@ class AdminPaymentsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(tr('payments_and_payouts'))),
+      appBar: AppBar(title: Text(tr('Payments and Payouts'))),
       body: StreamBuilder<QuerySnapshot>(
         // Fetch jobs that are completed but maybe not yet 'paid_out'
         // For this schema, we assume completed jobs need payout.
@@ -23,7 +23,7 @@ class AdminPaymentsScreen extends StatelessWidget {
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
           final jobs = snapshot.data!.docs;
-          if (jobs.isEmpty) return Center(child: Text(tr('no_pending_payouts')));
+          if (jobs.isEmpty) return Center(child: Text(tr('No pending payouts')));
 
           return ListView.builder(
             itemCount: jobs.length,
@@ -36,7 +36,7 @@ class AdminPaymentsScreen extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
-                  title: Text(jobData['title'] ?? tr('unknown_job')),
+                  title: Text(jobData['title'] ?? tr('Unknown Job')),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -52,7 +52,7 @@ class AdminPaymentsScreen extends StatelessWidget {
                       Text('₹$amount', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       const SizedBox(height: 4),
                       isPaidOut
-                          ? Text(tr('paid').toUpperCase(), style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold))
+                          ? Text(tr('Paid').toUpperCase(), style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold))
                           : ElevatedButton(
                               onPressed: () => _processPayout(context, jobId),
                               style: ElevatedButton.styleFrom(
@@ -60,7 +60,7 @@ class AdminPaymentsScreen extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                                 visualDensity: VisualDensity.compact,
                               ),
-                              child: Text(tr('payout'), style: const TextStyle(fontSize: 12)),
+                              child: Text(tr('Payout'), style: const TextStyle(fontSize: 12)),
                             ),
                     ],
                   ),
@@ -82,7 +82,7 @@ class AdminPaymentsScreen extends StatelessWidget {
       });
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('payout_processed_successfully'))),
+        SnackBar(content: Text(tr('Payout processed successfully'))),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

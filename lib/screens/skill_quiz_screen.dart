@@ -413,10 +413,10 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              BilingualText(textKey: 'no_questions_for', args: [currentSkill.replaceAll('_', ' ')]),
+              BilingualText(textKey: 'No questions for', args: [currentSkill.replaceAll('_', ' ')]),
               ElevatedButton(
                 onPressed: _nextSkill,
-                child: const BilingualText(textKey: 'back'),
+                child: const BilingualText(textKey: 'Back'),
               ),
             ],
           ),
@@ -450,7 +450,7 @@ class _SkillQuizScreenState extends State<SkillQuizScreen> with SingleTickerProv
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 BilingualText(
-                  textKey: 'question_progress',
+                  textKey: 'Question progress',
                   args: [(_currentQuestionIndex + 1).toString(), questions.length.toString()],
                   style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold),
                 ),

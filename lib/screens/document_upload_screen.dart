@@ -48,7 +48,7 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.tr('upload_identity_docs_title'))),
+      appBar: AppBar(title: Text(context.tr('Upload identity documents'))),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -56,22 +56,22 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElevatedButton(
-              onPressed: _uploading ? null : () => _pickAndUpload('aadhar'),
-              child: Text(_uploadedUrls.containsKey('aadhar')
-                  ? context.tr('aadhar_uploaded')
-                  : context.tr('upload_aadhar')),
+              onPressed: _uploading ? null : () => _pickAndUpload('Aadhar'),
+              child: Text(_uploadedUrls.containsKey('Aadhar')
+                  ? context.tr('Aadhar Uploaded')
+                  : context.tr('Upload Aadhar')),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _uploading ? null : () => _pickAndUpload('passport'),
-              child: Text(_uploadedUrls.containsKey('passport')
-                  ? context.tr('passport_uploaded')
-                  : context.tr('upload_passport')),
+              onPressed: _uploading ? null : () => _pickAndUpload('Passport'),
+              child: Text(_uploadedUrls.containsKey('Passport')
+                  ? context.tr('Passport Uploaded')
+                  : context.tr('Upload Passport')),
             ),
             const SizedBox(height: 32),
             if (_uploading) const Center(child: CircularProgressIndicator()),
             if (_uploadedUrls.length == 2) 
-              Center(child: Text(context.tr('all_docs_uploaded'))),
+              Center(child: Text(context.tr('All documents uploaded Successfully'))),
           ],
         ),
       ),

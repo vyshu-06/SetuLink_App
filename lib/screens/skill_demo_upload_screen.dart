@@ -82,7 +82,7 @@ class _SkillDemoUploadScreenState extends State<SkillDemoUploadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.tr('skill_verification_step', args: ['3','3']))),
+      appBar: AppBar(title: Text(context.tr('Skill Verification Step', args: ['3','3']))),
        body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -91,16 +91,16 @@ class _SkillDemoUploadScreenState extends State<SkillDemoUploadScreen> {
           children: [
              if (_videoFile != null)
               Expanded(
-                child: Center(child: Text('${context.tr('video_selected')}:\n${_videoFile!.path.split('/').last}', textAlign: TextAlign.center)),
+                child: Center(child: Text('${context.tr('Video Selected')}:\n${_videoFile!.path.split('/').last}', textAlign: TextAlign.center)),
               )
             else
               Expanded(
-                child: Center(child: Text(context.tr('no_video_selected'))),
+                child: Center(child: Text(context.tr('No Video Selected'))),
               ),
             ElevatedButton.icon(
               icon: const Icon(Icons.videocam),
               onPressed: _pickVideo,
-              label: Text(context.tr('record_select_video')),
+              label: Text(context.tr('Record or Select a Video supporting your skill')),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -108,7 +108,7 @@ class _SkillDemoUploadScreenState extends State<SkillDemoUploadScreen> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
               child: _uploading
                   ? const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
-                  : Text(context.tr('finish')),
+                  : Text(context.tr('Finish')),
             ),
           ],
         ),

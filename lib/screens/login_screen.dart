@@ -69,8 +69,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   }
 
   Future<void> _updateUserData(String userId) async {
-    await FCMService().updateToken(userId);
-    await LocationService().updateUserLocation(userId);
+    try {
+      await FCMService().updateToken(userId);
+      await LocationService().updateUserLocation(userId);
+    } catch (e) {
+      debugPrint('Error updating user data: $e');
+    }
   }
 
   @override
@@ -115,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const BilingualText(
-                            textKey: 'welcome_back',
+                            textKey: 'Welcome Back',
                             textAlign: TextAlign.center,
                             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                           ),
@@ -125,10 +129,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             enableSuggestions: false,
                             autocorrect: false,
                             decoration: const InputDecoration(
-                              label: BilingualText(textKey: 'email'),
+                              label: BilingualText(textKey: 'Email'),
                             ),
                             onChanged: (val) => email = val,
-                            validator: (val) => val!.isEmpty ? tr('enter_valid_email') : null,
+                            validator: (val) => val!.isEmpty ? tr('Enter a valid Email') : null,
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
@@ -136,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             enableSuggestions: false,
                             autocorrect: false,
                             decoration: InputDecoration(
-                              label: const BilingualText(textKey: 'password'),
+                              label: const BilingualText(textKey: 'Password'),
                               suffixIcon: IconButton(
                                 icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
                                 onPressed: () {
@@ -150,37 +154,48 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           ),
                           const SizedBox(height: 40),
                           ElevatedButton(
-                            child: loading ? const CircularProgressIndicator(color: Colors.white) : const BilingualText(textKey: 'login'),
+                            child: loading ? const CircularProgressIndicator(color: Colors.white) : const BilingualText(textKey: 'Login'),
                             onPressed: loading ? null : () async {
                               if (_formKey.currentState!.validate()) {
                                 setState(() => loading = true);
                                 if (_selectedRole == 'admin') {
                                   if (email == 'admin@setulink.com' && password == 'admin123') {
-                                    Navigator.pushReplacementNamed(context, '/admin');
                                     if(mounted) setState(() => loading = false);
+                                    Navigator.pushReplacementNamed(context, '/admin');
                                     return;
                                   }
                                 }
 
-                                final result = await context.read<AuthService>().signInWithEmail(email, password);
-                                if (!mounted) return;
-                                
-                                if (result == null) {
-                                  setState(() {
-                                    loading = false;
-                                    error = 'Login failed. Please check your credentials.';
-                                  });
-                                } else {
-                                  await _updateUserData(result.uid);
-                                  if (!mounted) return;
-                                  setState(() => loading = false);
+                                try {
+                                  final result = await context.read<AuthService>().signInWithEmail(email, password);
                                   
-                                  if (_selectedRole == 'citizen') {
-                                    Navigator.of(context).pushReplacementNamed('/citizen_home');
-                                  } else if (_selectedRole == 'craftizen') {
-                                    Navigator.of(context).pushReplacementNamed('/craftizen_home');
-                                  } else if (_selectedRole == 'admin') {
-                                    Navigator.of(context).pushReplacementNamed('/admin');
+                                  if (!mounted) return;
+                                  
+                                  if (result == null) {
+                                    setState(() {
+                                      loading = false;
+                                      error = 'Login failed. Please check your credentials.';
+                                    });
+                                  } else {
+                                    // Run data update in background to avoid blocking navigation
+                                    _updateUserData(result.uid);
+                                    
+                                    setState(() => loading = false);
+                                    
+                                    if (_selectedRole == 'citizen') {
+                                      Navigator.of(context).pushReplacementNamed('/citizen_home');
+                                    } else if (_selectedRole == 'craftizen') {
+                                      Navigator.of(context).pushReplacementNamed('/craftizen_home');
+                                    } else if (_selectedRole == 'admin') {
+                                      Navigator.of(context).pushReplacementNamed('/admin');
+                                    }
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    setState(() {
+                                      loading = false;
+                                      error = 'An error occurred: $e';
+                                    });
                                   }
                                 }
                               }
@@ -196,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
-                            child: const BilingualText(textKey: 'login_with_phone'),
+                            child: const BilingualText(textKey: 'Login with Phone Number'),
                           ),
                           if (error.isNotEmpty)
                             Padding(

@@ -68,7 +68,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final currentUser = _authService.getCurrentUser();
-    if (currentUser == null) return const Scaffold(body: Center(child: BilingualText(textKey: 'log_in_to_see_bookings')));
+    if (currentUser == null) return const Scaffold(body: Center(child: BilingualText(textKey: 'Log in to see your bookings')));
 
     final messageStream = _db
         .collection('chats')

@@ -1,22 +1,17 @@
-2026/01/17-08:29:53.555 efc Log #3: 2 ops saved to Table #23 OK
-2026/01/17-08:29:53.623 efc Archiving C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database/000003.log: OK
-2026/01/17-08:29:53.654 efc Log #6: 1 ops saved to Table #24 OK
-2026/01/17-08:29:53.663 efc Archiving C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database/000006.log: OK
-2026/01/17-08:29:53.668 efc Log #10: 3 ops saved to Table #25 OK
-2026/01/17-08:29:53.697 efc Archiving C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database/000010.log: OK
-2026/01/17-08:29:53.717 efc Log #17: 2 ops saved to Table #26 OK
-2026/01/17-08:29:53.720 efc Archiving C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database/000017.log: OK
-2026/01/17-08:29:53.723 efc Table #4: 2 entries OK
-2026/01/17-08:29:53.725 efc Table #7: 2 entries OK
-2026/01/17-08:29:53.726 efc Table #8: 1 entries OK
-2026/01/17-08:29:53.727 efc Table #12: 2 entries OK
-2026/01/17-08:29:53.728 efc Table #18: 2 entries OK
-2026/01/17-08:29:53.729 efc Table #20: 2 entries OK
-2026/01/17-08:29:53.730 efc Table #21: 1 entries OK
-2026/01/17-08:29:53.731 efc Table #22: 3 entries OK
-2026/01/17-08:29:53.731 efc Table #23: 2 entries OK
-2026/01/17-08:29:53.732 efc Table #24: 1 entries OK
-2026/01/17-08:29:53.732 efc Table #25: 3 entries OK
-2026/01/17-08:29:53.733 efc Table #26: 2 entries OK
-2026/01/17-08:29:53.783 efc Archiving C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database/MANIFEST-000001: OK
-2026/01/17-08:29:53.797 efc **** Repaired leveldb C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database; recovered 12 files; 2311 bytes. Some data may have been lost. ****
+2026/01/17-08:29:53.870 efc Reusing MANIFEST C:\Users\HP\AppData\Local\Temp\flutter_tools.ea51ce9a\flutter_tools_chrome_device.18dd6da\Default\Site Characteristics Database/MANIFEST-000001
+2026/01/17-08:29:53.976 2a84 Compacting 12@0 + 0@1 files
+2026/01/17-08:29:53.997 2a84 Generated table #29@0: 2 keys, 194 bytes
+2026/01/17-08:29:53.997 2a84 Compacted 12@0 + 0@1 files => 194 bytes
+2026/01/17-08:29:53.999 2a84 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/01/17-08:29:54.002 2a84 Delete type=2 #4
+2026/01/17-08:29:54.002 2a84 Delete type=2 #7
+2026/01/17-08:29:54.003 2a84 Delete type=2 #8
+2026/01/17-08:29:54.003 2a84 Delete type=2 #12
+2026/01/17-08:29:54.003 2a84 Delete type=2 #18
+2026/01/17-08:29:54.003 2a84 Delete type=2 #20
+2026/01/17-08:29:54.004 2a84 Delete type=2 #21
+2026/01/17-08:29:54.004 2a84 Delete type=2 #22
+2026/01/17-08:29:54.005 2a84 Delete type=2 #23
+2026/01/17-08:29:54.005 2a84 Delete type=2 #24
+2026/01/17-08:29:54.005 2a84 Delete type=2 #25
+2026/01/17-08:29:54.005 2a84 Delete type=2 #26
