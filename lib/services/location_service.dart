@@ -36,12 +36,14 @@ class LocationService {
     });
   }
 
+  Stream<DocumentSnapshot> getUserLocationStream(String userId) {
+    return _db.collection('users').doc(userId).snapshots();
+  }
+
   Stream<List<DocumentSnapshot>> getNearbyCraftizens(double lat, double lng, {double radius = 10, String? skill}) {
     GeoFirePoint center = _geo.point(latitude: lat, longitude: lng);
     var collectionReference = _db.collection('users').where('role', isEqualTo: 'craftizen');
     
-    // Skill filtering would usually be done on the client side after the geo-query
-    // because Firestore doesn't support multiple inequality filters easily with geo-queries.
     return _geo.collection(collectionRef: collectionReference)
         .within(center: center, radius: radius, field: 'position');
   }

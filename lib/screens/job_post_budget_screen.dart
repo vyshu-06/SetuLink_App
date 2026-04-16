@@ -135,17 +135,10 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
   
   @override
   Widget build(BuildContext context) {
-    final breakdown = _selectedProblem != null
-        ? PriceCalculatorService.getPriceBreakdown(
-            totalPrice: _calculatedPrice,
-            problemData: _selectedProblem!.data() as Map<String, dynamic>,
-          )
-        : <String, double>{};
-    
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const BilingualText(textKey: 'Platform Commission', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), // Using placeholder
+        title: const BilingualText(textKey: 'SetuLink', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), // Changed title
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -210,20 +203,6 @@ class _JobPostBudgetScreenState extends State<JobPostBudgetScreen> with SingleTi
                               border: InputBorder.none,
                             ),
                           ),
-                        ),
-                      ),
-                    
-                    if (_selectedProblem != null)
-                      Card(
-                        margin: const EdgeInsets.only(top: 20),
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                        child: ExpansionTile(
-                          title: const BilingualText(textKey: 'Amount'), // Placeholder
-                          children: breakdown.entries.map((e) => ListTile(
-                            title: BilingualText(textKey: e.key.replaceAll('_', ' ').toLowerCase()),
-                            trailing: Text('₹${e.value.toStringAsFixed(0)}'),
-                          )).toList(),
                         ),
                       ),
                     const Spacer(),
