@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:setulink_app/models/job_model.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'package:setulink_app/theme/app_colors.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class JobSummaryScreen extends StatefulWidget {
   final String jobId;
@@ -55,7 +54,7 @@ class _JobSummaryScreenState extends State<JobSummaryScreen> {
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           
-          final data = snapshot.data!.data() as Map<String, dynamic>;
+          final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
           final job = JobModel.fromMap(data, snapshot.data!.id);
           
           final startTime = data['startTime'] as Timestamp?;
@@ -93,20 +92,7 @@ class _JobSummaryScreenState extends State<JobSummaryScreen> {
                 ),
                 const SizedBox(height: 16),
                 Center(
-                  child: RatingBar.builder(
-                    initialRating: 0,
-                    minRating: 1,
-                    direction: Axis.horizontal,
-                    allowHalfRating: true,
-                    itemCount: 5,
-                    itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
-                    onRatingUpdate: (rating) {
-                      setState(() {
-                        _rating = rating;
-                      });
-                    },
-                  ),
+                  child: _buildStarRating(),
                 ),
                 const SizedBox(height: 60),
                 SizedBox(
@@ -128,6 +114,26 @@ class _JobSummaryScreenState extends State<JobSummaryScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildStarRating() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(5, (index) {
+        return IconButton(
+          onPressed: () {
+            setState(() {
+              _rating = index + 1.0;
+            });
+          },
+          icon: Icon(
+            index < _rating ? Icons.star : Icons.star_border,
+            color: Colors.amber,
+            size: 40,
+          ),
+        );
+      }),
     );
   }
 
