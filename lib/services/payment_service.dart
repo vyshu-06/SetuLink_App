@@ -1,9 +1,11 @@
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:setulink_app/services/payout_service.dart';
 
 class PaymentService {
   late Razorpay _razorpay;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final PayoutService _payoutService = PayoutService();
   
   final double _defaultCommission = 10.0;
   final Map<String, double> _commissionRates = {
@@ -40,21 +42,23 @@ class PaymentService {
     required String craftizenId,
     required String userId,
   }) async {
-    final commission = calculateCommission(amount, category);
-    final payout = amount - commission;
+    if (category == 'wallet_recharge') {
+      await _payoutService.rechargeWallet(userId, amount, paymentId);
+      return;
+    }
 
-    await _db.collection('transactions').add({
-      'paymentId': paymentId,
-      'amount': amount,
-      'commission': commission,
-      'payoutAmount': payout,
-      'jobId': jobId,
-      'craftizenId': craftizenId,
-      'userId': userId,
-      'category': category,
-      'status': 'completed',
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+    final commission = calculateCommission(amount, category);
+    
+    await _payoutService.processJobPayment(
+      jobId: jobId,
+      craftizenId: craftizenId,
+      userId: userId,
+      amount: amount,
+      category: category,
+      isCash: false,
+      paymentId: paymentId,
+      commission: commission,
+    );
   }
 
   void openCheckout({
@@ -69,7 +73,7 @@ class PaymentService {
       'key': 'YOUR_RAZORPAY_API_KEY', // Replace with your actual key
       'amount': (amount * 100).toInt(),
       'name': 'SetuLink',
-      'description': '$category Service Payment',
+      'description': category == 'wallet_recharge' ? 'Wallet Recharge' : '$category Service Payment',
       'prefill': {'contact': '', 'email': userEmail},
     };
 

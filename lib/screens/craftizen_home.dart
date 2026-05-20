@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:setulink_app/models/job_model.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/job_service.dart';
+import 'package:setulink_app/services/location_service.dart';
 import 'package:setulink_app/theme/app_colors.dart';
 import 'chat_list_screen.dart';
 import 'greeting_page.dart';
 import 'profile_screen.dart';
 import 'job_detail_screen.dart';
 import 'edit_profile_screen.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'earnings_screen.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 
 class CraftizenHome extends StatefulWidget {
@@ -21,10 +22,27 @@ class CraftizenHome extends StatefulWidget {
 
 class _CraftizenHomeState extends State<CraftizenHome> {
   int _selectedIndex = 0;
+  final LocationService _locationService = LocationService();
+
+  @override
+  void initState() {
+    super.initState();
+    final currentUser = AuthService().getCurrentUser();
+    if (currentUser != null) {
+      _locationService.startGlobalTracking(currentUser.uid);
+    }
+  }
+
+  @override
+  void dispose() {
+    _locationService.stopGlobalTracking();
+    super.dispose();
+  }
 
   static final List<Widget> _pages = <Widget>[
     const _HomeTabPage(),
     const _JobsTabPage(),
+    const EarningsScreen(),
     const ChatListScreen(),
   ];
 
@@ -35,6 +53,7 @@ class _CraftizenHomeState extends State<CraftizenHome> {
   }
 
   Future<void> _handleLogout() async {
+    _locationService.stopGlobalTracking();
     await AuthService().signOut();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
@@ -51,8 +70,8 @@ class _CraftizenHomeState extends State<CraftizenHome> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         extendBody: true,
         extendBodyBehindAppBar: true,
@@ -84,7 +103,7 @@ class _CraftizenHomeState extends State<CraftizenHome> {
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+              colors: [AppColors.primaryColor, AppColors.accentColor.withValues(alpha: 0.8)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -93,18 +112,20 @@ class _CraftizenHomeState extends State<CraftizenHome> {
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, spreadRadius: 5)],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, spreadRadius: 5)],
           ),
           child: ClipRRect(
             borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
             child: BottomNavigationBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
+              type: BottomNavigationBarType.fixed,
               items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: BilingualText.toBilingual(context, 'home')),
                 BottomNavigationBarItem(icon: const Icon(Icons.work_outline), activeIcon: const Icon(Icons.work), label: BilingualText.toBilingual(context, 'jobs')),
+                BottomNavigationBarItem(icon: const Icon(Icons.account_balance_wallet_outlined), activeIcon: const Icon(Icons.account_balance_wallet), label: BilingualText.toBilingual(context, 'my_earnings')),
                 BottomNavigationBarItem(icon: const Icon(Icons.chat_bubble_outline), activeIcon: const Icon(Icons.chat_bubble), label: BilingualText.toBilingual(context, 'chats')),
               ],
               currentIndex: _selectedIndex,
@@ -164,13 +185,13 @@ class _HomeTabPage extends StatelessWidget {
                       Text(
                         name,
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white.withOpacity(0.9)),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white.withValues(alpha: 0.9)),
                       ),
                       const SizedBox(height: 24),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(30),
                           border: Border.all(color: isAvailable ? Colors.greenAccent : Colors.white54),
                         ),
@@ -181,6 +202,7 @@ class _HomeTabPage extends StatelessWidget {
                             const SizedBox(width: 8),
                             Switch(
                               value: isAvailable,
+                              activeTrackColor: Colors.greenAccent.withValues(alpha: 0.5),
                               activeColor: Colors.greenAccent,
                               onChanged: (val) => _toggleAvailability(uid, isAvailable),
                             ),
@@ -193,7 +215,7 @@ class _HomeTabPage extends StatelessWidget {
                         label: const BilingualText(textKey: 'edit_professional_profile'),
                         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen())),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.9),
+                          backgroundColor: Colors.white.withValues(alpha: 0.9),
                           foregroundColor: AppColors.primaryColor,
                         ),
                       ),
@@ -219,7 +241,7 @@ class _HomeTabPage extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       elevation: 4,
-      color: Colors.white.withOpacity(0.95),
+      color: Colors.white.withValues(alpha: 0.95),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -237,7 +259,7 @@ class _HomeTabPage extends StatelessWidget {
               Wrap(
                 spacing: 8.0,
                 runSpacing: 8.0,
-                children: skills.map((skill) => Chip(label: BilingualText(textKey: skill), backgroundColor: AppColors.primaryColor.withOpacity(0.1))).toList(),
+                children: skills.map((skill) => Chip(label: BilingualText(textKey: skill), backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1))).toList(),
               ),
           ],
         ),
@@ -249,7 +271,7 @@ class _HomeTabPage extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       elevation: 4,
-      color: Colors.white.withOpacity(0.95),
+      color: Colors.white.withValues(alpha: 0.95),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -296,7 +318,7 @@ class _JobsTabPage extends StatelessWidget {
           children: [
             SizedBox(height: kToolbarHeight + MediaQuery.of(context).padding.top),
             Container(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               child: TabBar(
                 tabs: [
                   Tab(text: BilingualText.toBilingual(context, 'new_jobs')),
@@ -338,6 +360,7 @@ class _NewJobsList extends StatelessWidget {
         final userData = userSnapshot.data!.data() as Map<String, dynamic>?;
         final List<String> skills = (userData?['skills'] as List<dynamic>?)?.cast<String>() ?? [];
         final bool isKycVerified = userData?['kyc']?['verified'] ?? false;
+        final String? city = userData?['city'];
 
         if (!isKycVerified) {
           return const Center(
@@ -357,7 +380,7 @@ class _NewJobsList extends StatelessWidget {
         }
 
         return StreamBuilder<List<JobModel>>(
-          stream: JobService().getOpenJobsForCraftizen(skills),
+          stream: JobService().getOpenJobsForCraftizen(skills, city: city),
           builder: (context, jobSnapshot) {
             if (jobSnapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: Colors.white));
             if (!jobSnapshot.hasData || jobSnapshot.data!.isEmpty) return const Center(child: BilingualText(textKey: 'no_new_jobs_nearby', style: TextStyle(color: Colors.white)));

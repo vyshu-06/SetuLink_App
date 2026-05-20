@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:setulink_app/models/job_model.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
-import 'package:setulink_app/theme/app_colors.dart';
 
 class JobSummaryScreen extends StatefulWidget {
   final String jobId;
@@ -29,7 +28,7 @@ class _JobSummaryScreenState extends State<JobSummaryScreen> {
     try {
       await FirebaseFirestore.instance.collection('jobs').doc(widget.jobId).update({
         'citizenRating': _rating,
-        'status': 'finalized',
+        'jobStatus': 'finalized',
       });
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/craftizen_home', (route) => false);

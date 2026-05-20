@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:setulink_app/models/job_model.dart';
+import 'package:setulink_app/services/payout_service.dart';
+import 'package:setulink_app/services/payment_service.dart';
 import 'package:setulink_app/screens/job_summary_screen.dart';
+import 'package:setulink_app/screens/earnings_screen.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'package:setulink_app/theme/app_colors.dart';
 
@@ -16,14 +19,63 @@ class CollectPaymentScreen extends StatefulWidget {
 
 class _CollectPaymentScreenState extends State<CollectPaymentScreen> {
   bool _isProcessing = false;
+  final PayoutService _payoutService = PayoutService();
+  final PaymentService _paymentService = PaymentService();
 
   void _handleCollectCash() async {
+    if (widget.job.assignedTo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error: Job has no assigned worker')));
+      return;
+    }
+
     setState(() => _isProcessing = true);
-    await FirebaseFirestore.instance.collection('jobs').doc(widget.job.id).update({
-      'paymentMethod': 'cash',
-      'paymentStatus': 'paid',
-    });
-    _navigateToSummary();
+    
+    final category = widget.job.requiredSkills.isNotEmpty ? widget.job.requiredSkills.first : 'general';
+    final commission = _paymentService.calculateCommission(widget.job.budget, category);
+
+    try {
+      await _payoutService.processJobPayment(
+        jobId: widget.job.id,
+        craftizenId: widget.job.assignedTo!,
+        userId: widget.job.userId,
+        amount: widget.job.budget,
+        category: category,
+        isCash: true,
+        commission: commission,
+      );
+      _navigateToSummary();
+    } catch (e) {
+      setState(() => _isProcessing = false);
+      final errorStr = e.toString();
+      if (errorStr.contains('INSUFFICIENT_BALANCE')) {
+        _showLowBalanceDialog(commission);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment Error: $errorStr')));
+      }
+    }
+  }
+
+  void _showLowBalanceDialog(double requiredCommission) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const BilingualText(textKey: 'Insufficient Balance'),
+        content: Text('Your wallet balance is insufficient to pay the platform commission of ₹${requiredCommission.toStringAsFixed(2)}. Please recharge your wallet to continue.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const BilingualText(textKey: 'Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const EarningsScreen()));
+            },
+            child: const BilingualText(textKey: 'Recharge'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _handleScanQR() {
@@ -51,12 +103,29 @@ class _CollectPaymentScreenState extends State<CollectPaymentScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
+              if (widget.job.assignedTo == null) return;
+              
               setState(() => _isProcessing = true);
-              await FirebaseFirestore.instance.collection('jobs').doc(widget.job.id).update({
-                'paymentMethod': 'qr_scan',
-                'paymentStatus': 'paid',
-              });
-              _navigateToSummary();
+              
+              final category = widget.job.requiredSkills.isNotEmpty ? widget.job.requiredSkills.first : 'general';
+              final commission = _paymentService.calculateCommission(widget.job.budget, category);
+
+              try {
+                await _payoutService.processJobPayment(
+                  jobId: widget.job.id,
+                  craftizenId: widget.job.assignedTo!,
+                  userId: widget.job.userId,
+                  amount: widget.job.budget,
+                  category: category,
+                  isCash: false,
+                  paymentId: 'QR_MOCK_${DateTime.now().millisecondsSinceEpoch}',
+                  commission: commission,
+                );
+                _navigateToSummary();
+              } catch (e) {
+                setState(() => _isProcessing = false);
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment Error: $e')));
+              }
             },
             child: const Text('Mock Success'),
           ),

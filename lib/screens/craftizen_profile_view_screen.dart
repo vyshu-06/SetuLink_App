@@ -75,7 +75,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
           body: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+                colors: [AppColors.primaryColor, AppColors.accentColor.withValues(alpha: 0.8)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -96,7 +96,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
                             backgroundColor: Colors.white,
                             child: CircleAvatar(
                               radius: 57,
-                              backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                              backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
                               child: Text(craftizen.name[0], style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.primaryColor)),
                             ),
                           ),
@@ -113,7 +113,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(30),
                             ),
                             child: Row(
@@ -137,15 +137,63 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
                             spacing: 8,
                             children: craftizen.skills.map((s) => Chip(
                               label: BilingualText(textKey: s),
-                              backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                              backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
                             )).toList(),
                           ),
                         ),
                         const SizedBox(height: 16),
                         _buildSectionCard(
-                          titleKey: 'tagline', // About
-                          content: Text(data['bio'] ?? tr('No jobs available'), style: const TextStyle(fontSize: 16, height: 1.5)),
+                          titleKey: 'about',
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(craftizen.bio ?? tr('No bio available'), style: const TextStyle(fontSize: 16, height: 1.5)),
+                              const SizedBox(height: 16),
+                              _buildProfileDetailRow(Icons.email, 'email', craftizen.email),
+                              _buildProfileDetailRow(Icons.history, 'experience', '${craftizen.experienceLevel ?? "N/A"} years'),
+                              _buildProfileDetailRow(Icons.map, 'service_radius', '${craftizen.travelRadius ?? "N/A"}'),
+                              _buildProfileDetailRow(Icons.payments, 'min_charge', '₹${craftizen.minCharge.toStringAsFixed(0)}'),
+                              _buildProfileDetailRow(Icons.verified, 'certified', craftizen.isCertified ? tr('yes') : tr('no')),
+                              _buildProfileDetailRow(Icons.location_city, 'city', craftizen.city ?? 'N/A'),
+                              if (craftizen.createdAt != null)
+                                _buildProfileDetailRow(Icons.calendar_today, 'joined', DateFormat('MMM yyyy').format(craftizen.createdAt!)),
+                            ],
+                          ),
                         ),
+                        const SizedBox(height: 16),
+                        if (craftizen.commonAnswers.isNotEmpty || craftizen.isKycVerified)
+                          _buildSectionCard(
+                            titleKey: 'Verification',
+                            content: Column(
+                              children: [
+                                if (craftizen.isKycVerified)
+                                  _buildTrustItem(Icons.verified_user, 'KYC Verified', Colors.green),
+                                if (craftizen.commonAnswers['question_1'] == 'yes')
+                                  _buildTrustItem(Icons.security, 'Background Check Willing', Colors.blue),
+                                if (craftizen.commonAnswers['question_2'] == 'yes')
+                                  _buildTrustItem(Icons.handyman, 'Owns Professional Tools', Colors.orange),
+                                if (craftizen.commonAnswers['question_3'] == 'yes')
+                                  _buildTrustItem(Icons.event_available, 'Available Weekends', Colors.purple),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(height: 16),
+                        if (craftizen.videoUrls.isNotEmpty)
+                          _buildSectionCard(
+                            titleKey: 'Demo Video',
+                            content: Column(
+                              children: craftizen.videoUrls.entries.map((entry) => ListTile(
+                                leading: const Icon(Icons.play_circle_fill, color: AppColors.primaryColor, size: 30),
+                                title: BilingualText(textKey: entry.key),
+                                subtitle: const Text('Demo of skill expertise'),
+                                trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                                onTap: () {
+                                  // In a real app, open a video player
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Playing video...')));
+                                },
+                              )).toList(),
+                            ),
+                          ),
                         const SizedBox(height: 16),
                         _buildReviewsSection(),
                         const SizedBox(height: 100), 
@@ -160,7 +208,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
               color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, -5))],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -5))],
             ),
             child: Row(
               children: [
@@ -216,7 +264,7 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      color: Colors.white.withOpacity(0.95),
+      color: Colors.white.withValues(alpha: 0.95),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -228,6 +276,42 @@ class _CraftizenProfileViewScreenState extends State<CraftizenProfileViewScreen>
             content,
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTrustItem(IconData icon, String label, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(width: 12),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+          const Spacer(),
+          Icon(Icons.check_circle, color: color.withValues(alpha: 0.8), size: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileDetailRow(IconData icon, String labelKey, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppColors.primaryColor),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Row(
+              children: [
+                BilingualText(textKey: labelKey, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.grey)),
+                const Text(': ', style: TextStyle(color: Colors.grey)),
+                Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

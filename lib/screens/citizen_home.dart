@@ -54,8 +54,8 @@ class _CitizenHomeState extends State<CitizenHome> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         extendBody: true,
         extendBodyBehindAppBar: true,
@@ -83,7 +83,7 @@ class _CitizenHomeState extends State<CitizenHome> {
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+              colors: [AppColors.primaryColor, AppColors.accentColor.withValues(alpha: 0.8)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -95,14 +95,14 @@ class _CitizenHomeState extends State<CitizenHome> {
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 spreadRadius: 5,
               )
@@ -284,8 +284,8 @@ class _CategorySection extends StatelessWidget {
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => JobRequestScreen(category: service['titleKey']))),
                 child: Card(
                   elevation: 4.0,
-                  color: Colors.white.withOpacity(0.95),
-                  shadowColor: Colors.black.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.95),
+                  shadowColor: Colors.black.withValues(alpha: 0.1),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -294,7 +294,7 @@ class _CategorySection extends StatelessWidget {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [AppColors.primaryColor.withOpacity(0.1), AppColors.accentColor.withOpacity(0.2)],
+                            colors: [AppColors.primaryColor.withValues(alpha: 0.1), AppColors.accentColor.withValues(alpha: 0.2)],
                             begin: Alignment.topLeft, end: Alignment.bottomRight,
                           ),
                           shape: BoxShape.circle,

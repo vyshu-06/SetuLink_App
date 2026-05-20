@@ -8,6 +8,7 @@ import 'package:setulink_app/services/auth_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:setulink_app/theme/app_colors.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 
@@ -29,6 +30,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isRecording = false;
+  String? _otherUserPhone;
 
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -37,6 +39,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _initRecorder();
+    _fetchOtherUserPhone();
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -45,6 +48,28 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.forward();
+  }
+
+  Future<void> _fetchOtherUserPhone() async {
+    final ids = widget.chatId.split('-');
+    final currentUserId = _authService.getCurrentUser()?.uid;
+    if (currentUserId == null) return;
+    
+    final otherUserId = ids.first == currentUserId ? ids.last : ids.first;
+    final userDoc = await _db.collection('users').doc(otherUserId).get();
+    if (mounted) {
+      setState(() {
+        _otherUserPhone = userDoc.data()?['phone'];
+      });
+    }
+  }
+
+  void _makeCall() async {
+    if (_otherUserPhone == null) return;
+    final url = Uri.parse('tel:$_otherUserPhone');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    }
   }
 
   Future<void> _initRecorder() async {
@@ -81,14 +106,22 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(widget.otherUserName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          if (_otherUserPhone != null)
+            IconButton(
+              icon: const Icon(Icons.phone),
+              onPressed: _makeCall,
+            ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+            colors: [AppColors.primaryColor, AppColors.accentColor.withValues(alpha: 0.8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -132,14 +165,14 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isMe ? Colors.white : Colors.white.withOpacity(0.2),
+          color: isMe ? Colors.white : Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
             bottomLeft: Radius.circular(isMe ? 16 : 0),
             bottomRight: Radius.circular(isMe ? 0 : 16),
           ),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5)],
         ),
         child: Column(
           crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -165,7 +198,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, -2))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -2))],
       ),
       child: SafeArea(
         top: false,

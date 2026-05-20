@@ -145,20 +145,25 @@ exports.onJobCreate = functions.firestore
     .onCreate(async (snap, context) => {
       const job = snap.data();
       const requiredSkills = job.requiredSkills || [];
+      const jobCity = job.city;
 
       if (requiredSkills.length === 0) return null;
 
-      // 1. Find matching Craftizens
-      // In production, use Geofire for location + array-contains for skills
-      const craftizensQuery = await admin.firestore().collection("users")
+      // 1. Find matching Craftizens by skills and city
+      let query = admin.firestore().collection("users")
           .where("role", "==", "craftizen")
           .where("skills", "array-contains-any", requiredSkills)
-          .where("kyc.verified", "==", true) // Only verified pros
-          .limit(50)
-          .get();
+          .where("kyc.verified", "==", true);
+
+      // Filter by city if available
+      if (jobCity) {
+        query = query.where("city", "==", jobCity);
+      }
+
+      const craftizensQuery = await query.limit(50).get();
 
       if (craftizensQuery.empty) {
-        console.log("No matching craftizens found for job " + context.params.jobId);
+        console.log(`No matching craftizens found in ${jobCity || "any city"} for job ${context.params.jobId}`);
         return null;
       }
 
@@ -185,8 +190,20 @@ exports.onJobCreate = functions.firestore
       };
 
       try {
-        await admin.messaging().sendToDevice(tokens, payload);
-        console.log(`Sent job invite to ${tokens.length} craftizens.`);
+        const message = {
+          notification: {
+            title: "New Job Alert!",
+            body: `A new job for ${job.title} matches your skills. Check it out!`,
+          },
+          data: {
+            jobId: context.params.jobId,
+            type: "new_job",
+          },
+          tokens: tokens,
+        };
+
+        const response = await admin.messaging().sendEachForMulticast(message);
+        console.log(`Sent job invite to ${response.successCount} craftizens.`);
       } catch (e) {
         console.error("Error sending FCM:", e);
       }

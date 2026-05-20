@@ -1,17 +1,26 @@
 import 'dart:async';
-import 'dart:math' show cos, sqrt, asin, Random;
+import 'dart:convert';
+import 'dart:math' show Random, max, min;
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:setulink_app/firebase_options.dart';
 import 'package:setulink_app/models/job_model.dart';
-import 'package:setulink_app/services/location_service.dart';
 import 'package:setulink_app/services/chat_service.dart';
 import 'package:setulink_app/screens/chat_screen.dart';
 import 'package:setulink_app/screens/collect_payment_screen.dart';
 import 'package:setulink_app/features/ratings_rewards/presentation/rating_screen.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
+import 'package:setulink_app/widgets/swipe_to_confirm_button.dart';
 import 'package:setulink_app/theme/app_colors.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class JobTrackingScreen extends StatefulWidget {
   final JobModel job;
@@ -23,16 +32,18 @@ class JobTrackingScreen extends StatefulWidget {
 }
 
 class _JobTrackingScreenState extends State<JobTrackingScreen> {
-  final LocationService _locationService = LocationService();
   final ChatService _chatService = ChatService();
-  final Completer<GoogleMapController> _controller = Completer();
-  StreamSubscription? _locationSubscription;
+  final MapController _mapController = MapController();
+  
+  StreamSubscription? _dbSubscription;
   StreamSubscription? _jobSubscription;
+  StreamSubscription? _gpsSubscription;
+  
   LatLng? _craftizenPosition;
-  Set<Marker> _markers = {};
+  List<LatLng> _routePoints = [];
   bool _isCraftizen = false;
+  bool _firstLocationReceived = false;
   String? _otherUserName;
-  double _sliderValue = 0.0;
   String _currentStatus = '';
 
   @override
@@ -68,8 +79,8 @@ class _JobTrackingScreenState extends State<JobTrackingScreen> {
             _showOtpToCitizen(startOtp, 'Start');
           } else if (status == 'in_progress' && endOtp != null && data['endOtpVerified'] != true) {
             _showOtpToCitizen(endOtp, 'Completion');
-          } else if (status == 'completed') {
-             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: BilingualText(textKey: 'Work completed! Redirecting...')));
+          } else if (status == 'completed' || status == 'paid') {
+             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Work completed! Redirecting to rating...')));
             Future.delayed(const Duration(seconds: 2), () {
               if (mounted) {
                 Navigator.pushReplacement(
@@ -103,14 +114,12 @@ class _JobTrackingScreenState extends State<JobTrackingScreen> {
             Text(otp, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: 8)),
           ],
         ),
-        actions: [
-          // The dialog will close automatically via status listener when OTP is verified
-        ],
+        actions: [],
       ),
     );
-    // Auto-close dialog logic when OTP is verified in Firestore
     Timer.periodic(const Duration(seconds: 2), (timer) async {
       final doc = await FirebaseFirestore.instance.collection('jobs').doc(widget.job.id).get();
+      if (!doc.exists) return;
       final data = doc.data() as Map<String, dynamic>;
       bool verified = (type == 'Start') ? data['startOtpVerified'] == true : data['endOtpVerified'] == true;
       if (verified) {
@@ -130,63 +139,191 @@ class _JobTrackingScreenState extends State<JobTrackingScreen> {
     }
   }
 
-  void _setupTracking() {
-    final housePos = LatLng(widget.job.location.latitude, widget.job.location.longitude);
-    _markers.add(
-      Marker(
-        markerId: const MarkerId('citizen_house'),
-        position: housePos,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: const InfoWindow(title: 'Citizen House'),
-      ),
-    );
-
-    if (_isCraftizen) {
-      _locationSubscription = Stream.periodic(const Duration(seconds: 10)).listen((_) async {
-        await _locationService.updateUserLocation(widget.job.assignedTo!);
-      });
-      _locationService.updateUserLocation(widget.job.assignedTo!);
+  void _setupTracking() async {
+    // Sanitize the trip ID for Realtime Database keys
+    final tripId = widget.job.id.replaceAll(RegExp(r'[.#$\[\]]'), '_');
+    
+    // Explicitly use the database URL to ensure connection on all platforms
+    String? dbUrl = DefaultFirebaseOptions.currentPlatform.databaseURL;
+    
+    // Fallback if for some reason the platform options are missing the URL
+    if (dbUrl == null || dbUrl.isEmpty) {
+      dbUrl = 'https://setulink-app-fb-default-rtdb.asia-southeast1.firebasedatabase.app';
     }
 
-    _locationService.getUserLocationStream(widget.job.assignedTo!).listen((doc) {
-      final data = doc.data() as Map<String, dynamic>?;
-      if (data != null && data['position'] != null) {
-        final GeoPoint geoPoint = data['position']['geopoint'];
-        if (mounted) {
+    debugPrint('Tracking Trip ID: $tripId at URL: $dbUrl');
+    
+    try {
+      final DatabaseReference tripRef = FirebaseDatabase.instanceFor(
+        app: Firebase.app(),
+        databaseURL: dbUrl,
+      ).ref("active_trips/$tripId/driver_location");
+
+      // Listen to real-time events from the cloud for BOTH Citizen and Craftizen
+      _dbSubscription = tripRef.onValue.listen((DatabaseEvent event) {
+        final data = event.snapshot.value as Map?;
+        debugPrint('Received tracking data from RTDB: $data');
+        if (data != null && data['latitude'] != null && data['longitude'] != null && mounted) {
+          final lat = (data['latitude'] as num).toDouble();
+          final lng = (data['longitude'] as num).toDouble();
+          
+          if (lat.isNaN || lng.isNaN) return;
+
+          final newPos = LatLng(lat, lng);
+          
           setState(() {
-            _craftizenPosition = LatLng(geoPoint.latitude, geoPoint.longitude);
-            _updateCraftizenMarker(_craftizenPosition!);
+            _craftizenPosition = newPos;
           });
+          _updateRoute();
+          _fitMapBounds();
+        }
+      }, onError: (e) {
+        debugPrint('RTDB Listener Error: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Realtime Sync Error: $e')));
+        }
+      });
+
+      // For Craftizen, we also ensure they are broadcasting
+      if (_isCraftizen) {
+        LocationPermission permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+        }
+        
+        // Force an initial update for the trip ref even if global tracking is running
+        try {
+          Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+          _handleNewLocation(position, tripRef);
+        } catch (_) {}
+      }
+    } catch (e) {
+      debugPrint('Firebase Realtime Init Error: $e');
+    }
+  }
+
+  void _handleNewLocation(Position position, DatabaseReference tripRef) {
+    if (position.latitude.isNaN || position.longitude.isNaN) return;
+
+    final newPos = LatLng(position.latitude, position.longitude);
+    debugPrint('Craftizen moved to: ${position.latitude}, ${position.longitude}');
+    
+    if (mounted) {
+      setState(() {
+        _craftizenPosition = newPos;
+      });
+      _updateRoute();
+    }
+
+    // Broadcast to Realtime Database
+    tripRef.set({
+      "latitude": position.latitude,
+      "longitude": position.longitude,
+      "heading": position.heading,
+      "timestamp": ServerValue.timestamp,
+    }).then((_) {
+      debugPrint('Successfully wrote location to RTDB');
+    }).catchError((e) {
+      debugPrint('Error writing to RTDB: $e');
+      // On some platforms, this might fail if the database rules are not set correctly
+    });
+  }
+
+  void _fitMapBounds() {
+    if (_craftizenPosition == null || _firstLocationReceived) return;
+    
+    final housePos = LatLng(widget.job.location.latitude, widget.job.location.longitude);
+    
+    // Create bounds that include both points, ensuring no identical points (which might cause NaN in some engines)
+    final north = max(housePos.latitude, _craftizenPosition!.latitude);
+    final south = min(housePos.latitude, _craftizenPosition!.latitude);
+    final east = max(housePos.longitude, _craftizenPosition!.longitude);
+    final west = min(housePos.longitude, _craftizenPosition!.longitude);
+    
+    // Add a tiny offset if points are identical to avoid zero-size bounds
+    final finalSouth = south == north ? south - 0.001 : south;
+    final finalNorth = south == north ? north + 0.001 : north;
+    final finalWest = west == east ? west - 0.001 : west;
+    final finalEast = west == east ? east + 0.001 : east;
+
+    final bounds = LatLngBounds(LatLng(finalSouth, finalWest), LatLng(finalNorth, finalEast));
+    
+    // Use a small delay to ensure the map controller is ready
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      if (mounted) {
+        try {
+          _mapController.fitCamera(
+            CameraFit.bounds(
+              bounds: bounds,
+              padding: const EdgeInsets.all(70),
+            ),
+          );
+          _firstLocationReceived = true;
+        } catch (e) {
+          debugPrint('Error fitting map bounds: $e');
         }
       }
     });
   }
 
-  void _updateCraftizenMarker(LatLng pos) {
-    _markers.removeWhere((m) => m.markerId.value == 'craftizen');
-    _markers.add(
-      Marker(
-        markerId: const MarkerId('craftizen'),
-        position: pos,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        infoWindow: const InfoWindow(title: 'Craftizen'),
-      ),
-    );
+  LatLng? _lastRouteFetchPos;
+  Future<void> _updateRoute() async {
+    if (_craftizenPosition == null) return;
+    
+    final housePos = LatLng(widget.job.location.latitude, widget.job.location.longitude);
+    
+    // Check if positions are too close (within 5 meters) to avoid OSRM zero-length errors
+    final distToHouse = _calculateDistance(_craftizenPosition!, housePos);
+    if (distToHouse < 5) {
+      if (mounted) setState(() => _routePoints = []);
+      return;
+    }
+
+    // Throttle route fetching: only fetch if moved more than 30 meters from last fetch
+    if (_lastRouteFetchPos != null) {
+      final movedDist = _calculateDistance(_craftizenPosition!, _lastRouteFetchPos!);
+      if (movedDist < 30) return; 
+    }
+
+    debugPrint('Fetching new route path from ${_craftizenPosition!.latitude},${_craftizenPosition!.longitude} to ${housePos.latitude},${housePos.longitude}');
+    final route = await fetchRoadRoute(_craftizenPosition!, housePos);
+    if (mounted && route.isNotEmpty) {
+      setState(() {
+        _routePoints = route;
+        _lastRouteFetchPos = _craftizenPosition;
+      });
+    }
+  }
+
+  Future<List<LatLng>> fetchRoadRoute(LatLng start, LatLng end) async {
+    // Correct OSRM endpoint for public use
+    final url = 'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson';
+    
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['routes'] != null && (data['routes'] as List).isNotEmpty) {
+          final List coordinates = data['routes'][0]['geometry']['coordinates'];
+          debugPrint('Route fetched with ${coordinates.length} points');
+          return coordinates.map((coord) => LatLng((coord[1] as num).toDouble(), (coord[0] as num).toDouble())).toList();
+        }
+      } else {
+        debugPrint('OSRM Error: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      debugPrint("Routing engine connection error: $e");
+    }
+    return [];
   }
 
   double _calculateDistance(LatLng p1, LatLng p2) {
-    var p = 0.017453292519943295;
-    var c = cos;
-    var a = 0.5 - c((p2.latitude - p1.latitude) * p) / 2 +
-        c(p1.latitude * p) * c(p2.latitude * p) *
-            (1 - c((p2.longitude - p1.longitude) * p)) / 2;
-    return 12742 * asin(sqrt(a)) * 1000; 
+    return const Distance().as(LengthUnit.Meter, p1, p2);
   }
 
   void _handleArrived() async {
     if (_craftizenPosition == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Wait for location update...')));
-      setState(() => _sliderValue = 0.0);
       return;
     }
 
@@ -206,30 +343,20 @@ class _JobTrackingScreenState extends State<JobTrackingScreen> {
             ),
           ) ?? false;
 
-      if (!confirm) {
-        setState(() => _sliderValue = 0.0);
-        return;
-      }
+      if (!confirm) return;
     }
 
-    // Generate Start OTP when arrived
     String startOtp = (1000 + Random().nextInt(9000)).toString();
     await FirebaseFirestore.instance.collection('jobs').doc(widget.job.id).update({
       'jobStatus': 'arrived',
       'startOtp': startOtp,
       'startOtpVerified': false,
     });
-
-    setState(() {
-      _sliderValue = 0.0;
-      _currentStatus = 'arrived';
-    });
   }
 
   void _handleStartWork() async {
     final doc = await FirebaseFirestore.instance.collection('jobs').doc(widget.job.id).get();
     final correctOtp = doc.data()?['startOtp'];
-
     String? enteredOtp = await _showOtpInputDialog('Enter Start OTP');
     
     if (enteredOtp == correctOtp) {
@@ -238,13 +365,8 @@ class _JobTrackingScreenState extends State<JobTrackingScreen> {
         'startTime': FieldValue.serverTimestamp(),
         'startOtpVerified': true,
       });
-      setState(() {
-        _sliderValue = 0.0;
-        _currentStatus = 'in_progress';
-      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid OTP! Please try again.')));
-      setState(() => _sliderValue = 0.0);
     }
   }
 
@@ -261,12 +383,8 @@ class _JobTrackingScreenState extends State<JobTrackingScreen> {
       ),
     ) ?? false;
 
-    if (!confirm) {
-      setState(() => _sliderValue = 0.0);
-      return;
-    }
+    if (!confirm) return;
 
-    // Generate End OTP
     String endOtp = (1000 + Random().nextInt(9000)).toString();
     await FirebaseFirestore.instance.collection('jobs').doc(widget.job.id).update({
       'endOtp': endOtp,
@@ -284,6 +402,11 @@ class _JobTrackingScreenState extends State<JobTrackingScreen> {
         'endOtpVerified': true,
       });
 
+      final currentUser = FirebaseAuth.instance.currentUser;
+      final otherUserId = _isCraftizen ? widget.job.userId : widget.job.assignedTo!;
+      final chatId = _chatService.getChatId(currentUser!.uid, otherUserId);
+      await _chatService.deleteChatMessages(chatId);
+
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -292,7 +415,6 @@ class _JobTrackingScreenState extends State<JobTrackingScreen> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid OTP!')));
-      setState(() => _sliderValue = 0.0);
     }
   }
 
@@ -330,10 +452,24 @@ class _JobTrackingScreenState extends State<JobTrackingScreen> {
     );
   }
 
+  void _openInExternalMaps() async {
+    final lat = widget.job.location.latitude;
+    final lng = widget.job.location.longitude;
+    final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not open maps application')));
+      }
+    }
+  }
+
   @override
   void dispose() {
-    _locationSubscription?.cancel();
+    _dbSubscription?.cancel();
     _jobSubscription?.cancel();
+    _gpsSubscription?.cancel();
     super.dispose();
   }
 
@@ -344,16 +480,106 @@ class _JobTrackingScreenState extends State<JobTrackingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: BilingualText(textKey: _isCraftizen ? 'Job Tracking' : 'Tracking Craftizen'),
-        actions: [IconButton(icon: const Icon(Icons.chat), onPressed: _openChat)],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.my_location),
+            onPressed: () {
+              if (_craftizenPosition != null) {
+                _mapController.move(_craftizenPosition!, 15.0);
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.directions),
+            onPressed: _openInExternalMaps,
+          ),
+          IconButton(icon: const Icon(Icons.chat), onPressed: _openChat),
+        ],
       ),
       body: Stack(
         children: [
-          GoogleMap(
-            initialCameraPosition: CameraPosition(target: housePos, zoom: 14.0),
-            onMapCreated: (controller) => _controller.complete(controller),
-            markers: _markers,
-            myLocationEnabled: true,
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: housePos,
+              initialZoom: 14.0,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.setulink_app',
+              ),
+              if (_routePoints.isNotEmpty)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: _routePoints,
+                      strokeWidth: 5,
+                      color: Colors.blue.withValues(alpha: 0.7),
+                    ),
+                  ],
+                ),
+              MarkerLayer(
+                markers: [
+                  // 1. Citizen House (Destination)
+                  Marker(
+                    point: housePos,
+                    width: 50,
+                    height: 50,
+                    child: const Column(
+                      children: [
+                        Icon(Icons.home, color: Colors.red, size: 35),
+                        Text('Citizen', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, backgroundColor: Colors.white70)),
+                      ],
+                    ),
+                  ),
+                  // 2. Craftizen (Live Location)
+                  if (_craftizenPosition != null)
+                    Marker(
+                      point: _craftizenPosition!,
+                      width: 50,
+                      height: 50,
+                      child: const Column(
+                        children: [
+                          Icon(Icons.person_pin_circle, color: Colors.blue, size: 35),
+                          Text('Worker', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, backgroundColor: Colors.white70)),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ],
           ),
+          if (!_isCraftizen && _craftizenPosition == null)
+            Positioned(
+              top: 20,
+              left: 20,
+              right: 20,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [const BoxShadow(color: Colors.black26, blurRadius: 5)],
+                ),
+                child: const Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        'Waiting for Craftizen to share live location...',
+                        style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blueGrey),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           if (_isCraftizen)
             Positioned(
               bottom: 20,
@@ -377,54 +603,28 @@ class _JobTrackingScreenState extends State<JobTrackingScreen> {
   Widget _buildSliderAction() {
     String label = '';
     Color color = Colors.green;
-    Function(double) onChanged = (val) {};
+    VoidCallback onConfirm = () {};
 
     if (_currentStatus == 'confirmed' || _currentStatus == 'on_the_way') {
-      label = 'ARRIVED';
+      label = tr('swipe_to_arrive').toUpperCase();
       color = Colors.green;
-      onChanged = (value) {
-        setState(() => _sliderValue = value);
-        if (value == 1.0) _handleArrived();
-      };
+      onConfirm = _handleArrived;
     } else if (_currentStatus == 'arrived') {
-      label = 'START THE WORK';
+      label = tr('swipe_to_start').toUpperCase();
       color = Colors.blue;
-      onChanged = (value) {
-        setState(() => _sliderValue = value);
-        if (value == 1.0) _handleStartWork();
-      };
+      onConfirm = _handleStartWork;
     } else if (_currentStatus == 'in_progress') {
-      label = 'WORK COMPLETED';
+      label = tr('swipe_to_complete').toUpperCase();
       color = Colors.orange;
-      onChanged = (value) {
-        setState(() => _sliderValue = value);
-        if (value == 1.0) _handleCompleteWork();
-      };
+      onConfirm = _handleCompleteWork;
     } else {
       return const SizedBox.shrink();
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [const BoxShadow(color: Colors.black26, blurRadius: 10)],
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.swipe, color: color),
-          Expanded(
-            child: Slider(
-              value: _sliderValue,
-              activeColor: color,
-              inactiveColor: color.withOpacity(0.3),
-              onChanged: onChanged,
-            ),
-          ),
-          Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: color)),
-        ],
-      ),
+    return SwipeToConfirmButton(
+      text: label,
+      color: color,
+      onConfirm: onConfirm,
     );
   }
 }

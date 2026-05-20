@@ -50,6 +50,7 @@ class DefaultFirebaseOptions {
     projectId: 'setulink-app-fb',
     authDomain: 'setulink-app-fb.firebaseapp.com',
     storageBucket: 'setulink-app-fb.firebasestorage.app',
+    databaseURL: 'https://setulink-app-fb-default-rtdb.asia-southeast1.firebasedatabase.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -58,6 +59,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '60751051995',
     projectId: 'setulink-app-fb',
     storageBucket: 'setulink-app-fb.firebasestorage.app',
+    databaseURL: 'https://setulink-app-fb-default-rtdb.asia-southeast1.firebasedatabase.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

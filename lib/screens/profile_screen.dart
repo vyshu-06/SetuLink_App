@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/screens/greeting_page.dart';
 import 'package:setulink_app/screens/kyc_screen.dart';
+import 'package:setulink_app/services/location_service.dart';
 import 'package:setulink_app/services/auth_service.dart' as app_auth;
 import 'package:setulink_app/widgets/bilingual_text.dart';
 import 'package:setulink_app/theme/app_colors.dart';
@@ -20,6 +21,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
   final app_auth.AuthService _authService = app_auth.AuthService();
+  final LocationService _locationService = LocationService();
   User? _authUser;
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
@@ -104,6 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   Future<void> _handleLogout() async {
+    _locationService.stopGlobalTracking();
     await _authService.signOut();
     if(mounted) {
        Navigator.of(context).pushAndRemoveUntil(
@@ -192,6 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         _buildInfoCard(icon: Icons.phone, text: phone),
         const SizedBox(height: 24),
         if (role == 'craftizen') ...[
+          _buildOptionButton(context, textKey: 'my_earnings', onTap: () => Navigator.pushNamed(context, '/earnings')),
           _buildOptionButton(context, textKey: 'KYC Verification', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KYCScreen()))),
           _buildOptionButton(context, textKey: 'Subscription Plans', onTap: () => Navigator.pushNamed(context, '/subscription_plans')),
         ],

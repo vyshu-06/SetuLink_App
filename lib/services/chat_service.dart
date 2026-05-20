@@ -20,4 +20,18 @@ class ChatService {
         ? '$userId1-$userId2'
         : '$userId2-$userId1';
   }
+
+  Future<void> deleteChatMessages(String chatId) async {
+    final messages = await _db.collection('chats').doc(chatId).collection('messages').get();
+    final batch = _db.batch();
+    for (var doc in messages.docs) {
+      batch.delete(doc.reference);
+    }
+    // Also clear last message metadata
+    batch.update(_db.collection('chats').doc(chatId), {
+      'lastMessage': FieldValue.delete(),
+      'lastTimestamp': FieldValue.delete(),
+    });
+    await batch.commit();
+  }
 }

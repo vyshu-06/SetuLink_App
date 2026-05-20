@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 

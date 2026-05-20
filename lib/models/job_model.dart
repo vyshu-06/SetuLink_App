@@ -8,6 +8,8 @@ class JobModel {
   final double budget;
   final DateTime scheduledTime;
   final GeoPoint location;
+  final String address;
+  final String city;
   final List<String> requiredSkills;
   final List<String> images;
   final String? voiceUrl;
@@ -23,6 +25,8 @@ class JobModel {
     required this.budget,
     required this.scheduledTime,
     required this.location,
+    this.address = '',
+    this.city = '',
     required this.requiredSkills,
     required this.images,
     this.voiceUrl,
@@ -40,6 +44,8 @@ class JobModel {
       budget: (data['budget'] as num?)?.toDouble() ?? 0.0,
       scheduledTime: (data['scheduledTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
       location: data['location'] as GeoPoint? ?? const GeoPoint(0, 0),
+      address: data['address'] ?? '',
+      city: data['city'] ?? '',
       requiredSkills: List<String>.from(data['requiredSkills'] ?? []),
       images: List<String>.from(data['images'] ?? []),
       voiceUrl: data['voiceUrl'],
@@ -57,6 +63,8 @@ class JobModel {
       'budget': budget,
       'scheduledTime': Timestamp.fromDate(scheduledTime),
       'location': location,
+      'address': address,
+      'city': city,
       'requiredSkills': requiredSkills,
       'images': images,
       'voiceUrl': voiceUrl,

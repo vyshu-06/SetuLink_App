@@ -54,7 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+            colors: [AppColors.primaryColor, AppColors.accentColor.withValues(alpha: 0.8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -113,7 +113,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      color: color?.withOpacity(0.1) ?? AppColors.primaryColor.withOpacity(0.2),
+      color: color?.withValues(alpha: 0.1) ?? AppColors.primaryColor.withValues(alpha: 0.2),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -129,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                   children: [
                     BilingualText(textKey: titleKey, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                     const SizedBox(height: 4),
-                    BilingualText(textKey: subtitleKey, style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.8))),
+                    BilingualText(textKey: subtitleKey, style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.8))),
                   ],
                 ),
               ),

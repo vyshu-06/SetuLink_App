@@ -47,7 +47,7 @@ class _GreetingPageState extends State<GreetingPage> with SingleTickerProviderSt
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.primaryColor, AppColors.accentColor.withOpacity(0.8)],
+            colors: [AppColors.primaryColor, AppColors.accentColor.withValues(alpha: 0.8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

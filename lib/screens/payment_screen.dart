@@ -3,6 +3,7 @@ import 'package:setulink_app/services/payment_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/price_calculator_service.dart';
+import 'package:setulink_app/features/ratings_rewards/presentation/rating_screen.dart';
 import 'package:setulink_app/theme/app_colors.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
 
@@ -84,11 +85,10 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
       userName: currentUser.displayName ?? 'Customer',
       userEmail: currentUser.email ?? 'customer@example.com',
       category: widget.category,
-      onSuccess: (paymentId) {
+      onSuccess: (paymentId) async {
         if (!mounted) return;
-        setState(() => _isLoading = false);
-
-        _paymentService.saveTransaction(
+        
+        await _paymentService.saveTransaction(
           paymentId: paymentId,
           amount: _finalAmount,
           category: widget.category,
@@ -97,10 +97,26 @@ class _PaymentScreenState extends State<PaymentScreen> with SingleTickerProvider
           userId: currentUser.uid,
         );
 
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${tr('payment_successful')}: $paymentId')),
         );
-        Navigator.pop(context);
+        
+        if (widget.category == 'job_payment' && widget.jobId != null && widget.craftizenId != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RatingScreen(
+                jobId: widget.jobId!,
+                craftizenId: widget.craftizenId!,
+              ),
+            ),
+          );
+        } else {
+          Navigator.pop(context);
+        }
       },
       onError: (error) {
         if (!mounted) return;

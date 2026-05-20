@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:setulink_app/services/auth_service.dart';
 import 'package:setulink_app/services/chat_service.dart';
 import 'package:setulink_app/screens/chat_screen.dart';
@@ -52,7 +51,7 @@ class ChatListScreen extends StatelessWidget {
                         
                         return ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                            backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
                             child: Text(peerName[0].toUpperCase(), style: const TextStyle(color: AppColors.primaryColor, fontWeight: FontWeight.bold)),
                           ),
                           title: Text(peerName, style: const TextStyle(fontWeight: FontWeight.bold)),

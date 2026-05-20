@@ -32,6 +32,7 @@ import 'package:setulink_app/screens/craftizen_experience_screen.dart';
 import 'package:setulink_app/screens/pending_verification_screen.dart'; 
 import 'package:setulink_app/theme/app_theme.dart';
 import 'package:setulink_app/screens/language_selection_screen.dart';
+import 'package:setulink_app/widgets/bilingual_text.dart'; // Added
 import 'firebase_options.dart';
 
 final AnalyticsService analyticsService = AnalyticsService();
@@ -40,6 +41,7 @@ final FCMService fcmService = FCMService(); // Added
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  await BilingualText.initEn(); // Added
 
   try {
     await Firebase.initializeApp(
@@ -58,6 +60,7 @@ Future<void> main() async {
   } catch (e) {
     debugPrint('FIREBASE INIT FAILED: $e');
   }
+
 
   runApp(
     EasyLocalization(

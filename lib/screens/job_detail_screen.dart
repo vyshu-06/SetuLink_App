@@ -40,10 +40,40 @@ class JobDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: [
               _buildDetailRow('status', job.jobStatus.toUpperCase()),
+              _buildDetailRow('address', job.address),
               _buildDetailRow('amount', '₹${job.budget}'),
               _buildDetailRow('time', DateFormat('dd MMM, yyyy - hh:mm a').format(job.scheduledTime)),
               _buildDetailRow('description', job.description),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
+              if (job.assignedTo != null && isCitizen)
+                FutureBuilder<DocumentSnapshot>(
+                  future: FirebaseFirestore.instance.collection('users').doc(job.assignedTo).get(),
+                  builder: (context, userSnapshot) {
+                    if (userSnapshot.hasData && userSnapshot.data!.exists) {
+                      final userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                      return Card(
+                        elevation: 2,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const BilingualText(textKey: 'assigned_craftizen', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primaryColor)),
+                              const SizedBox(height: 8),
+                              _buildProfileDetail('name', userData['name'] ?? 'N/A'),
+                              _buildProfileDetail('skills', (userData['skills'] as List<dynamic>?)?.join(', ') ?? 'N/A'),
+                              if (userData['rating'] != null)
+                                _buildProfileDetail('rating', userData['rating'].toString()),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+              const SizedBox(height: 16),
               
               // Tracking Button for both Citizen and Craftizen
               if (job.jobStatus == 'confirmed' || job.jobStatus == 'on_the_way' || job.jobStatus == 'started')
@@ -91,30 +121,24 @@ class JobDetailScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildProfileDetail(String labelKey, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          BilingualText(textKey: labelKey, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.grey)),
+          const Text(': '),
+          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500))),
+        ],
+      ),
+    );
+  }
+
   List<Widget> _buildCitizenActions(BuildContext context, JobModel job) {
     final bool isRated = (job.preferences['rated'] ?? false) == true;
 
     return [
-      if (job.jobStatus == 'completed')
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PaymentScreen(
-                  jobId: job.id,
-                  amount: job.budget,
-                  craftizenId: job.assignedTo,
-                  category: 'job_payment',
-                ),
-              ),
-            );
-          },
-          style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
-          child: const BilingualText(textKey: 'pay_now'),
-        ),
-      
-      if (job.jobStatus == 'paid' && !isRated)
+      if ((job.jobStatus == 'completed' || job.jobStatus == 'paid') && !isRated)
         Padding(
           padding: const EdgeInsets.only(top: 12),
           child: ElevatedButton(

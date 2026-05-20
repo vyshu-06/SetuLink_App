@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:setulink_app/services/location_service.dart';
 import 'package:setulink_app/widgets/bilingual_text.dart';
-import 'package:location/location.dart';
 
 class MapNearbyCraftizens extends StatefulWidget {
   final String skillCategory;
@@ -16,7 +16,7 @@ class MapNearbyCraftizens extends StatefulWidget {
 class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
   final LocationService _locationService = LocationService();
   LatLng? _currentPosition;
-  Set<Marker> _craftizenMarkers = {};
+  List<Marker> _craftizenMarkers = [];
   final double _radiusInKm = 10.0; 
 
   @override
@@ -44,7 +44,7 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
   }
 
   void _updateMarkers(List<DocumentSnapshot> craftizenDocs) {
-    Set<Marker> markers = {};
+    List<Marker> markers = [];
     for (var doc in craftizenDocs) {
       final data = doc.data() as Map<String, dynamic>; 
       final Map<String, dynamic>? positionData = data['position'];
@@ -57,11 +57,29 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
       if (skills != null && skills.contains(widget.skillCategory)) {
           markers.add(
             Marker(
-              markerId: MarkerId(doc.id),
-              position: LatLng(geoPoint.latitude, geoPoint.longitude),
-              infoWindow: InfoWindow(
-                title: data['name'] ?? 'Unknown',
-                snippet: (data['skills'] as List<dynamic>?)?.join(', '), 
+              point: LatLng(geoPoint.latitude, geoPoint.longitude),
+              width: 40,
+              height: 40,
+              child: GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(data['name'] ?? 'Unknown', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 8),
+                          Text((data['skills'] as List<dynamic>?)?.join(', ') ?? ''),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                child: const Icon(Icons.location_on, color: Colors.blue, size: 40),
               ),
             ),
           );
@@ -81,14 +99,28 @@ class _MapNearbyCraftizensState extends State<MapNearbyCraftizens> {
       appBar: AppBar(title: const BilingualText(textKey: 'Nearby Craftizens')),
       body: _currentPosition == null
           ? const Center(child: CircularProgressIndicator())
-          : GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: _currentPosition!,
-                zoom: 13.5,
+          : FlutterMap(
+              options: MapOptions(
+                initialCenter: _currentPosition!,
+                initialZoom: 13.5,
               ),
-              markers: _craftizenMarkers,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.setulink_app',
+                ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _currentPosition!,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(Icons.my_location, color: Colors.red, size: 30),
+                    ),
+                    ..._craftizenMarkers,
+                  ],
+                ),
+              ],
             ),
     );
   }

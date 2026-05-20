@@ -28,13 +28,19 @@ class JobService {
         .map((snapshot) => snapshot.docs.map((doc) => JobModel.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList());
   }
 
-  Stream<List<JobModel>> getOpenJobsForCraftizen(List<String> skills) {
+  Stream<List<JobModel>> getOpenJobsForCraftizen(List<String> skills, {String? city}) {
     if (skills.isEmpty) return Stream.value([]); // Return empty if craftizen has no skills
 
-    return _db
+    Query query = _db
         .collection(collection)
         .where('jobStatus', isEqualTo: 'open')
-        .where('requiredSkills', arrayContainsAny: skills)
+        .where('requiredSkills', arrayContainsAny: skills);
+    
+    if (city != null && city.isNotEmpty) {
+      query = query.where('city', isEqualTo: city);
+    }
+
+    return query
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => JobModel.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList());
   }
